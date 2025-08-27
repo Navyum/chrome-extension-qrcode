@@ -1,0 +1,175 @@
+<svg width="1440" height="560" viewBox="0 0 1440 560" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- 渐变定义 -->
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f1419;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#1a1f2e;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2d3748;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="accentGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00d4ff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0099cc;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="glowGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00d4ff;stop-opacity:0.6" />
+      <stop offset="100%" style="stop-color:#00d4ff;stop-opacity:0" />
+    </linearGradient>
+    
+    <radialGradient id="radialGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#00d4ff;stop-opacity:0.2" />
+      <stop offset="70%" style="stop-color:#00d4ff;stop-opacity:0.05" />
+      <stop offset="100%" style="stop-color:#00d4ff;stop-opacity:0" />
+    </radialGradient>
+    
+    <!-- 滤镜效果 -->
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge> 
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- 主背景 -->
+  <rect width="1440" height="560" fill="url(#bgGradient)"/>
+  
+  <!-- 径向光效 -->
+  <circle cx="720" cy="280" r="360" fill="url(#radialGlow)" opacity="0.8"/>
+  
+  <!-- 背景装饰网格 -->
+  <g opacity="0.05">
+    <path d="M0 80 L1440 80 M0 160 L1440 160 M0 240 L1440 240 M0 320 L1440 320 M0 400 L1440 400 M0 480 L1440 480" 
+          stroke="#00d4ff" stroke-width="2"/>
+    <path d="M80 0 L80 560 M160 0 L160 560 M240 0 L240 560 M320 0 L320 560 M400 0 L400 560 M480 0 L480 560 M560 0 L560 560 M640 0 L640 560 M720 0 L720 560 M800 0 L800 560 M880 0 L880 560 M960 0 L960 560 M1040 0 L1040 560 M1120 0 L1120 560 M1200 0 L1200 560 M1280 0 L1280 560 M1360 0 L1360 560" 
+          stroke="#00d4ff" stroke-width="2"/>
+  </g>
+  
+  <!-- 左侧装饰性几何图形 -->
+  <g opacity="0.3">
+    <polygon points="0,0 120,0 80,80 0,80" fill="url(#accentGradient)"/>
+    <polygon points="0,480 160,480 120,560 0,560" fill="url(#accentGradient)"/>
+  </g>
+  
+  <!-- 右侧装饰性几何图形 -->
+  <g opacity="0.3">
+    <polygon points="1320,0 1440,0 1440,120 1360,80" fill="url(#accentGradient)"/>
+    <polygon points="1280,440 1440,440 1440,560 1360,520" fill="url(#accentGradient)"/>
+  </g>
+  
+  <!-- 中央装饰元素 -->
+  <g opacity="0.2">
+    <!-- 中央圆形 -->
+    <circle cx="720" cy="280" r="100" fill="none" stroke="url(#accentGradient)" stroke-width="2"/>
+    <circle cx="720" cy="280" r="60" fill="none" stroke="url(#accentGradient)" stroke-width="2"/>
+    <circle cx="720" cy="280" r="30" fill="none" stroke="url(#accentGradient)" stroke-width="2"/>
+  </g>
+  
+  <!-- 装饰性光效点 -->
+  <g opacity="0.5">
+    <circle cx="120" cy="120" r="4" fill="url(#glowGradient)" filter="url(#glow)"/>
+    <circle cx="1320" cy="160" r="3" fill="url(#glowGradient)" filter="url(#glow)"/>
+    <circle cx="180" cy="440" r="5" fill="url(#glowGradient)" filter="url(#glow)"/>
+    <circle cx="1260" cy="400" r="3" fill="url(#glowGradient)" filter="url(#glow)"/>
+    <circle cx="300" cy="200" r="3" fill="url(#glowGradient)" filter="url(#glow)"/>
+    <circle cx="1140" cy="360" r="4" fill="url(#glowGradient)" filter="url(#glow)"/>
+    <circle cx="360" cy="360" r="3" fill="url(#glowGradient)" filter="url(#glow)"/>
+    <circle cx="1080" cy="200" r="4" fill="url(#glowGradient)" filter="url(#glow)"/>
+    <circle cx="600" cy="120" r="3" fill="url(#glowGradient)" filter="url(#glow)"/>
+    <circle cx="840" cy="440" r="4" fill="url(#glowGradient)" filter="url(#glow)"/>
+  </g>
+  
+  <!-- 科技感装饰线条 -->
+  <g opacity="0.2">
+    <!-- 左侧装饰线 -->
+    <line x1="60" y1="100" x2="60" y2="460" stroke="#00d4ff" stroke-width="1"/>
+    
+    <!-- 右侧装饰线 -->
+    <line x1="1380" y1="100" x2="1380" y2="460" stroke="#00d4ff" stroke-width="1"/>
+    
+    <!-- 顶部装饰线 -->
+    <line x1="100" y1="60" x2="1340" y2="60" stroke="#00d4ff" stroke-width="1"/>
+    
+    <!-- 底部装饰线 -->
+    <line x1="100" y1="500" x2="1340" y2="500" stroke="#00d4ff" stroke-width="1"/>
+  </g>
+  
+  <!-- 中央光效 -->
+  <g opacity="0.15">
+    <circle cx="720" cy="280" r="120" fill="url(#glowGradient)" opacity="0.3"/>
+    <circle cx="720" cy="280" r="80" fill="url(#glowGradient)" opacity="0.2"/>
+    <circle cx="720" cy="280" r="50" fill="url(#glowGradient)" opacity="0.3"/>
+  </g>
+  
+  <!-- 边缘装饰 -->
+  <g opacity="0.2">
+    <!-- 顶部边缘 -->
+    <rect x="0" y="0" width="1440" height="4" fill="url(#accentGradient)"/>
+    
+    <!-- 底部边缘 -->
+    <rect x="0" y="556" width="1440" height="4" fill="url(#accentGradient)"/>
+    
+    <!-- 左侧边缘 -->
+    <rect x="0" y="0" width="4" height="560" fill="url(#accentGradient)"/>
+    
+    <!-- 右侧边缘 -->
+    <rect x="1436" y="0" width="4" height="560" fill="url(#accentGradient)"/>
+  </g>
+  
+  <!-- 中央十字装饰 -->
+  <g opacity="0.15">
+    <line x1="340" y1="280" x2="540" y2="280" stroke="url(#accentGradient)" stroke-width="1"/>
+    <line x1="720" y1="180" x2="720" y2="380" stroke="url(#accentGradient)" stroke-width="1"/>
+  </g>
+  
+  <!-- 关键词标签 -->
+  <g>
+    <!-- QR 标签 - 左上角 -->
+    <rect x="80" y="80" width="120" height="56" rx="28" fill="url(#accentGradient)" opacity="0.9"/>
+    <text x="140" y="116" text-anchor="middle" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="#ffffff">
+      QR
+    </text>
+    
+    <!-- FAST 标签 - 右上角 -->
+    <rect x="1240" y="80" width="120" height="56" rx="28" fill="url(#accentGradient)" opacity="0.9"/>
+    <text x="1300" y="116" text-anchor="middle" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="#ffffff">
+      FAST
+    </text>
+    
+    <!-- SAFETY 标签 - 底部中央 -->
+    <rect x="620" y="440" width="200" height="64" rx="32" fill="url(#accentGradient)" opacity="0.9"/>
+    <text x="720" y="482" text-anchor="middle" font-family="Arial, sans-serif" font-size="32" font-weight="bold" fill="#ffffff">
+      SAFETY
+    </text>
+  </g>
+  
+  <!-- 关键词装饰光效 -->
+  <g opacity="0.6">
+    <!-- QR 标签光效 -->
+    <circle cx="140" cy="108" r="16" fill="url(#glowGradient)" filter="url(#glow)"/>
+    
+    <!-- FAST 标签光效 -->
+    <circle cx="1300" cy="108" r="16" fill="url(#glowGradient)" filter="url(#glow)"/>
+    
+    <!-- SAFETY 标签光效 -->
+    <circle cx="720" cy="472" r="20" fill="url(#glowGradient)" filter="url(#glow)"/>
+  </g>
+  
+  <!-- 额外的装饰元素 -->
+  <g opacity="0.3">
+    <!-- 对角线装饰 -->
+    <line x1="0" y1="0" x2="1440" y2="560" stroke="#00d4ff" stroke-width="2"/>
+    <line x1="1440" y1="0" x2="0" y2="560" stroke="#00d4ff" stroke-width="2"/>
+    <line x1="0" y1="280" x2="1440" y2="280" stroke="#00d4ff" stroke-width="2"/>
+    <line x1="720" y1="0" x2="720" y2="560" stroke="#00d4ff" stroke-width="2"/>
+  </g>
+  
+  <!-- 中央装饰圆环 -->
+  <g opacity="0.15">
+    <circle cx="720" cy="280" r="180" fill="none" stroke="url(#accentGradient)" stroke-width="4"/>
+    <circle cx="720" cy="280" r="140" fill="none" stroke="url(#accentGradient)" stroke-width="2"/>
+    <circle cx="720" cy="280" r="100" fill="none" stroke="url(#accentGradient)" stroke-width="2"/>
+  </g>
+</svg> 

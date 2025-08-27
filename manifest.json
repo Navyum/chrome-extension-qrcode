@@ -1,0 +1,73 @@
+{
+  "manifest_version": 3,
+  "name": "QR Code Generator & Scanner - Free QR Code Creator",
+  "version": "1.0.0",
+  "description": "Free QR Code Generator - Create and customize QR codes for URLs, text so on. Customize logo supported.",
+  
+  "permissions": [
+    "activeTab",
+    "contextMenus",
+    "storage",
+    "downloads",
+    "tabs"
+  ],
+  
+  "host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ],
+  
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "QR Code Generator & Scanner - Create QR Codes Instantly",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  
+  "background": {
+    "service_worker": "background.js"
+  },
+  
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["content.js"],
+      "run_at": "document_end"
+    }
+  ],
+  
+  "web_accessible_resources": [
+    {
+      "resources": ["icons/*"],
+      "matches": ["http://*/*", "https://*/*"]
+    }
+  ],
+  
+  "commands": {
+    "_execute_action": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+Q",
+        "mac": "Command+Shift+Q"
+      },
+      "description": "Generate QR code for current page"
+    },
+    "generate-text-qr": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+T",
+        "mac": "Command+Shift+T"
+      },
+      "description": "Generate QR code for selected text"
+    }
+  }
+} 

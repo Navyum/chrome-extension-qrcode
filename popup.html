@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Generator</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header Section -->
+        <header class="header">
+            <div class="header-content">
+                <div class="header-text">
+                    <div class="title-container">
+                        <div class="cloud-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M18 10H16.74C16.3659 7.49025 14.2356 5.5 11.64 5.5C9.17347 5.5 7.12647 7.22729 6.5 9.5C4.5 9.5 3 11 3 13C3 15 4.5 16.5 6.5 16.5H18C19.6569 16.5 21 15.1569 21 13.5C21 11.8431 19.6569 10.5 18 10Z" fill="#87CEEB"/>
+                                <path d="M20 12C20 13.1046 19.1046 14 18 14C16.8954 14 16 13.1046 16 12C16 10.8954 16.8954 10 18 10C19.1046 10 20 10.8954 20 12Z" fill="#4682B4"/>
+                            </svg>
+                        </div>
+                        <h1 class="title">Title</h1>
+                    </div>
+                    <input type="text" class="subtitle url-input" id="current-url" placeholder="Loading..." />
+                </div>
+            </div>
+        </header>
+
+        <!-- QR Code Display Section -->
+        <div class="qr-display-section">
+            <div class="qr-container" id="qr-container">
+                <div class="qr-placeholder">
+                    <span class="placeholder-icon">📱</span>
+                    <p>Generating QR Code...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons Section -->
+        <div class="action-buttons">
+            <div class="primary-buttons">
+                <button class="action-btn primary download" id="download-btn">
+                    <img src="asserts/download.svg" alt="Download" class="icon">
+                    Download QR Code
+                </button>
+                <button class="action-btn primary copy" id="copy-btn">
+                    <img src="asserts/copysvg.svg" alt="Copy" class="icon">
+                </button>
+            </div>
+            <div class="secondary-buttons">
+                <button class="action-btn secondary" id="edit-btn">
+                    <img src="asserts/palette.svg" alt="Edit" class="icon">
+                    Edit QR Code
+                </button>
+                <button class="action-btn secondary" id="scan-btn">
+                    <img src="asserts/scan.svg" alt="Scan" class="icon">
+                    Scan QR Code
+                </button>
+            </div>
+            <div class="bottom-icons">
+                <button class="bottom-icon-btn" id="history-btn" title="History">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20Z" fill="currentColor"/>
+                        <path d="M12.5 7H11V13L16.25 16.15L17 14.92L12.5 12.25V7Z" fill="currentColor"/>
+                    </svg>
+                </button>
+                <div class="right-icons">
+                    <button class="bottom-icon-btn" id="star-btn" title="Rate 5 Stars">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="currentColor"/>
+                        </svg>
+                    </button>
+                    <button class="bottom-icon-btn" id="feedback-btn" title="Feedback">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M20 2H4C2.9 2 2 2.9 2 4V22L6 18H20C21.1 18 22 17.1 22 16V4C22 2.9 21.1 2 20 2ZM20 16H6L4 18V4H20V16Z" fill="currentColor"/>
+                            <path d="M7 9H17V11H7V9ZM7 12H14V14H7V12Z" fill="currentColor"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit QR Code Modal -->
+    <div class="modal" id="edit-modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Edit QR Code</h3>
+                <button class="close-btn" id="close-edit-modal">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="edit-section">
+                    <h4>Color Settings</h4>
+                    <div class="color-inputs">
+                        <div class="color-input">
+                            <label>Foreground:</label>
+                            <input type="color" id="foreground-color" value="#000000">
+                        </div>
+                        <div class="color-input">
+                            <label>Background:</label>
+                            <input type="color" id="background-color" value="#FFFFFF">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="edit-section">
+                    <h4>Size Settings</h4>
+                    <div class="size-inputs">
+                        <div class="size-input">
+                            <label>Width:</label>
+                            <input type="number" id="qr-width" value="512" min="120" max="1024">
+                        </div>
+                        <div class="size-input">
+                            <label>Height:</label>
+                            <input type="number" id="qr-height" value="512" min="120" max="1024">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="edit-section">
+                    <h4>Logo Settings</h4>
+                    <div class="logo-inputs">
+                        <div class="file-input-wrapper">
+                            <input type="file" id="logo-file" accept="image/*">
+                            <label for="logo-file" class="file-input-label">
+                                <span class="file-input-text">Choose Logo File</span>
+                                <span class="file-input-hint">No file selected</span>
+                            </label>
+                        </div>
+                        <div class="logo-options" style="display: none;">
+                            <label>Opacity:</label>
+                            <input type="range" id="logo-opacity" min="0" max="100" value="100">
+                            <span id="opacity-value">100%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="action-btn primary" id="apply-edit">Apply</button>
+                <button class="action-btn secondary" id="cancel-edit">Cancel</button>
+                <button class="action-btn secondary" id="reset-edit">Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scan QR Code Modal -->
+    <div class="modal" id="scan-modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Scan QR Code</h3>
+                <button class="close-btn" id="close-scan-modal">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="scan-section">
+                    <h4>Upload QR Code Image</h4>
+                    <div class="file-input-wrapper">
+                        <input type="file" id="qr-file" accept="image/*">
+                        <label for="qr-file" class="file-input-label">
+                            <span class="file-input-text">Choose QR Code Image</span>
+                            <span class="file-input-hint">No file selected</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="scan-result" id="scan-result" style="display: none;">
+                    <h4>Scan Result</h4>
+                    <div class="result-content">
+                        <div class="result-type">
+                            <span class="type-label">Type:</span>
+                            <span class="type-value" id="result-type">URL</span>
+                        </div>
+                        <div class="result-text">
+                            <span class="text-label">Content:</span>
+                            <div class="text-value" id="result-content"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="action-btn primary" id="copy-result">Copy</button>
+                <button class="action-btn secondary" id="open-result">Open</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- History Modal -->
+    <div class="modal" id="history-modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>History</h3>
+                <button class="close-btn" id="close-history-modal">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="history-tabs">
+                    <button class="tab-btn active" id="generate-tab">Generated</button>
+                    <button class="tab-btn" id="scan-tab">Scanned</button>
+                </div>
+                <div class="history-content">
+                    <div class="history-list" id="generate-history">
+                        <!-- Generated QR codes will be listed here -->
+                    </div>
+                    <div class="history-list" id="scan-history" style="display: none;">
+                        <!-- Scanned QR codes will be listed here -->
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="action-btn secondary" id="clear-history">Clear All</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="libs/qrcode.js"></script>
+    <script src="libs/qrcode-with-logo.js"></script>
+    <script src="libs/jsqr.js"></script>
+    <script src="libs/jsqr-improve.js"></script>
+    <script src="popup.js"></script>
+</body>
+</html> 

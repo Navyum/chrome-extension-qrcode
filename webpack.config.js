@@ -11,9 +11,9 @@ const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
 
 module.exports = {
   entry: {
-    popup: './popup.js',
-    background: './background.js',
-    content: './content.js'
+    popup: './src/popup.js',
+    background: './src/background.js',
+    content: './src/content.js'
   },
   output: {
     path: path.resolve(__dirname, `dist/${browser}`),
@@ -39,28 +39,46 @@ module.exports = {
     new CopyWebpackPlugin({
       patterns: [
         {
-          from: 'popup.html',
-          to: 'popup.html'
+          from: 'src/popup.html',
+          to: 'popup.html',
+          globOptions: {
+            ignore: ['**/.*', '**/.*/**']
+          }
         },
         {
-          from: 'popup.css',
-          to: 'popup.css'
+          from: 'src/popup.css',
+          to: 'popup.css',
+          globOptions: {
+            ignore: ['**/.*', '**/.*/**']
+          }
         },
         {
           from: 'icons',
-          to: 'icons'
+          to: 'icons',
+          globOptions: {
+            ignore: ['**/.*', '**/.*/**']
+          }
         },
         {
           from: 'libs',
-          to: 'libs'
+          to: 'libs',
+          globOptions: {
+            ignore: ['**/.*', '**/.*/**']
+          }
         },
         {
           from: 'asserts',
-          to: 'asserts'
+          to: 'asserts',
+          globOptions: {
+            ignore: ['**/.*', '**/.*/**']
+          }
         },
         {
           from: manifestPath,
-          to: 'manifest.json'
+          to: 'manifest.json',
+          globOptions: {
+            ignore: ['**/.*', '**/.*/**']
+          }
         }
       ]
     })

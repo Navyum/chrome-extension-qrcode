@@ -1,7 +1,17 @@
 // QR Code Generator Chrome Extension - Content Script
+// 浏览器API适配器
+const browserApi = (() => {
+    if (typeof browser !== 'undefined') {
+      return browser;
+    } else if (typeof chrome !== 'undefined') {
+      return chrome;
+    } else {
+      throw new Error('Neither browser nor chrome API is available');
+    }
+  })();
 
 // 监听来自popup或background的消息
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+browserApi.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === 'getSelectedText') {
         const selectedText = getSelectedText();
         sendResponse({ text: selectedText });
@@ -151,7 +161,7 @@ function generateQRCodeInPage(container, content) {
     if (typeof QRCode === 'undefined') {
         // 动态加载QRCode库
         const script = document.createElement('script');
-        script.src = chrome.runtime.getURL('qrcode.min.js');
+        script.src = browserApi.runtime.getURL('qrcode.min.js');
         script.onload = () => {
             createQRCode(container, content);
         };
@@ -178,7 +188,7 @@ document.addEventListener('keydown', (e) => {
     // Ctrl+Shift+Q: 生成当前页面二维码
     if (e.ctrlKey && e.shiftKey && e.key === 'Q') {
         e.preventDefault();
-        chrome.runtime.sendMessage({
+        browserApi.runtime.sendMessage({
             action: 'generateQR',
             content: window.location.href,
             type: 'url'
@@ -190,7 +200,7 @@ document.addEventListener('keydown', (e) => {
         e.preventDefault();
         const selectedText = getSelectedText();
         if (selectedText) {
-            chrome.runtime.sendMessage({
+            browserApi.runtime.sendMessage({
                 action: 'generateQR',
                 content: selectedText,
                 type: 'text'

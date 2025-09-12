@@ -1,5 +1,33 @@
 // QR Code Generator Chrome Extension - Popup Script
 
+// 浏览器API适配器
+const browserApi = (() => {
+    // 检测浏览器类型
+    const isFirefox = typeof browser !== 'undefined' && browser.runtime;
+    const isChrome = typeof chrome !== 'undefined' && chrome.runtime;
+    
+    if (isFirefox) {
+        // Firefox环境
+        return {
+            ...browser,
+            // 重写action，指向browser_action
+            action: browser.browserAction,
+            // 为了向后兼容，也提供browser_action别名
+            browser_action: browser.browserAction
+        };
+    } else if (isChrome) {
+        // Chrome/Edge环境
+        return {
+            ...chrome,
+            // 为了向后兼容，提供browser_action别名指向action
+            browser_action: chrome.action
+        };
+    } else {
+        throw new Error('Neither browser nor chrome API is available');
+    }
+})();
+
+
 class QRCodePopup {
     constructor() {
         this.currentQRCode = null;
@@ -109,7 +137,7 @@ class QRCodePopup {
     async checkPendingQRData() {
         try {
             // 从background script获取待处理数据
-            const response = await chrome.runtime.sendMessage({ action: 'getPendingQRData' });
+            const response = await browserApi.runtime.sendMessage({ action: 'getPendingQRData' });
             
             if (response && response.content !== undefined) {
                 // 有待处理数据，根据类型处理
@@ -122,7 +150,7 @@ class QRCodePopup {
                 if (response.type === 'url') {
                     // 对于URL类型，尝试获取页面信息并显示自定义URL
                     try {
-                        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+                        const [tab] = await browserApi.tabs.query({ active: true, currentWindow: true });
                         if (tab) {
                             this.updatePageInfo(tab, response.content);
                         }
@@ -164,7 +192,7 @@ class QRCodePopup {
     async generateCurrentPageQR() {
         try {
             // 获取当前标签页信息
-            const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+            const [tab] = await browserApi.tabs.query({ active: true, currentWindow: true });
             
             if (tab && tab.url) {
                 this.currentContent = tab.url;
@@ -282,7 +310,7 @@ class QRCodePopup {
             let faviconUrl = null;
             if (type === 'url') {
                 try {
-                    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+                    const [tab] = await browserApi.tabs.query({ active: true, currentWindow: true });
                     if (tab && tab.favIconUrl) {
                         faviconUrl = tab.favIconUrl;
                     }
@@ -514,7 +542,7 @@ class QRCodePopup {
         document.getElementById('open-result').addEventListener('click', () => {
             const content = document.getElementById('result-content').textContent;
             if (content.startsWith('http://') || content.startsWith('https://')) {
-                chrome.tabs.create({ url: content });
+                browserApi.tabs.create({ url: content });
             } else {
                 this.showMessage('Cannot open non-URL content', 'warning');
             }
@@ -883,19 +911,19 @@ class QRCodePopup {
     }
 
     async loadSettings() {
-        const result = await chrome.storage.local.get('qrOptions');
+        const result = await browserApi.storage.local.get('qrOptions');
         if (result.qrOptions) {
             this.qrOptions = { ...this.qrOptions, ...result.qrOptions };
         }
     }
 
     async saveSettings() {
-        await chrome.storage.local.set({ qrOptions: this.qrOptions });
+        await browserApi.storage.local.set({ qrOptions: this.qrOptions });
     }
 
     // 历史记录相关方法
     async loadHistory() {
-        const result = await chrome.storage.local.get(['history']);
+        const result = await browserApi.storage.local.get(['history']);
         if (result.history) {
             this.history = result.history;
             // 清理重复记录
@@ -927,7 +955,7 @@ class QRCodePopup {
     }
 
     async saveHistory() {
-        await chrome.storage.local.set({ history: this.history });
+        await browserApi.storage.local.set({ history: this.history });
     }
 
     addToHistory(type, record) {
@@ -996,9 +1024,7 @@ class QRCodePopup {
             const title = this.truncateText(record.content, 60);
             const isUrl = this.isUrl(record.content);
             
-            console.log('🔍 [DEBUG] Rendering generated record:', record);
-            console.log('🔍 [DEBUG] Record content:', record.content);
-            
+
             // 使用保存的favicon URL或占位图标
             let iconHtml = '📱';
             if (isUrl && record.faviconUrl) {
@@ -1051,9 +1077,7 @@ class QRCodePopup {
             const title = this.truncateText(record.displayData || record.content, 60);
             const isUrl = this.isUrl(record.content);
             
-            console.log('🔍 [DEBUG] Rendering scanned record:', record);
-            console.log('🔍 [DEBUG] Record content:', record.content);
-            
+
             // 使用保存的favicon URL或占位图标
             let iconHtml = '🔍';
             if (isUrl && record.faviconUrl) {
@@ -1325,28 +1349,44 @@ class QRCodePopup {
 
     openHistoryContent(content) {
         if (content.startsWith('http://') || content.startsWith('https://')) {
-            chrome.tabs.create({ url: content });
+            browserApi.tabs.create({ url: content });
         } else {
             this.showMessage('Cannot open non-URL content', 'warning');
         }
     }
 
     rateExtension() {
-        // 跳转到Chrome Web Store评分页面
-        const extensionId = chrome.runtime.id;
-        const reviewUrl = `https://chrome.google.com/webstore/detail/${extensionId}/reviews`;
-        chrome.tabs.create({ url: reviewUrl });
+        // 跳转到浏览器商店评分页面
+        const extensionId = browserApi.runtime.id;
+        let reviewUrl;
+        
+        if (typeof browser !== 'undefined' && browser.runtime) {
+            // Firefox - 使用Firefox Add-ons商店
+            reviewUrl = `https://addons.mozilla.org/en-US/firefox/addon/${extensionId}/reviews/`;
+        } else {
+            // Chrome/Edge - 使用Chrome Web Store
+            reviewUrl = `https://chrome.google.com/webstore/detail/${extensionId}/reviews`;
+        }
+
+        browserApi.tabs.create({ url: reviewUrl });
         this.showMessage('Thank you for rating our extension!', 'success');
     }
-
     openFeedback() {
-        // 跳转到Chrome Web Store官方support页面
-        const extensionId = chrome.runtime.id;
-        const supportUrl = `https://chromewebstore.google.com/detail/${extensionId}/support`;
-        chrome.tabs.create({ url: supportUrl });
+        // 跳转到浏览器商店官方support页面
+        const extensionId = browserApi.runtime.id;
+        let supportUrl;
+        
+        if (typeof browser !== 'undefined' && browser.runtime) {
+            // Firefox - 使用Firefox Add-ons商店
+            supportUrl = `https://addons.mozilla.org/en-US/firefox/addon/${extensionId}/`;
+        } else {
+            // Chrome/Edge - 使用Chrome Web Store
+            supportUrl = `https://chrome.google.com/webstore/detail/${extensionId}/support`;
+        }
+
+        browserApi.tabs.create({ url: supportUrl });
         this.showMessage('Opening support page...', 'info');
     }
-
     showMessage(message, type = 'info') {
         // 创建消息元素
         const messageEl = document.createElement('div');

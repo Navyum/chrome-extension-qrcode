@@ -1,0 +1,39 @@
+{
+  "name": "chrome-extension-qrcode",
+  "version": "1.0.0",
+  "description": "Free QR Code Generator - Create and customize QR codes for URLs, text so on. Customize logo supported.",
+  "main": "index.js",
+  "scripts": {
+    "build:chrome": "cross-env BROWSER=chrome webpack --mode=production",
+    "build:firefox": "cross-env BROWSER=firefox webpack --mode=production",
+    "build:edge": "cross-env BROWSER=edge webpack --mode=production",
+    "build:all": "npm run clean && npm run build:chrome && npm run build:firefox && npm run build:edge",
+    "clean": "rimraf dist",
+    "dev": "webpack --mode=development --watch",
+    "pack:chrome": "mkdir -pv build && cd dist/chrome && zip -r ../../build/chrome.zip *",
+    "pack:firefox": "mkdir -pv build && cd dist/firefox && zip -r ../../build/firefox.xpi *",
+    "pack:edge": "mkdir -pv build && cd dist/edge && zip -r ../../build/edge.zip *",
+    "pack:all": "npm run pack:chrome && npm run pack:firefox && npm run pack:edge"
+  },
+  "keywords": [
+    "chrome-extension",
+    "firefox-extension",
+    "edge-extension",
+    "qr-code",
+    "generator",
+    "scanner"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "webpack": "^5.88.0",
+    "webpack-cli": "^5.1.4",
+    "copy-webpack-plugin": "^11.0.0",
+    "cross-env": "^7.0.3",
+    "rimraf": "^5.0.1",
+    "css-loader": "^6.8.1",
+    "style-loader": "^3.3.3",
+    "file-loader": "^6.2.0",
+    "url-loader": "^4.1.1"
+  }
+}

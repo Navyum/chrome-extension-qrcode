@@ -46,28 +46,28 @@ function createContextMenus() {
         // 为选中文本创建菜单
         browserApi.contextMenus.create({
             id: 'generate-qr-selected-text',
-            title: '生成选中文本的二维码',
+            title: 'Generate Text QR',
             contexts: ['selection']
         });
         
         // 为链接创建菜单
         browserApi.contextMenus.create({
             id: 'generate-qr-link',
-            title: '生成链接的二维码',
+            title: 'Generate Link QR',
             contexts: ['link']
         });
         
         // 为图片创建菜单
         browserApi.contextMenus.create({
             id: 'generate-qr-image',
-            title: '生成图片链接的二维码',
+            title: 'Generate Image QR',
             contexts: ['image']
         });
         
         // 为页面创建菜单
         browserApi.contextMenus.create({
             id: 'generate-qr-page',
-            title: '生成当前页面的二维码',
+            title: 'Generate Current Page QR',
             contexts: ['page']
         });
     });

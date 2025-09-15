@@ -1,6 +1,6 @@
 {
   "manifest_version": 2,
-  "name": "QR Code Generator & Scanner - Free QR Code Creator",
+  "name": "QR Code Generator & Scanner, Free , Offline",
   "version": "1.0.0",
   "description": "Free QR Code Generator - Create and customize QR codes for URLs, text so on. Customize logo supported.",
   
@@ -13,10 +13,19 @@
     "http://*/*",
     "https://*/*"
   ],
+
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "qrcode-generator@yhj2433488839gmail.com",
+      "data_collection_permissions": {
+        "required": ["browsingActivity"]
+      }
+    }
+  },
   
   "browser_action": {
     "default_popup": "popup.html",
-    "default_title": "QR Code Generator & Scanner - Create QR Codes Instantly",
+    "default_title": "QR Code Generator & Scanner, Free , Offline",
     "default_icon": {
       "16": "icons/icon16.png",
       "32": "icons/icon32.png",

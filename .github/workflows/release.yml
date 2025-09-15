@@ -1,0 +1,68 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'  # 当推送以 v 开头的 tag 时触发
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Build Chrome extension
+      run: npm run build:chrome
+      
+    - name: Build Firefox extension
+      run: npm run build:firefox
+
+    - name: Build Edge extension
+      run: npm run build:edge
+
+    - name: Create Chrome package
+      run: |
+        mkdir -p build
+        cd dist/chrome
+        zip -r ../../build/qr-code-generator-chrome.zip *
+        
+    - name: Create Firefox package
+      run: |
+        cd dist/firefox
+        zip -r ../../build/qr-code-generator-firefox.xpi *
+        
+    - name: Create Edge package
+      run: |
+        cd dist/edge
+        zip -r ../../build/qr-code-generator-edge.zip *
+
+    - name: Get tag name
+      id: get_tag
+      run: echo "TAG_NAME=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+      
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ steps.get_tag.outputs.TAG_NAME }}
+        name: Release ${{ steps.get_tag.outputs.TAG_NAME }}
+        draft: false
+        prerelease: false
+        files: |
+          build/qr-code-generator-chrome.zip
+          build/qr-code-generator-firefox.xpi
+          build/qr-code-generator-edge.zip
+        body: |
+          ## qr-code-generator-${{ steps.get_tag.outputs.TAG_NAME }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

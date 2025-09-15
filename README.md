@@ -18,16 +18,16 @@
 <div align="center">
 
 ### 主页面 - 一键生成当前页面二维码
-<img src="images/1-1.png" alt="主页面截图" width="400">
+<img src="images/1-1.png" alt="主页面截图" width="800">
 
 ### 自定义页面 - 支持Logo和颜色自定义
-<img src="images/1-2.png" alt="自定义页面截图" width="400">
+<img src="images/1-2.png" alt="自定义页面截图" width="800">
 
 ### 扫描页面 - 上传图片识别二维码
-<img src="images/1-3.png" alt="扫描页面截图" width="400">
+<img src="images/1-3.png" alt="扫描页面截图" width="800">
 
 ### 历史记录 - 查看生成和扫描历史
-<img src="images/1-4.png" alt="历史记录页面截图" width="400">
+<img src="images/1-4.png" alt="历史记录页面截图" width="800">
 
 </div>
 

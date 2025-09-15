@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "QR Code Generator & Scanner, Free , Offline",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Free QR Code Generator - Create and customize QR codes for URLs, text so on. Customize logo supported.",
   
   "permissions": [

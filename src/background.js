@@ -29,7 +29,7 @@ const browserApi = (() => {
 })();
 
 
-browserApi.runtime.onInstalled.addListener(() => {
+browserApi.runtime.onInstalled.addListener((details) => {
     console.log('QR Code Generator Extension 已安装');
     
     // 创建右键菜单
@@ -37,6 +37,11 @@ browserApi.runtime.onInstalled.addListener(() => {
     
     // 设置默认配置
     setDefaultSettings();
+
+    // 卸载时触发调研问卷
+    if (details.reason === browserApi.runtime.OnInstalledReason.INSTALL) {
+        browserApi.runtime.setUninstallURL('https://forms.gle/TbehvAbCm72vyxUG9');
+    }
 });
 
 // 创建右键菜单

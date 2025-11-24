@@ -1,4 +1,4 @@
-# QR Code Generator & Scanner - 免费离线二维码生成器
+# PixelQR - QR Code Generator & Scanner - 免费离线二维码生成器
 
 <div align="center">
 

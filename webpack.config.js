@@ -86,6 +86,11 @@ module.exports = {
           globOptions: {
             ignore: ['**/.*', '**/.*/**']
           }
+        },
+        {
+          from: 'robots.txt',
+          to: 'robots.txt',
+          noErrorOnMissing: true
         }
       ]
     })

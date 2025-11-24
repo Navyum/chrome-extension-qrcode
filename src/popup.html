@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A simple and efficient QR Code Generator extension for Chrome. Generate QR codes for current page URL, selected text, or custom content. Scan QR codes from images.">
     <title>QR Code Generator</title>
     <link rel="stylesheet" href="popup.css">
 </head>
@@ -59,22 +60,14 @@
             </div>
             <div class="bottom-icons">
                 <button class="bottom-icon-btn" id="history-btn" title="History" data-i18n-title="popup_history_button_title">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20Z" fill="currentColor"/>
-                        <path d="M12.5 7H11V13L16.25 16.15L17 14.92L12.5 12.25V7Z" fill="currentColor"/>
-                    </svg>
+                    <img src="assets/history.svg" alt="History" width="16" height="16">
                 </button>
                 <div class="right-icons">
                     <button class="bottom-icon-btn" id="star-btn" title="Rate 5 Stars" data-i18n-title="popup_rate_button_title">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="currentColor"/>
-                        </svg>
+                        <img src="assets/rate.svg" alt="Rate 5 Stars" width="16" height="16">
                     </button>
                     <button class="bottom-icon-btn" id="feedback-btn" title="Feedback" data-i18n-title="popup_feedback_button_title">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M20 2H4C2.9 2 2 2.9 2 4V22L6 18H20C21.1 18 22 17.1 22 16V4C22 2.9 21.1 2 20 2ZM20 16H6L4 18V4H20V16Z" fill="currentColor"/>
-                            <path d="M7 9H17V11H7V9ZM7 12H14V14H7V12Z" fill="currentColor"/>
-                        </svg>
+                        <img src="assets/feedback.svg" alt="Feedback" width="16" height="16">
                     </button>
                 </div>
             </div>

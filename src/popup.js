@@ -253,30 +253,36 @@ class QRCodePopup {
         
         // 更新favicon
         if (cloudIconElement) {
-            if (tab.favIconUrl && !customUrl) {
-                // 使用当前页面的favicon
-                // 对 tab.favIconUrl 进行基本验证，避免加载 chrome:// 等受限协议图标失败时的丑陋占位符
+            // 尝试获取最佳favicon (优先使用 _favicon API 获取 64px 高清图标)
+            const targetUrl = customUrl || tab.url;
+            let bestFavicon = null;
+            
+            // 总是尝试获取 _favicon 链接，因为它能提供指定尺寸(64px)的图标
+            // 从而解决 "Image natural dimensions" 的警告
+            const faviconUrls = this.getFaviconUrl(targetUrl);
+            if (faviconUrls && faviconUrls.length > 0) {
+                bestFavicon = faviconUrls[0];
+            }
+
+            if (bestFavicon) {
+                 cloudIconElement.innerHTML = `<img src="${bestFavicon}" alt="Favicon" width="24" height="24" style="border-radius: 4px;" class="cloud-favicon">
+                        <div style="display:none" class="cloud-default-icon">${this.getDefaultIconSvg()}</div>`;
+                 
+                 // 绑定错误处理事件
+                 const img = cloudIconElement.querySelector('.cloud-favicon');
+                 const fallback = cloudIconElement.querySelector('.cloud-default-icon');
+                 if (img && fallback) {
+                     img.addEventListener('error', () => {
+                         img.style.display = 'none';
+                         fallback.style.display = 'inline-block';
+                     });
+                 }
+            } else if (tab.favIconUrl && !customUrl) {
+                // 如果 _favicon API 不可用（例如URL解析失败），回退到 tab.favIconUrl
                 const isRestrictedProtocol = tab.favIconUrl.startsWith('chrome') || tab.favIconUrl.startsWith('edge');
                 if (!isRestrictedProtocol) {
                      cloudIconElement.innerHTML = `<img src="${this.escapeHtmlForAttribute(tab.favIconUrl)}" alt="Favicon" width="24" height="24" style="border-radius: 4px;">`;
                 } else {
-                    // 使用默认图标
-                    this.renderDefaultIcon(cloudIconElement);
-                }
-            } else if (customUrl) {
-                // 对于自定义URL，尝试获取favicon
-                try {
-                    const faviconUrls = this.getFaviconUrl(customUrl);
-                    // 优先使用第一个 (chrome favicon API)
-                    const bestFavicon = faviconUrls && faviconUrls.length > 0 ? faviconUrls[0] : null;
-                    
-                    if (bestFavicon) {
-                         cloudIconElement.innerHTML = `<img src="${bestFavicon}" alt="Favicon" width="24" height="24" style="border-radius: 4px;" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';">
-                        <div style="display:none">${this.getDefaultIconSvg()}</div>`;
-                    } else {
-                        this.renderDefaultIcon(cloudIconElement);
-                    }
-                } catch (error) {
                     this.renderDefaultIcon(cloudIconElement);
                 }
             } else {
@@ -325,13 +331,27 @@ class QRCodePopup {
             document.getElementById('copy-btn').disabled = false;
             document.getElementById('scan-btn').disabled = false;
             
-            // 获取当前标签页的favicon URL
+            // 获取URL的favicon URL
             let faviconUrl = null;
             if (type === 'url') {
                 try {
-                    const [tab] = await browserApi.tabs.query({ active: true, currentWindow: true });
-                    if (tab && tab.favIconUrl) {
-                        faviconUrl = tab.favIconUrl;
+                    // 优先尝试获取对应URL的高清favicon
+                    const faviconUrls = this.getFaviconUrl(content);
+                    if (faviconUrls && faviconUrls.length > 0) {
+                        faviconUrl = faviconUrls[0];
+                    }
+                    
+                    // 如果没找到，且内容与当前标签页一致，尝试使用标签页的favicon作为后备
+                    if (!faviconUrl) {
+                        const [tab] = await browserApi.tabs.query({ active: true, currentWindow: true });
+                        if (tab && tab.favIconUrl) {
+                            // 简单的URL比较，忽略末尾斜杠等差异
+                            const normContent = content.replace(/\/$/, '');
+                            const normTabUrl = tab.url.replace(/\/$/, '');
+                            if (normContent === normTabUrl) {
+                                faviconUrl = tab.favIconUrl;
+                            }
+                        }
                     }
                 } catch (error) {
                     // 静默处理favicon获取失败
@@ -1052,7 +1072,7 @@ class QRCodePopup {
             // 使用保存的favicon URL或占位图标
             let iconHtml = '📱';
             if (isUrl && record.faviconUrl) {
-                iconHtml = `<img src="${this.escapeHtmlForAttribute(record.faviconUrl)}" alt="favicon" class="favicon" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';" />
+                iconHtml = `<img src="${this.escapeHtmlForAttribute(record.faviconUrl)}" alt="favicon" class="favicon" />
                            <span class="fallback-icon" style="display: none;">📱</span>`;
             } else if (isUrl) {
                 iconHtml = `<span class="fallback-icon">📱</span>
@@ -1077,6 +1097,9 @@ class QRCodePopup {
                 </div>
             `;
         }).join('');
+        
+        // 绑定图片错误处理事件
+        this.bindImageErrorHandlers(container);
         
         // 只为没有favicon URL的记录异步加载favicon
         this.loadFaviconsForHistory('generated');
@@ -1107,7 +1130,7 @@ class QRCodePopup {
             // 使用保存的favicon URL或占位图标
             let iconHtml = '🔍';
             if (isUrl && record.faviconUrl) {
-                iconHtml = `<img src="${this.escapeHtmlForAttribute(record.faviconUrl)}" alt="favicon" class="favicon" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';" />
+                iconHtml = `<img src="${this.escapeHtmlForAttribute(record.faviconUrl)}" alt="favicon" class="favicon" />
                            <span class="fallback-icon" style="display: none;">🔍</span>`;
             } else if (isUrl) {
                 iconHtml = `<span class="fallback-icon">🔍</span>
@@ -1133,8 +1156,25 @@ class QRCodePopup {
             `;
         }).join('');
         
+        // 绑定图片错误处理事件
+        this.bindImageErrorHandlers(container);
+        
         // 只为没有favicon URL的记录异步加载favicon
         this.loadFaviconsForHistory('scanned');
+    }
+
+    bindImageErrorHandlers(container) {
+        if (!container) return;
+        const favicons = container.querySelectorAll('.favicon');
+        favicons.forEach(img => {
+            img.addEventListener('error', () => {
+                img.style.display = 'none';
+                const fallback = img.nextElementSibling;
+                if (fallback && fallback.classList.contains('fallback-icon')) {
+                    fallback.style.display = 'inline-block';
+                }
+            });
+        });
     }
 
     formatTime(timestamp) {
@@ -1171,7 +1211,7 @@ class QRCodePopup {
             // MV3 Preferred method
             const extensionFaviconUrl = new URL(browserApi.runtime.getURL("/_favicon/"));
             extensionFaviconUrl.searchParams.set("pageUrl", url);
-            extensionFaviconUrl.searchParams.set("size", "32");
+            extensionFaviconUrl.searchParams.set("size", "64");
             faviconPaths.push(extensionFaviconUrl.toString());
 
             // Fallbacks

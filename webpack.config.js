@@ -67,8 +67,15 @@ module.exports = {
           }
         },
         {
-          from: 'asserts',
-          to: 'asserts',
+          from: 'assets',
+          to: 'assets',
+          globOptions: {
+            ignore: ['**/.*', '**/.*/**']
+          }
+        },
+        {
+          from: 'src/_locales',
+          to: '_locales',
           globOptions: {
             ignore: ['**/.*', '**/.*/**']
           }

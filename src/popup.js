@@ -1,32 +1,6 @@
 // QR Code Generator Chrome Extension - Popup Script
 
-// 浏览器API适配器
-const browserApi = (() => {
-    // 检测浏览器类型
-    const isFirefox = typeof browser !== 'undefined' && browser.runtime;
-    const isChrome = typeof chrome !== 'undefined' && chrome.runtime;
-    
-    if (isFirefox) {
-        // Firefox环境
-        return {
-            ...browser,
-            // 重写action，指向browser_action
-            action: browser.browserAction,
-            // 为了向后兼容，也提供browser_action别名
-            browser_action: browser.browserAction
-        };
-    } else if (isChrome) {
-        // Chrome/Edge环境
-        return {
-            ...chrome,
-            // 为了向后兼容，提供browser_action别名指向action
-            browser_action: chrome.action
-        };
-    } else {
-        throw new Error('Neither browser nor chrome API is available');
-    }
-})();
-
+const browserApi = require('./utils/browser-api');
 
 class QRCodePopup {
     constructor() {
@@ -54,6 +28,7 @@ class QRCodePopup {
     }
 
     async init() {
+        this.initI18n();
         this.bindEvents();
         this.loadSettings();
         this.loadHistory();
@@ -64,8 +39,48 @@ class QRCodePopup {
         
         // 聚焦到URL输入框的末尾
         this.focusUrlInput();
-        
-        // 字符计数功能已移除
+    }
+
+    initI18n() {
+        // 设置 HTML 语言和方向
+        document.documentElement.lang = browserApi.i18n.getMessage('htmlLang') || 'en';
+        document.documentElement.dir = browserApi.i18n.getMessage('htmlDir') || 'ltr';
+
+        // 替换 data-i18n 属性的文本内容
+        document.querySelectorAll('[data-i18n]').forEach(element => {
+            const messageKey = element.getAttribute('data-i18n');
+            const message = browserApi.i18n.getMessage(messageKey);
+            if (message) {
+                element.textContent = message;
+            }
+        });
+
+        // 替换 data-i18n-title 属性的 title
+        document.querySelectorAll('[data-i18n-title]').forEach(element => {
+            const messageKey = element.getAttribute('data-i18n-title');
+            const message = browserApi.i18n.getMessage(messageKey);
+            if (message) {
+                element.title = message;
+            }
+        });
+
+        // 替换 data-i18n-placeholder 属性的 placeholder
+        document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
+            const messageKey = element.getAttribute('data-i18n-placeholder');
+            const message = browserApi.i18n.getMessage(messageKey);
+            if (message) {
+                element.placeholder = message;
+            }
+        });
+
+        // 替换 data-i18n-alt 属性的 alt
+        document.querySelectorAll('[data-i18n-alt]').forEach(element => {
+            const messageKey = element.getAttribute('data-i18n-alt');
+            const message = browserApi.i18n.getMessage(messageKey);
+            if (message) {
+                element.alt = message;
+            }
+        });
     }
 
     bindEvents() {
@@ -106,8 +121,6 @@ class QRCodePopup {
         document.getElementById('current-url').addEventListener('input', (e) => {
             this.currentContent = e.target.value;
             this.currentType = 'url';
-            
-            // 字符计数功能已移除
             
             // 如果内容不为空，尝试生成二维码
             if (e.target.value.trim()) {
@@ -204,11 +217,11 @@ class QRCodePopup {
                 // 生成二维码
                 await this.createQRCode(tab.url, 'url');
             } else {
-                this.showMessage('Unable to get current page URL', 'error');
+                this.showMessage(browserApi.i18n.getMessage('error_unable_get_current_page_url'), 'error');
             }
         } catch (error) {
             console.error('Failed to generate QR code:', error);
-            this.showMessage('Failed to generate QR code', 'error');
+            this.showMessage(browserApi.i18n.getMessage('error_failed_generate_qr'), 'error');
         }
     }
 
@@ -232,7 +245,7 @@ class QRCodePopup {
                     const urlObj = new URL(customUrl);
                     titleElement.textContent = urlObj.hostname;
                 } catch (error) {
-                    titleElement.textContent = 'Custom URL';
+                    titleElement.textContent = browserApi.i18n.getMessage('popup_custom_url_title');
                 }
             }
         }
@@ -245,36 +258,45 @@ class QRCodePopup {
         if (cloudIconElement) {
             if (tab.favIconUrl && !customUrl) {
                 // 使用当前页面的favicon
-                cloudIconElement.innerHTML = `<img src="${tab.favIconUrl}" alt="Favicon" width="24" height="24" style="border-radius: 4px;">`;
+                // 对 tab.favIconUrl 进行基本验证，避免加载 chrome:// 等受限协议图标失败时的丑陋占位符
+                const isRestrictedProtocol = tab.favIconUrl.startsWith('chrome') || tab.favIconUrl.startsWith('edge');
+                if (!isRestrictedProtocol) {
+                     cloudIconElement.innerHTML = `<img src="${this.escapeHtmlForAttribute(tab.favIconUrl)}" alt="Favicon" width="24" height="24" style="border-radius: 4px;">`;
+                } else {
+                    // 使用默认图标
+                    this.renderDefaultIcon(cloudIconElement);
+                }
             } else if (customUrl) {
                 // 对于自定义URL，尝试获取favicon
                 try {
-                    const urlObj = new URL(customUrl);
-                    const faviconUrl = `${urlObj.protocol}//${urlObj.hostname}/favicon.ico`;
-                    cloudIconElement.innerHTML = `<img src="${faviconUrl}" alt="Favicon" width="24" height="24" style="border-radius: 4px;" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: none;">
-                            <path d="M18 10H16.74C16.3659 7.49025 14.2356 5.5 11.64 5.5C9.17347 5.5 7.12647 7.22729 6.5 9.5C4.5 9.5 3 11 3 13C3 15 4.5 16.5 6.5 16.5H18C19.6569 16.5 21 15.1569 21 13.5C21 11.8431 19.6569 10.5 18 10Z" fill="#87CEEB"/>
-                            <path d="M20 12C20 13.1046 19.1046 14 18 14C16.8954 14 16 13.1046 16 12C16 10.8954 16.8954 10 18 10C19.1046 10 20 10.8954 20 12Z" fill="#4682B4"/>
-                        </svg>`;
+                    const faviconUrls = this.getFaviconUrl(customUrl);
+                    // 优先使用第一个 (chrome favicon API)
+                    const bestFavicon = faviconUrls && faviconUrls.length > 0 ? faviconUrls[0] : null;
+                    
+                    if (bestFavicon) {
+                         cloudIconElement.innerHTML = `<img src="${bestFavicon}" alt="Favicon" width="24" height="24" style="border-radius: 4px;" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';">
+                        <div style="display:none">${this.getDefaultIconSvg()}</div>`;
+                    } else {
+                        this.renderDefaultIcon(cloudIconElement);
+                    }
                 } catch (error) {
-                    // 如果URL解析失败，使用默认图标
-                    cloudIconElement.innerHTML = `
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M18 10H16.74C16.3659 7.49025 14.2356 5.5 11.64 5.5C9.17347 5.5 7.12647 7.22729 6.5 9.5C4.5 9.5 3 11 3 13C3 15 4.5 16.5 6.5 16.5H18C19.6569 16.5 21 15.1569 21 13.5C21 11.8431 19.6569 10.5 18 10Z" fill="#87CEEB"/>
-                            <path d="M20 12C20 13.1046 19.1046 14 18 14C16.8954 14 16 13.1046 16 12C16 10.8954 16.8954 10 18 10C19.1046 10 20 10.8954 20 12Z" fill="#4682B4"/>
-                        </svg>
-                    `;
+                    this.renderDefaultIcon(cloudIconElement);
                 }
             } else {
-                // 如果没有favicon，使用默认的云图标
-                cloudIconElement.innerHTML = `
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M18 10H16.74C16.3659 7.49025 14.2356 5.5 11.64 5.5C9.17347 5.5 7.12647 7.22729 6.5 9.5C4.5 9.5 3 11 3 13C3 15 4.5 16.5 6.5 16.5H18C19.6569 16.5 21 15.1569 21 13.5C21 11.8431 19.6569 10.5 18 10Z" fill="#87CEEB"/>
-                        <path d="M20 12C20 13.1046 19.1046 14 18 14C16.8954 14 16 13.1046 16 12C16 10.8954 16.8954 10 18 10C19.1046 10 20 10.8954 20 12Z" fill="#4682B4"/>
-                    </svg>
-                `;
+                this.renderDefaultIcon(cloudIconElement);
             }
         }
+    }
+
+    renderDefaultIcon(element) {
+        element.innerHTML = this.getDefaultIconSvg();
+    }
+
+    getDefaultIconSvg() {
+        return `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M18 10H16.74C16.3659 7.49025 14.2356 5.5 11.64 5.5C9.17347 5.5 7.12647 7.22729 6.5 9.5C4.5 9.5 3 11 3 13C3 15 4.5 16.5 6.5 16.5H18C19.6569 16.5 21 15.1569 21 13.5C21 11.8431 19.6569 10.5 18 10Z" fill="#87CEEB"/>
+                    <path d="M20 12C20 13.1046 19.1046 14 18 14C16.8954 14 16 13.1046 16 12C16 10.8954 16.8954 10 18 10C19.1046 10 20 10.8954 20 12Z" fill="#4682B4"/>
+                </svg>`;
     }
 
     async createQRCode(content, type) {
@@ -285,7 +307,7 @@ class QRCodePopup {
         
         // 检查内容长度（只在真正需要时检查）
         if (!content || typeof content !== 'string') {
-            this.showMessage('Invalid content. Please enter valid text.', 'error');
+            this.showMessage(browserApi.i18n.getMessage('error_invalid_content'), 'error');
             return;
         }
         
@@ -330,15 +352,21 @@ class QRCodePopup {
             console.error('Failed to generate QR code:', error);
             
             // 检查是否是长度溢出错误
-            if (error.message && error.message.includes('code length overflow')) {
+            // 增加对 TypeError 的检查，处理库未抛出明确 overflow 错误的情况
+            if ((error.message && error.message.includes('code length overflow')) || 
+                (error.message && error.message.includes('Unable to generate QR code with any error correction level')) ||
+                (error instanceof TypeError)) {
+                
                 const currentLength = this.getUTF8Length(content);
-                this.showMessage(`Content too long (${currentLength} UTF-8 bytes). Maximum supported: 2953 bytes. Please shorten the content.`, 'error');
-            } else if (error.message && error.message.includes('Unable to generate QR code with any error correction level')) {
-                const currentLength = this.getUTF8Length(content);
-                this.showMessage(`Unable to generate QR code. Content may be too complex(${currentLength} UTF-8 bytes - Maximum supported: 2953 bytes) or contain unsupported characters.`, 'error');
+                // 如果长度很大，优先提示长度过长，而不是“太复杂”
+                if (currentLength > 2300) { // 2300是大致的中等纠错级别容量，超过这个数很有可能就是太长了
+                     this.showMessage(browserApi.i18n.getMessage('error_content_too_long', [currentLength]), 'error');
+                } else {
+                     this.showMessage(browserApi.i18n.getMessage('error_content_too_complex', [currentLength]), 'error');
+                }
             } else {
                 // 其他错误，显示通用错误信息
-                this.showMessage('Failed to generate QR code. Please check your content and try again.', 'error');
+                this.showMessage(browserApi.i18n.getMessage('error_generate_generic'), 'error');
             }
             return;
         }
@@ -369,12 +397,16 @@ class QRCodePopup {
                 
                 // 如果成功生成，显示纠错级别信息
                 if (errorLevel.name === 'Low') {
-                    this.showMessage(`QR code generated with ${errorLevel.name} error correction level for better compatibility.`, 'info');
+                    const levelName = browserApi.i18n.getMessage('error_level_low');
+                    this.showMessage(browserApi.i18n.getMessage('info_generated_with_error_level', [levelName]), 'info');
                 }
                 
                 return canvas;
             } catch (error) {
-                console.warn(`Failed to generate QR code with ${errorLevel.name} error correction:`, error);
+                // 这里的错误通常意味着当前纠错级别无法容纳该内容（长度溢出），
+                // 或者发生了其他生成错误。这是正常的降级过程，我们只需静默失败并尝试下一个级别。
+                // 最终如果所有级别都失败，会在上层 createQRCode 中捕获并提示用户。
+                
                 // 清空容器，准备下一次尝试
                 container.innerHTML = '';
                 continue;
@@ -460,7 +492,7 @@ class QRCodePopup {
                     this.createQRCode(this.currentContent, this.currentType);
                 }
             } else {
-                fileHint.textContent = 'No file selected';
+                fileHint.textContent = browserApi.i18n.getMessage('popup_common_no_file_selected');
                 fileHint.style.color = '#6c757d';
             }
         });
@@ -492,26 +524,23 @@ class QRCodePopup {
 
         // 清除历史记录
         document.getElementById('clear-history').addEventListener('click', () => {
-            if (confirm('Are you sure you want to clear all history? This action cannot be undone.')) {
+            if (confirm(browserApi.i18n.getMessage('confirm_clear_history'))) {
                 this.history.generated = [];
                 this.history.scanned = [];
                 this.saveHistory();
                 this.renderHistory();
-                this.showMessage('History cleared', 'success');
+                this.showMessage(browserApi.i18n.getMessage('success_history_cleared'), 'success');
             }
         });
 
         // 历史记录copy按钮事件委托
         document.addEventListener('click', (e) => {
             if (e.target.classList.contains('copy-btn')) {
-                console.log('🔍 [DEBUG] Copy button clicked');
                 const content = e.target.getAttribute('data-content');
-                console.log('🔍 [DEBUG] Content from data attribute:', content);
                 if (content) {
                     this.copyHistoryContent(content);
                 } else {
-                    console.error('❌ [DEBUG] No content found in data attribute');
-                    this.showMessage('No content to copy', 'error');
+                    this.showMessage(browserApi.i18n.getMessage('error_no_content_to_copy'), 'error');
                 }
             }
         });
@@ -526,7 +555,7 @@ class QRCodePopup {
                 fileHint.style.color = '#47630f';
                 this.scanQRCode(file);
             } else {
-                fileHint.textContent = 'No file selected';
+                fileHint.textContent = browserApi.i18n.getMessage('popup_common_no_file_selected');
                 fileHint.style.color = '#6c757d';
             }
         });
@@ -535,7 +564,7 @@ class QRCodePopup {
         document.getElementById('copy-result').addEventListener('click', () => {
             const content = document.getElementById('result-content').textContent;
             navigator.clipboard.writeText(content).then(() => {
-                this.showMessage('Result copied to clipboard', 'success');
+                this.showMessage(browserApi.i18n.getMessage('success_result_copied'), 'success');
             });
         });
 
@@ -544,7 +573,7 @@ class QRCodePopup {
             if (content.startsWith('http://') || content.startsWith('https://')) {
                 browserApi.tabs.create({ url: content });
             } else {
-                this.showMessage('Cannot open non-URL content', 'warning');
+                this.showMessage(browserApi.i18n.getMessage('warning_cannot_open_non_url'), 'warning');
             }
         });
 
@@ -598,11 +627,16 @@ class QRCodePopup {
         document.getElementById('opacity-value').textContent = '100%';
         document.querySelector('.logo-options').style.display = 'none';
         document.getElementById('logo-file').value = '';
+        
+        // 重置文件名显示
+        const fileHint = document.querySelector('.file-input-hint');
+        fileHint.textContent = browserApi.i18n.getMessage('popup_common_no_file_selected');
+        fileHint.style.color = '#6c757d';
     }
 
     async downloadQRCode() {
         if (!this.currentQRCode) {
-            this.showMessage('Please generate QR code first', 'warning');
+            this.showMessage(browserApi.i18n.getMessage('warning_generate_first'), 'warning');
             return;
         }
 
@@ -657,20 +691,20 @@ class QRCodePopup {
                 link.href = canvasToDownload.toDataURL('image/png');
                 link.click();
                 
-                this.showMessage('QR code downloaded successfully', 'success');
+                this.showMessage(browserApi.i18n.getMessage('success_qr_downloaded'), 'success');
             }
 
             // 清理临时容器
             document.body.removeChild(tempContainer);
         } catch (error) {
             console.error('Download failed:', error);
-            this.showMessage('Download failed, please try again', 'error');
+            this.showMessage(browserApi.i18n.getMessage('error_download_failed'), 'error');
         }
     }
 
     async copyQRCode() {
         if (!this.currentQRCode) {
-            this.showMessage('Please generate QR code first', 'warning');
+            this.showMessage(browserApi.i18n.getMessage('warning_generate_first'), 'warning');
             return;
         }
 
@@ -719,13 +753,13 @@ class QRCodePopup {
                 new ClipboardItem({ "image/png": blob })
             ]);
             
-            this.showMessage('QR code copied to clipboard', 'success');
+            this.showMessage(browserApi.i18n.getMessage('success_qr_copied'), 'success');
 
             // 清理临时容器
             document.body.removeChild(tempContainer);
         } catch (error) {
             console.error('Copy failed:', error);
-            this.showMessage('Copy failed, please try again', 'error');
+            this.showMessage(browserApi.i18n.getMessage('error_copy_qr_failed'), 'error');
         }
     }
 
@@ -768,7 +802,7 @@ class QRCodePopup {
         // 重置扫描结果
         document.getElementById('scan-result').style.display = 'none';
         document.getElementById('qr-file').value = '';
-        document.querySelector('#scan-modal .file-input-hint').textContent = 'No file selected';
+        document.querySelector('#scan-modal .file-input-hint').textContent = browserApi.i18n.getMessage('popup_common_no_file_selected');
         document.querySelector('#scan-modal .file-input-hint').style.color = '#6c757d';
         
         // 隐藏底部的Copy和Open按钮
@@ -779,7 +813,7 @@ class QRCodePopup {
     async scanQRCode(file) {
         try {
             // 显示加载状态
-            this.showMessage('Scanning QR code...', 'info');
+            this.showMessage(browserApi.i18n.getMessage('info_scanning_qr'), 'info');
             
             const reader = new FileReader();
             reader.onload = async (e) => {
@@ -788,7 +822,7 @@ class QRCodePopup {
                     try {
                         // 检查图片尺寸
                         if (img.width < 50 || img.height < 50) {
-                            this.showMessage('Image too small to scan QR code', 'error');
+                            this.showMessage(browserApi.i18n.getMessage('error_image_too_small'), 'error');
                             return;
                         }
                         
@@ -806,31 +840,31 @@ class QRCodePopup {
                         
                         if (result) {
                             this.showScanResult(result);
-                            this.showMessage('QR code scanned successfully', 'success');
+                            this.showMessage(browserApi.i18n.getMessage('success_scan_completed'), 'success');
                         } else {
-                            this.showMessage('No QR code found in the image', 'error');
+                            this.showMessage(browserApi.i18n.getMessage('error_no_qr_found'), 'error');
                         }
                     } catch (error) {
                         console.error('QR code scanning failed:', error);
-                        this.showMessage('Failed to scan QR code: ' + error.message, 'error');
+                        this.showMessage(browserApi.i18n.getMessage('error_scan_failed', [error.message]), 'error');
                     }
                 };
                 
                 img.onerror = () => {
-                    this.showMessage('Failed to load image', 'error');
+                    this.showMessage(browserApi.i18n.getMessage('error_load_image_failed'), 'error');
                 };
                 
                 img.src = e.target.result;
             };
             
             reader.onerror = () => {
-                this.showMessage('Failed to read file', 'error');
+                this.showMessage(browserApi.i18n.getMessage('error_read_file_failed'), 'error');
             };
             
             reader.readAsDataURL(file);
         } catch (error) {
             console.error('File reading failed:', error);
-            this.showMessage('Failed to read file: ' + error.message, 'error');
+            this.showMessage(browserApi.i18n.getMessage('error_read_file_failed_reason', [error.message]), 'error');
         }
     }
 
@@ -857,10 +891,8 @@ class QRCodePopup {
         }
     }
 
-    // detectContentType方法已移至jsQR适配器中处理
-
     showScanResult(result) {
-        document.getElementById('result-type').textContent = result.type;
+        document.getElementById('result-type').textContent = browserApi.i18n.getMessage(`type_${result.type.toLowerCase()}`) || result.type;
         
         // 使用格式化后的显示数据
         const contentElement = document.getElementById('result-content');
@@ -1012,8 +1044,8 @@ class QRCodePopup {
             container.innerHTML = `
                 <div class="empty-history">
                     <div class="empty-history-icon">📱</div>
-                    <div class="empty-history-text">No generated QR codes yet</div>
-                    <div class="empty-history-hint">Generate your first QR code to see it here</div>
+                    <div class="empty-history-text">${this.escapeHtml(browserApi.i18n.getMessage('popup_history_empty_generated_title'))}</div>
+                    <div class="empty-history-hint">${this.escapeHtml(browserApi.i18n.getMessage('popup_history_empty_generated_hint'))}</div>
                 </div>
             `;
             return;
@@ -1021,14 +1053,16 @@ class QRCodePopup {
 
         container.innerHTML = this.history.generated.map((record, index) => {
             const time = this.formatTime(record.timestamp);
-            const title = this.truncateText(record.content, 60);
+            const title = this.escapeHtml(this.truncateText(record.content, 60));
             const isUrl = this.isUrl(record.content);
+            const dirAttr = isUrl ? 'dir="ltr"' : '';
+            const copyText = this.escapeHtml(browserApi.i18n.getMessage('popup_history_action_copy'));
             
 
             // 使用保存的favicon URL或占位图标
             let iconHtml = '📱';
             if (isUrl && record.faviconUrl) {
-                iconHtml = `<img src="${record.faviconUrl}" alt="favicon" class="favicon" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';" />
+                iconHtml = `<img src="${this.escapeHtmlForAttribute(record.faviconUrl)}" alt="favicon" class="favicon" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';" />
                            <span class="fallback-icon" style="display: none;">📱</span>`;
             } else if (isUrl) {
                 iconHtml = `<span class="fallback-icon">📱</span>
@@ -1041,14 +1075,14 @@ class QRCodePopup {
                         ${iconHtml}
                     </div>
                     <div class="history-content-wrapper">
-                        <div class="history-title">${title}</div>
+                        <div class="history-title" ${dirAttr}>${title}</div>
                         <div class="history-subtitle">
-                            <span>${record.type.toUpperCase()}</span>
+                            <span>${this.escapeHtml(record.type.toUpperCase())}</span>
                             <span class="history-time">${time}</span>
                         </div>
                     </div>
                     <div class="history-actions">
-                        <button class="history-action-btn copy-btn" data-content="${this.escapeHtmlForAttribute(record.content)}">Copy</button>
+                        <button class="history-action-btn copy-btn" data-content="${this.escapeHtmlForAttribute(record.content)}">${copyText}</button>
                     </div>
                 </div>
             `;
@@ -1065,8 +1099,8 @@ class QRCodePopup {
             container.innerHTML = `
                 <div class="empty-history">
                     <div class="empty-history-icon">🔍</div>
-                    <div class="empty-history-text">No scanned QR codes yet</div>
-                    <div class="empty-history-hint">Scan your first QR code to see it here</div>
+                    <div class="empty-history-text">${this.escapeHtml(browserApi.i18n.getMessage('popup_history_empty_scanned_title'))}</div>
+                    <div class="empty-history-hint">${this.escapeHtml(browserApi.i18n.getMessage('popup_history_empty_scanned_hint'))}</div>
                 </div>
             `;
             return;
@@ -1074,14 +1108,16 @@ class QRCodePopup {
 
         container.innerHTML = this.history.scanned.map((record, index) => {
             const time = this.formatTime(record.timestamp);
-            const title = this.truncateText(record.displayData || record.content, 60);
+            const title = this.escapeHtml(this.truncateText(record.displayData || record.content, 60));
             const isUrl = this.isUrl(record.content);
+            const dirAttr = isUrl ? 'dir="ltr"' : '';
+            const copyText = this.escapeHtml(browserApi.i18n.getMessage('popup_history_action_copy'));
             
 
             // 使用保存的favicon URL或占位图标
             let iconHtml = '🔍';
             if (isUrl && record.faviconUrl) {
-                iconHtml = `<img src="${record.faviconUrl}" alt="favicon" class="favicon" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';" />
+                iconHtml = `<img src="${this.escapeHtmlForAttribute(record.faviconUrl)}" alt="favicon" class="favicon" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';" />
                            <span class="fallback-icon" style="display: none;">🔍</span>`;
             } else if (isUrl) {
                 iconHtml = `<span class="fallback-icon">🔍</span>
@@ -1094,14 +1130,14 @@ class QRCodePopup {
                         ${iconHtml}
                     </div>
                     <div class="history-content-wrapper">
-                        <div class="history-title">${title}</div>
+                        <div class="history-title" ${dirAttr}>${title}</div>
                         <div class="history-subtitle">
-                            <span>${record.type.toUpperCase()}</span>
+                            <span>${this.escapeHtml(record.type.toUpperCase())}</span>
                             <span class="history-time">${time}</span>
                         </div>
                     </div>
                     <div class="history-actions">
-                        <button class="history-action-btn copy-btn" data-content="${this.escapeHtmlForAttribute(record.content)}">Copy</button>
+                        <button class="history-action-btn copy-btn" data-content="${this.escapeHtmlForAttribute(record.content)}">${copyText}</button>
                     </div>
                 </div>
             `;
@@ -1120,10 +1156,10 @@ class QRCodePopup {
         const hours = Math.floor(diff / 3600000);
         const days = Math.floor(diff / 86400000);
         
-        if (minutes < 1) return 'Just now';
-        if (minutes < 60) return `${minutes}m ago`;
-        if (hours < 24) return `${hours}h ago`;
-        if (days < 7) return `${days}d ago`;
+        if (minutes < 1) return browserApi.i18n.getMessage('time_just_now');
+        if (minutes < 60) return browserApi.i18n.getMessage('time_minutes_ago', [minutes]);
+        if (hours < 24) return browserApi.i18n.getMessage('time_hours_ago', [hours]);
+        if (days < 7) return browserApi.i18n.getMessage('time_days_ago', [days]);
         
         return date.toLocaleDateString();
     }
@@ -1136,18 +1172,23 @@ class QRCodePopup {
     getFaviconUrl(url) {
         try {
             const urlObj = new URL(url);
-            const hostname = urlObj.hostname;
+            // chrome://favicon API (Best practice for extensions)
+            // 优先使用 chrome-extension://_favicon/ (MV3) 或 chrome://favicon/ (MV2/Firefox)
+            // 注意：Chrome MV3 需要 "favicon" 权限才能访问 chrome-extension://_favicon/
             
-            // 尝试多种favicon路径
-            const faviconPaths = [
-                `${urlObj.protocol}//${hostname}/favicon.ico`,
-                `${urlObj.protocol}//${hostname}/apple-touch-icon.png`,
-                `${urlObj.protocol}//${hostname}/apple-touch-icon-precomposed.png`,
-                `https://www.google.com/s2/favicons?domain=${hostname}&sz=32`,
-                `https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${hostname}&size=32`
-            ];
+            const faviconPaths = [];
             
-            return faviconPaths; // 返回所有路径数组
+            // MV3 Preferred method
+            const extensionFaviconUrl = new URL(browserApi.runtime.getURL("/_favicon/"));
+            extensionFaviconUrl.searchParams.set("pageUrl", url);
+            extensionFaviconUrl.searchParams.set("size", "32");
+            faviconPaths.push(extensionFaviconUrl.toString());
+
+            // Fallbacks
+            faviconPaths.push(`${urlObj.protocol}//${urlObj.hostname}/favicon.ico`);
+            faviconPaths.push(`${urlObj.protocol}//${urlObj.hostname}/apple-touch-icon.png`);
+            
+            return faviconPaths; 
         } catch (error) {
             return null;
         }
@@ -1249,10 +1290,6 @@ class QRCodePopup {
         }
     }
 
-
-
-    // updateCharacterCount函数已移除
-
     getUTF8Length(text) {
         if (!text || typeof text !== 'string') {
             return 0;
@@ -1272,55 +1309,37 @@ class QRCodePopup {
     escapeHtmlForAttribute(text) {
         if (!text) return '';
         return text
-            .replace(/\\/g, '\\\\')
-            .replace(/'/g, "\\'")
-            .replace(/"/g, '\\"')
-            .replace(/\n/g, '\\n')
-            .replace(/\r/g, '\\r')
-            .replace(/\t/g, '\\t');
+            .replace(/&/g, '&amp;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
     }
 
     copyHistoryContent(content) {
-        console.log('🔍 [DEBUG] copyHistoryContent called with content:', content);
-        console.log('🔍 [DEBUG] content type:', typeof content);
-        console.log('🔍 [DEBUG] content length:', content ? content.length : 'null/undefined');
-        
         // 检查navigator.clipboard是否可用
         if (!navigator.clipboard) {
-            console.error('❌ [DEBUG] navigator.clipboard is not available');
-            this.showMessage('Clipboard API not supported', 'error');
+            this.showMessage(browserApi.i18n.getMessage('error_clipboard_not_supported'), 'error');
             return;
         }
-        
-        console.log('🔍 [DEBUG] navigator.clipboard is available');
         
         // 检查内容是否有效
         if (!content || typeof content !== 'string') {
-            console.error('❌ [DEBUG] Invalid content:', content);
-            this.showMessage('Invalid content to copy', 'error');
+            this.showMessage(browserApi.i18n.getMessage('error_invalid_copy_content'), 'error');
             return;
         }
         
-        console.log('🔍 [DEBUG] Content is valid, attempting to copy...');
-        
         navigator.clipboard.writeText(content)
             .then(() => {
-                console.log('✅ [DEBUG] Copy successful');
-                this.showMessage('Content copied to clipboard', 'success');
+                this.showMessage(browserApi.i18n.getMessage('success_text_copied'), 'success');
             })
             .catch((error) => {
-                console.error('❌ [DEBUG] Copy failed with error:', error);
-                console.error('❌ [DEBUG] Error name:', error.name);
-                console.error('❌ [DEBUG] Error message:', error.message);
-                
                 // 尝试使用备用方法
                 this.fallbackCopyTextToClipboard(content);
             });
     }
     
     fallbackCopyTextToClipboard(text) {
-        console.log('🔍 [DEBUG] Trying fallback copy method');
-        
         try {
             const textArea = document.createElement('textarea');
             textArea.value = text;
@@ -1335,15 +1354,12 @@ class QRCodePopup {
             document.body.removeChild(textArea);
             
             if (successful) {
-                console.log('✅ [DEBUG] Fallback copy successful');
-                this.showMessage('Content copied to clipboard', 'success');
+                this.showMessage(browserApi.i18n.getMessage('success_text_copied'), 'success');
             } else {
-                console.error('❌ [DEBUG] Fallback copy failed');
-                this.showMessage('Failed to copy content', 'error');
+                this.showMessage(browserApi.i18n.getMessage('error_copy_failed'), 'error');
             }
         } catch (error) {
-            console.error('❌ [DEBUG] Fallback copy error:', error);
-            this.showMessage('Failed to copy content', 'error');
+            this.showMessage(browserApi.i18n.getMessage('error_copy_failed'), 'error');
         }
     }
 
@@ -1351,7 +1367,7 @@ class QRCodePopup {
         if (content.startsWith('http://') || content.startsWith('https://')) {
             browserApi.tabs.create({ url: content });
         } else {
-            this.showMessage('Cannot open non-URL content', 'warning');
+            this.showMessage(browserApi.i18n.getMessage('warning_cannot_open_non_url'), 'warning');
         }
     }
 
@@ -1369,7 +1385,7 @@ class QRCodePopup {
         }
 
         browserApi.tabs.create({ url: reviewUrl });
-        this.showMessage('Thank you for rating our extension!', 'success');
+        this.showMessage(browserApi.i18n.getMessage('success_thanks_rating'), 'success');
     }
     openFeedback() {
         // 跳转到浏览器商店官方support页面
@@ -1385,7 +1401,7 @@ class QRCodePopup {
         }
 
         browserApi.tabs.create({ url: supportUrl });
-        this.showMessage('Opening support page...', 'info');
+        this.showMessage(browserApi.i18n.getMessage('info_opening_support'), 'info');
     }
     showMessage(message, type = 'info') {
         // 创建消息元素
@@ -1427,33 +1443,6 @@ class QRCodePopup {
         }, duration);
     }
 }
-
-// 添加动画样式
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes slideIn {
-        from {
-            transform: translateX(100%);
-            opacity: 0;
-        }
-        to {
-            transform: translateX(0);
-            opacity: 1;
-        }
-    }
-    
-    @keyframes slideOut {
-        from {
-            transform: translateX(0);
-            opacity: 1;
-        }
-        to {
-            transform: translateX(100%);
-            opacity: 0;
-        }
-    }
-`;
-document.head.appendChild(style);
 
 // 初始化插件
 document.addEventListener('DOMContentLoaded', () => {

@@ -1,37 +1,8 @@
 // QR Code Generator Chrome Extension - Background Script
 
-// 插件安装时的初始化
-// 浏览器API适配器
-const browserApi = (() => {
-    // 检测浏览器类型
-    const isFirefox = typeof browser !== 'undefined' && browser.runtime;
-    const isChrome = typeof chrome !== 'undefined' && chrome.runtime;
-    
-    if (isFirefox) {
-        // Firefox环境
-        return {
-            ...browser,
-            // 重写action，指向browser_action
-            action: browser.browserAction,
-            // 为了向后兼容，也提供browser_action别名
-            browser_action: browser.browserAction
-        };
-    } else if (isChrome) {
-        // Chrome/Edge环境
-        return {
-            ...chrome,
-            // 为了向后兼容，提供browser_action别名指向action
-            browser_action: chrome.action
-        };
-    } else {
-        throw new Error('Neither browser nor chrome API is available');
-    }
-})();
-
+const browserApi = require('./utils/browser-api');
 
 browserApi.runtime.onInstalled.addListener((details) => {
-    console.log('QR Code Generator Extension 已安装');
-    
     // 创建右键菜单
     createContextMenus();
     
@@ -51,28 +22,28 @@ function createContextMenus() {
         // 为选中文本创建菜单
         browserApi.contextMenus.create({
             id: 'generate-qr-selected-text',
-            title: 'Generate Text QR',
+            title: browserApi.i18n.getMessage('contextMenuGenerateText'),
             contexts: ['selection']
         });
         
         // 为链接创建菜单
         browserApi.contextMenus.create({
             id: 'generate-qr-link',
-            title: 'Generate Link QR',
+            title: browserApi.i18n.getMessage('contextMenuGenerateLink'),
             contexts: ['link']
         });
         
         // 为图片创建菜单
         browserApi.contextMenus.create({
             id: 'generate-qr-image',
-            title: 'Generate Image QR',
+            title: browserApi.i18n.getMessage('contextMenuGenerateImage'),
             contexts: ['image']
         });
         
         // 为页面创建菜单
         browserApi.contextMenus.create({
             id: 'generate-qr-page',
-            title: 'Generate Current Page QR',
+            title: browserApi.i18n.getMessage('contextMenuGeneratePage'),
             contexts: ['page']
         });
     });
@@ -97,7 +68,17 @@ async function setDefaultSettings() {
         }
     };
     
-    await browserApi.storage.local.set(defaultSettings);
+    // 只有在没有设置时才设置默认值
+    const current = await browserApi.storage.local.get('qrOptions');
+    if (!current.qrOptions) {
+        await browserApi.storage.local.set(defaultSettings);
+    }
+}
+
+// 获取选中文本的函数（将被注入到页面执行）
+function getSelectionScript() {
+    const selection = window.getSelection();
+    return selection ? selection.toString().trim() : '';
 }
 
 // 处理右键菜单点击
@@ -122,7 +103,8 @@ browserApi.contextMenus.onClicked.addListener(async (info, tab) => {
             break;
             
         case 'generate-qr-page':
-            content = tab.url;
+            // 在 activeTab 下，tab.url 是可访问的
+            content = tab.url || info.pageUrl;
             type = 'url';
             break;
     }
@@ -145,75 +127,80 @@ async function openPopupWithData(content, type) {
     });
     
     // 打开弹出窗口
-    console.log("browserApi.action");
-    console.log(browserApi);
-    console.log(browserApi.action);
-    console.log(browserApi.browser_action);
-    const actionApi = browserApi.action|| browserApi.browser_action;
-    actionApi.openPopup();
+    const actionApi = browserApi.action || browserApi.browser_action;
+    // openPopup 仅在 Firefox 或特定的 Chrome 版本/策略下有效，通常需要用户交互
+    // 对于 commands 触发的，它是有效的。
+    // 对于 contextMenu 触发的，它也是有效的。
+    try {
+        await actionApi.openPopup();
+    } catch (e) {
+        // Ignore popup open errors (usually due to lack of user gesture)
+    }
 }
 
 // 处理快捷键
 browserApi.commands.onCommand.addListener(async (command) => {
     const [tab] = await browserApi.tabs.query({ active: true, currentWindow: true });
     
+    // 忽略受限页面 (如 chrome:// URLs)
+    if (!tab || !tab.id || tab.url.startsWith('chrome://') || tab.url.startsWith('edge://') || tab.url.startsWith('about:')) {
+         if (command === '_execute_action') {
+             // 即使在受限页面，_execute_action 也会打开 popup，popup.js 会处理显示当前 URL (如果 activeTab 允许) 或显示 placeholder
+             // 但是这里我们显式调用 openPopupWithData 是为了传递特定的意图
+             // 如果 activeTab 不允许访问 url，popup.js 可能只能显示 'Loading...'
+             return; 
+         }
+    }
+
     switch (command) {
         case '_execute_action':
             // 生成当前页面二维码
-            await openPopupWithData(tab.url, 'url');
+            // 注意：manifest 中 _execute_action 默认行为是打开 popup
+            // 但如果我们想预填数据，可以这里设置 storage，然后让 popup 读取
+            // 实际上，_execute_action 会自动打开 popup，这里不需要手动 openPopup
+            // 只需要设置数据。但是 _execute_action 命令本身就是打开 popup，
+            // 这里 listener 可能在 popup 打开之前或之后运行。
+            // 更可靠的是：popup.js 启动时检查当前 tab。
+            // 所以对于 _execute_action，其实不需要做太多，除非我们想强制刷新数据。
             break;
             
         case 'generate-text-qr':
             // 生成选中文本二维码
             try {
-                const response = await browserApi.tabs.sendMessage(tab.id, { action: 'getSelectedText' });
-                if (response && response.text) {
-                    await openPopupWithData(response.text, 'text');
+                let text = '';
+                // 检查是否支持 scripting API (MV3)
+                if (browserApi.scripting) {
+                    const results = await browserApi.scripting.executeScript({
+                        target: { tabId: tab.id },
+                        func: getSelectionScript
+                    });
+                    
+                    if (results && results[0] && results[0].result) {
+                        text = results[0].result;
+                    }
+                } 
+                // 回退到 tabs.executeScript (MV2 / Firefox)
+                else if (browserApi.tabs.executeScript) {
+                    const results = await browserApi.tabs.executeScript(tab.id, {
+                        code: `(${getSelectionScript.toString()})()`
+                    });
+                    
+                    if (results && results[0]) {
+                        text = results[0];
+                    }
+                }
+
+                if (text) {
+                    await openPopupWithData(text, 'text');
                 } else {
                     // 如果没有选中文本，打开popup到自定义标签页
                     await openPopupWithData('', 'custom');
                 }
             } catch (error) {
-                console.log('无法获取选中文本，打开自定义输入页面');
                 await openPopupWithData('', 'custom');
             }
             break;
     }
-});
-
-// 处理来自content script的消息
-browserApi.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.action === 'getSelectedText') {
-        // 获取选中文本
-        browserApi.tabs.sendMessage(sender.tab.id, { action: 'getSelectedText' }, (response) => {
-            sendResponse(response);
-        });
-        return true; // 保持消息通道开放
-    }
-    
-    if (request.action === 'generateQR') {
-        // 生成二维码
-        openPopupWithData(request.content, request.type);
-    }
-});
-
-// 处理标签页更新
-browserApi.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-    if (changeInfo.status === 'complete' && tab.url) {
-        // 可以在这里添加页面加载完成后的逻辑
-        console.log('页面加载完成:', tab.url);
-    }
-});
-
-// 处理插件图标点击
-browserApi.action.onClicked.addListener(async (tab) => {
-    // 如果没有设置popup，则直接打开弹出窗口
-    await openPopupWithData(tab.url, 'url');
-});
-
-// 错误处理
-browserApi.runtime.onSuspend.addListener(() => {
-    console.log('插件即将卸载');
 });
 
 // 处理来自popup的消息
@@ -240,8 +227,9 @@ browserApi.runtime.onMessage.addListener((request, sender, sendResponse) => {
         return true;
     }
     
+    // getTabInfo 现在 popup.js 可以直接调用 tabs.query (有 activeTab 权限)
+    // 但为了兼容性保留
     if (request.action === 'getTabInfo') {
-        // 获取当前标签页信息
         browserApi.tabs.query({ active: true, currentWindow: true }, (tabs) => {
             sendResponse({ tab: tabs[0] });
         });
@@ -251,7 +239,7 @@ browserApi.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 // 权限检查
 browserApi.permissions.contains({
-    permissions: ['activeTab', 'contextMenus', 'storage', 'downloads', 'tabs']
+    permissions: ['activeTab', 'contextMenus', 'storage', 'downloads', 'scripting']
 }, (result) => {
     if (!result) {
         console.warn('插件缺少必要权限');
@@ -271,7 +259,6 @@ setInterval(async () => {
         
         if (filteredHistory.length !== result.history.length) {
             await browserApi.storage.local.set({ history: filteredHistory });
-            console.log('已清理过期历史记录');
         }
     }
 }, 24 * 60 * 60 * 1000); // 每24小时执行一次

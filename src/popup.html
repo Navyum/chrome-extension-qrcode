@@ -19,9 +19,9 @@
                                 <path d="M20 12C20 13.1046 19.1046 14 18 14C16.8954 14 16 13.1046 16 12C16 10.8954 16.8954 10 18 10C19.1046 10 20 10.8954 20 12Z" fill="#4682B4"/>
                             </svg>
                         </div>
-                        <h1 class="title">Title</h1>
+                        <h1 class="title" data-i18n="popup_title_placeholder">Title</h1>
                     </div>
-                    <input type="text" class="subtitle url-input" id="current-url" placeholder="Loading..." />
+                    <input type="text" class="subtitle url-input" id="current-url" placeholder="Loading..." data-i18n-placeholder="popup_url_loading" />
                 </div>
             </div>
         </header>
@@ -31,7 +31,7 @@
             <div class="qr-container" id="qr-container">
                 <div class="qr-placeholder">
                     <span class="placeholder-icon">📱</span>
-                    <p>Generating QR Code...</p>
+                    <p data-i18n="popup_qr_generating">Generating QR Code...</p>
                 </div>
             </div>
         </div>
@@ -40,37 +40,37 @@
         <div class="action-buttons">
             <div class="primary-buttons">
                 <button class="action-btn primary download" id="download-btn">
-                    <img src="asserts/download.svg" alt="Download" class="icon">
-                    Download QR Code
+                    <img src="assets/download.svg" alt="Download" class="icon" data-i18n-alt="popup_download_icon_alt">
+                    <span data-i18n="popup_download_button">Download QR Code</span>
                 </button>
                 <button class="action-btn primary copy" id="copy-btn">
-                    <img src="asserts/copysvg.svg" alt="Copy" class="icon">
+                    <img src="assets/copysvg.svg" alt="Copy" class="icon" data-i18n-alt="popup_copy_icon_alt">
                 </button>
             </div>
             <div class="secondary-buttons">
                 <button class="action-btn secondary" id="edit-btn">
-                    <img src="asserts/palette.svg" alt="Edit" class="icon">
-                    Edit QR Code
+                    <img src="assets/palette.svg" alt="Edit" class="icon">
+                    <span data-i18n="popup_edit_button">Edit QR Code</span>
                 </button>
                 <button class="action-btn secondary" id="scan-btn">
-                    <img src="asserts/scan.svg" alt="Scan" class="icon">
-                    Scan QR Code
+                    <img src="assets/scan.svg" alt="Scan" class="icon">
+                    <span data-i18n="popup_scan_button">Scan QR Code</span>
                 </button>
             </div>
             <div class="bottom-icons">
-                <button class="bottom-icon-btn" id="history-btn" title="History">
+                <button class="bottom-icon-btn" id="history-btn" title="History" data-i18n-title="popup_history_button_title">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20Z" fill="currentColor"/>
                         <path d="M12.5 7H11V13L16.25 16.15L17 14.92L12.5 12.25V7Z" fill="currentColor"/>
                     </svg>
                 </button>
                 <div class="right-icons">
-                    <button class="bottom-icon-btn" id="star-btn" title="Rate 5 Stars">
+                    <button class="bottom-icon-btn" id="star-btn" title="Rate 5 Stars" data-i18n-title="popup_rate_button_title">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="currentColor"/>
                         </svg>
                     </button>
-                    <button class="bottom-icon-btn" id="feedback-btn" title="Feedback">
+                    <button class="bottom-icon-btn" id="feedback-btn" title="Feedback" data-i18n-title="popup_feedback_button_title">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M20 2H4C2.9 2 2 2.9 2 4V22L6 18H20C21.1 18 22 17.1 22 16V4C22 2.9 21.1 2 20 2ZM20 16H6L4 18V4H20V16Z" fill="currentColor"/>
                             <path d="M7 9H17V11H7V9ZM7 12H14V14H7V12Z" fill="currentColor"/>
@@ -85,50 +85,50 @@
     <div class="modal" id="edit-modal" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Edit QR Code</h3>
+                <h3 data-i18n="popup_edit_modal_title">Edit QR Code</h3>
                 <button class="close-btn" id="close-edit-modal">×</button>
             </div>
             <div class="modal-body">
                 <div class="edit-section">
-                    <h4>Color Settings</h4>
+                    <h4 data-i18n="popup_edit_modal_color_section">Color Settings</h4>
                     <div class="color-inputs">
                         <div class="color-input">
-                            <label>Foreground:</label>
+                            <label data-i18n="popup_edit_modal_foreground_label">Foreground:</label>
                             <input type="color" id="foreground-color" value="#000000">
                         </div>
                         <div class="color-input">
-                            <label>Background:</label>
+                            <label data-i18n="popup_edit_modal_background_label">Background:</label>
                             <input type="color" id="background-color" value="#FFFFFF">
                         </div>
                     </div>
                 </div>
                 
                 <div class="edit-section">
-                    <h4>Size Settings</h4>
+                    <h4 data-i18n="popup_edit_modal_size_section">Size Settings</h4>
                     <div class="size-inputs">
                         <div class="size-input">
-                            <label>Width:</label>
+                            <label data-i18n="popup_edit_modal_width_label">Width:</label>
                             <input type="number" id="qr-width" value="512" min="120" max="1024">
                         </div>
                         <div class="size-input">
-                            <label>Height:</label>
+                            <label data-i18n="popup_edit_modal_height_label">Height:</label>
                             <input type="number" id="qr-height" value="512" min="120" max="1024">
                         </div>
                     </div>
                 </div>
                 
                 <div class="edit-section">
-                    <h4>Logo Settings</h4>
+                    <h4 data-i18n="popup_edit_modal_logo_section">Logo Settings</h4>
                     <div class="logo-inputs">
                         <div class="file-input-wrapper">
                             <input type="file" id="logo-file" accept="image/*">
                             <label for="logo-file" class="file-input-label">
-                                <span class="file-input-text">Choose Logo File</span>
-                                <span class="file-input-hint">No file selected</span>
+                                <span class="file-input-text" data-i18n="popup_edit_modal_choose_logo">Choose Logo File</span>
+                                <span class="file-input-hint" data-i18n="popup_common_no_file_selected">No file selected</span>
                             </label>
                         </div>
                         <div class="logo-options" style="display: none;">
-                            <label>Opacity:</label>
+                            <label data-i18n="popup_edit_modal_opacity_label">Opacity:</label>
                             <input type="range" id="logo-opacity" min="0" max="100" value="100">
                             <span id="opacity-value">100%</span>
                         </div>
@@ -136,9 +136,9 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="action-btn primary" id="apply-edit">Apply</button>
-                <button class="action-btn secondary" id="cancel-edit">Cancel</button>
-                <button class="action-btn secondary" id="reset-edit">Reset</button>
+                <button class="action-btn primary" id="apply-edit" data-i18n="popup_edit_modal_apply">Apply</button>
+                <button class="action-btn secondary" id="cancel-edit" data-i18n="popup_common_cancel">Cancel</button>
+                <button class="action-btn secondary" id="reset-edit" data-i18n="popup_edit_modal_reset">Reset</button>
             </div>
         </div>
     </div>
@@ -147,38 +147,38 @@
     <div class="modal" id="scan-modal" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Scan QR Code</h3>
+                <h3 data-i18n="popup_scan_modal_title">Scan QR Code</h3>
                 <button class="close-btn" id="close-scan-modal">×</button>
             </div>
             <div class="modal-body">
                 <div class="scan-section">
-                    <h4>Upload QR Code Image</h4>
+                    <h4 data-i18n="popup_scan_modal_upload_section">Upload QR Code Image</h4>
                     <div class="file-input-wrapper">
                         <input type="file" id="qr-file" accept="image/*">
                         <label for="qr-file" class="file-input-label">
-                            <span class="file-input-text">Choose QR Code Image</span>
-                            <span class="file-input-hint">No file selected</span>
+                            <span class="file-input-text" data-i18n="popup_scan_modal_choose_file">Choose QR Code Image</span>
+                            <span class="file-input-hint" data-i18n="popup_common_no_file_selected">No file selected</span>
                         </label>
                     </div>
                 </div>
                 
                 <div class="scan-result" id="scan-result" style="display: none;">
-                    <h4>Scan Result</h4>
+                    <h4 data-i18n="popup_scan_modal_result_title">Scan Result</h4>
                     <div class="result-content">
                         <div class="result-type">
-                            <span class="type-label">Type:</span>
+                            <span class="type-label" data-i18n="popup_scan_modal_result_type">Type:</span>
                             <span class="type-value" id="result-type">URL</span>
                         </div>
                         <div class="result-text">
-                            <span class="text-label">Content:</span>
+                            <span class="text-label" data-i18n="popup_scan_modal_result_content">Content:</span>
                             <div class="text-value" id="result-content"></div>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="action-btn primary" id="copy-result">Copy</button>
-                <button class="action-btn secondary" id="open-result">Open</button>
+                <button class="action-btn primary" id="copy-result" data-i18n="popup_scan_modal_copy">Copy</button>
+                <button class="action-btn secondary" id="open-result" data-i18n="popup_scan_modal_open">Open</button>
             </div>
         </div>
     </div>
@@ -187,13 +187,13 @@
     <div class="modal" id="history-modal" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>History</h3>
+                <h3 data-i18n="popup_history_modal_title">History</h3>
                 <button class="close-btn" id="close-history-modal">×</button>
             </div>
             <div class="modal-body">
                 <div class="history-tabs">
-                    <button class="tab-btn active" id="generate-tab">Generated</button>
-                    <button class="tab-btn" id="scan-tab">Scanned</button>
+                    <button class="tab-btn active" id="generate-tab" data-i18n="popup_history_tab_generated">Generated</button>
+                    <button class="tab-btn" id="scan-tab" data-i18n="popup_history_tab_scanned">Scanned</button>
                 </div>
                 <div class="history-content">
                     <div class="history-list" id="generate-history">
@@ -205,7 +205,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="action-btn secondary" id="clear-history">Clear All</button>
+                <button class="action-btn secondary" id="clear-history" data-i18n="popup_history_clear_all">Clear All</button>
             </div>
         </div>
     </div>

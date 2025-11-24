@@ -1,17 +1,14 @@
 {
   "manifest_version": 2,
-  "name": "QR Code Generator & Scanner, Free , Offline",
+  "name": "__MSG_extName__",
   "version": "1.0.3",
-  "description": "Free QR Code Generator - Create and customize QR codes for URLs, text so on. Customize logo supported.",
-  
+  "description": "__MSG_extDescription__",
+  "default_locale": "en",
   "permissions": [
     "activeTab",
     "contextMenus",
     "storage",
-    "downloads",
-    "tabs",
-    "http://*/*",
-    "https://*/*"
+    "downloads"
   ],
 
   "browser_specific_settings": {
@@ -25,7 +22,7 @@
   
   "browser_action": {
     "default_popup": "popup.html",
-    "default_title": "QR Code Generator & Scanner, Free , Offline",
+    "default_title": "__MSG_actionTitle__",
     "default_icon": {
       "16": "icons/icon16.png",
       "32": "icons/icon32.png",
@@ -46,32 +43,20 @@
     "persistent": false
   },
   
-  "content_scripts": [
-    {
-      "matches": ["http://*/*", "https://*/*"],
-      "js": ["content.js"],
-      "run_at": "document_end"
-    }
-  ],
-  
-  "web_accessible_resources": [
-    "icons/*"
-  ],
-  
   "commands": {
     "_execute_browser_action": {
       "suggested_key": {
         "default": "Ctrl+Shift+Q",
         "mac": "Command+Shift+Q"
       },
-      "description": "Generate QR code for current page"
+      "description": "__MSG_commandGeneratePageDesc__"
     },
     "generate-text-qr": {
       "suggested_key": {
         "default": "Ctrl+Shift+T",
         "mac": "Command+Shift+T"
       },
-      "description": "Generate QR code for selected text"
+      "description": "__MSG_commandGenerateTextDesc__"
     }
   }
 }

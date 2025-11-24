@@ -1,3 +1,211 @@
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    body {
+        background-color: #202124;
+        color: #e8eaed;
+    }
+
+    .container {
+        background: #202124;
+    }
+
+    .header {
+        background: #202124;
+        border-bottom-color: #3c4043;
+    }
+
+    .title {
+        color: #e8eaed;
+    }
+
+    .subtitle {
+        color: #9aa0a6;
+    }
+
+    .url-input {
+        background: #292a2d;
+        border-color: #3c4043;
+        color: #e8eaed;
+    }
+
+    .url-input:hover {
+        border-color: #5f6368;
+    }
+
+    .url-input:focus {
+        border-color: #8ab4f8;
+    }
+
+    .qr-container {
+        background: #ffffff; /* QR Code needs white background */
+        border-color: #3c4043;
+    }
+
+    .action-btn.secondary {
+        background: #292a2d;
+        color: #e8eaed;
+        border-color: #3c4043;
+    }
+
+    .action-btn.secondary:hover {
+        background: #3c4043;
+        border-color: #5f6368;
+    }
+    
+    .action-btn.secondary .icon {
+        filter: brightness(0) invert(1); /* Invert icons for dark mode */
+    }
+
+    .bottom-icons {
+        border-top-color: #3c4043;
+    }
+
+    .bottom-icon-btn {
+        color: #9aa0a6;
+    }
+
+    .bottom-icon-btn:hover {
+        background: #3c4043;
+        color: #e8eaed;
+    }
+
+    /* Modal Dark Mode */
+    .modal-content {
+        background: #292a2d;
+        color: #e8eaed;
+    }
+
+    .modal-header, .modal-footer {
+        border-color: #3c4043;
+    }
+
+    .modal-header h3 {
+        color: #e8eaed;
+    }
+
+    .close-btn {
+        color: #9aa0a6;
+    }
+
+    .close-btn:hover {
+        color: #e8eaed;
+    }
+
+    .edit-section h4, .scan-section h4, .scan-result h4 {
+        color: #e8eaed;
+    }
+
+    .color-input label, .size-input label, .logo-options label, .type-label, .text-label, #opacity-value {
+        color: #9aa0a6;
+    }
+
+    .color-input input[type="color"], .size-input input {
+        background: #202124;
+        border-color: #5f6368;
+        color: #e8eaed;
+    }
+
+    .file-input-label {
+        background: #202124;
+        border-color: #3c4043;
+    }
+
+    .file-input-label:hover {
+        background: #3c4043;
+        border-color: #8ab4f8;
+    }
+
+    .file-input-text {
+        color: #8ab4f8;
+    }
+
+    .scan-result {
+        background: #202124;
+        border-color: #3c4043;
+    }
+
+    .text-value {
+        background: #292a2d;
+        border-color: #3c4043;
+        color: #e8eaed;
+    }
+
+    .type-value {
+        background: #3c4043;
+        color: #8ab4f8;
+    }
+
+    /* History Dark Mode */
+    .history-tabs {
+        border-bottom-color: #3c4043;
+    }
+
+    .tab-btn {
+        color: #9aa0a6;
+    }
+
+    .tab-btn.active {
+        color: #8ab4f8;
+        border-bottom-color: #8ab4f8;
+    }
+
+    .tab-btn:hover {
+        background: #3c4043;
+    }
+
+    .history-item {
+        background: #202124;
+        border-color: #3c4043;
+    }
+
+    .history-item:hover {
+        border-color: #8ab4f8;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .history-title {
+        color: #e8eaed;
+    }
+
+    .history-subtitle {
+        color: #9aa0a6;
+    }
+
+    .history-action-btn {
+        border-color: #3c4043;
+        color: #9aa0a6;
+    }
+
+    .history-action-btn:hover {
+        background: #3c4043;
+        border-color: #8ab4f8;
+        color: #8ab4f8;
+    }
+    
+    .history-icon.generate {
+        background: #3c4043;
+        color: #e8eaed;
+    }
+    
+    .history-icon.scan {
+        background: #3c4043;
+        color: #e8eaed;
+    }
+
+    /* Scrollbar Dark Mode */
+    ::-webkit-scrollbar-track {
+        background: #202124;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: #5f6368;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: #70757a;
+    }
+}
+
 /* Reset and Base Styles */
 * {
     margin: 0;
@@ -349,15 +557,27 @@ body {
 .color-input input[type="color"] {
     width: 100%;
     height: 40px;
-    border: 2px solid #e9ecef;
+    border: 1px solid #e9ecef;
+    padding: 2px;
+    background: #fff;
     border-radius: 6px;
     cursor: pointer;
+}
+
+/* Customize Webkit Color Input Swatch (Chrome/Edge/Safari) */
+input[type="color"]::-webkit-color-swatch-wrapper {
+    padding: 0;
+}
+
+input[type="color"]::-webkit-color-swatch {
+    border: none;
+    border-radius: 4px; /* Match inner radius */
 }
 
 .size-input input {
     width: 100%;
     padding: 8px;
-    border: 2px solid #e9ecef;
+    border: 1px solid #e9ecef;
     border-radius: 6px;
     font-size: 14px;
 }
@@ -365,6 +585,7 @@ body {
 .size-input input:focus {
     outline: none;
     border-color: #6B8E23;
+    box-shadow: 0 0 0 2px rgba(107, 142, 35, 0.2);
 }
 
 .file-input-wrapper {
@@ -478,6 +699,28 @@ body {
     to {
         opacity: 1;
         transform: translateY(0);
+    }
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOut {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
     }
 }
 
@@ -775,4 +1018,9 @@ body {
 .empty-history-hint {
     font-size: 12px;
     opacity: 0.7;
-} 
+}
+
+/* RTL Support adjustments */
+html[dir="rtl"] .history-title[dir="ltr"] {
+    text-align: right;
+}

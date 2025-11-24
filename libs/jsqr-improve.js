@@ -5,7 +5,6 @@ class jsQRAdapter {
     constructor() {
         // 检查jsQR库是否已加载
         if (typeof jsQR === 'undefined') {
-            console.error('jsQR library not loaded');
             return;
         }
         
@@ -41,7 +40,6 @@ class jsQRAdapter {
             
             // 检查缓存
             if (this.scanHistory.has(cacheKey)) {
-                console.log('Using cached result');
                 return this.scanHistory.get(cacheKey);
             }
 
@@ -64,7 +62,6 @@ class jsQRAdapter {
             return null;
             
         } catch (error) {
-            console.error('QR code scanning failed:', error);
             return null;
         }
     }

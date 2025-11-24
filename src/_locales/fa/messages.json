@@ -1,9 +1,9 @@
 {
   "htmlLang": { "message": "fa" },
   "htmlDir": { "message": "rtl" },
-  "extName": { "message": "تولید و اسکنر کد QR رایگان و آفلاین" },
+  "extName": { "message": "PixelQR - تولیدکننده و اسکنر کیو‌آر کد" },
   "extDescription": { "message": "تولیدکننده رایگان کد QR برای ساخت و شخصی‌سازی کدها جهت آدرس‌ها، متن و ... با پشتیبانی از لوگو." },
-  "actionTitle": { "message": "تولید و اسکنر کد QR" },
+  "actionTitle": { "message": "PixelQR: تولید و اسکنر کد QR" },
   "commandGeneratePageDesc": { "message": "ساخت کد QR برای صفحه فعلی" },
   "commandGenerateTextDesc": { "message": "ساخت کد QR برای متن انتخاب‌شده" },
   "contextMenuGenerateText": { "message": "ساخت کد QR از متن" },

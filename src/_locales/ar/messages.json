@@ -1,9 +1,9 @@
 {
   "htmlLang": { "message": "ar" },
   "htmlDir": { "message": "rtl" },
-  "extName": { "message": "منشئ وقارئ رموز QR مجاني وغير متصل" },
+  "extName": { "message": "PixelQR - مولد وماسح رمز الاستجابة السريعة" },
   "extDescription": { "message": "مولد رموز QR مجاني لإنشاء رموز لعناوين URL والنصوص وغيرها مع دعم تخصيص الشعار." },
-  "actionTitle": { "message": "منشئ وقارئ رموز QR" },
+  "actionTitle": { "message": "PixelQR: منشئ وقارئ رموز QR" },
   "commandGeneratePageDesc": { "message": "إنشاء رمز QR للصفحة الحالية" },
   "commandGenerateTextDesc": { "message": "إنشاء رمز QR للنص المحدد" },
   "contextMenuGenerateText": { "message": "إنشاء رمز QR للنص" },

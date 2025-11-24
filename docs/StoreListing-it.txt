@@ -1,0 +1,36 @@
+PixelQR: Generatore e Scanner di Codici QR - Privacy al Primo Posto & Offline
+
+Prova il modo più veloce e sicuro per generare e scansionare codici QR direttamente in Chrome. Progettata con un focus sulla privacy e la facilità d'uso, questa estensione funziona completamente offline utilizzando la più recente tecnologia Chrome Manifest V3.
+
+✨ Funzionalità Chiave
+
+🚀 Generazione Istantanea
+• Creazione con un clic: Genera istantaneamente un codice QR per la tua scheda corrente.
+• Menu contestuale intelligente: Fai clic destro su qualsiasi testo, link o immagine per convertirlo immediatamente in un codice QR.
+• Contenuto personalizzato: Crea codici per testo libero, URL, credenziali Wi-Fi, email, vCard e altro.
+• Anteprima dal vivo: Guarda il tuo codice QR aggiornarsi in tempo reale mentre scrivi.
+
+📷 Scansione Avanzata
+• Scansione su schermo: Rileva e leggi codici QR da qualsiasi pagina web.
+• Supporto fotocamera: Scansiona codici fisici usando la tua webcam.
+• Caricamento file: Decodifica codici QR da immagini locali.
+
+🎨 Personalizzazione Professionale
+• Controllo totale del design: Regola colori, dimensioni e margini per adattarli al tuo brand.
+• Integrazione logo: Carica il tuo logo o icona al centro del codice QR.
+• Esportazioni di alta qualità: Scarica in formati PNG, JPG o vettoriale SVG (fino a 1024px).
+
+🔒 Privacy e Sicurezza
+• 100% Offline: Tutta l'elaborazione avviene localmente sul tuo computer. I tuoi dati non lasciano mai il tuo dispositivo.
+• Nessun tracciamento: Non raccogliamo dati utente, cronologia di navigazione o analisi.
+• Permessi minimi: Costruito sull'architettura sicura Manifest V3, richiedendo solo i permessi strettamente necessari.
+• Sicuro e pulito: Nessuna pubblicità, nessuno script nascosto e nessun processo in background non necessario.
+
+💡 Perché sceglierci?
+• Completamente Gratuito: Nessun muro a pagamento o registrazione richiesta.
+• Facile da usare: Interfaccia moderna e pulita con supporto Modalità Scura.
+• Aumento produttività: Supporta scorciatoie da tastiera (Ctrl+Shift+Q) per un accesso rapido.
+• Supporto globale: Completamente localizzato in 12 lingue.
+
+Perfetto per condividere rapidamente link al cellulare, salvare informazioni testuali o creare codici QR professionali per la stampa. Installa ora per l'esperienza codice QR più affidabile su Chrome!
+

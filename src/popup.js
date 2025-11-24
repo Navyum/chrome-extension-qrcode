@@ -168,7 +168,6 @@ class QRCodePopup {
                             this.updatePageInfo(tab, response.content);
                         }
                     } catch (error) {
-                        console.warn('Failed to get tab info:', error);
                         // 如果获取tab信息失败，仍然更新URL输入框
                         const urlElement = document.getElementById('current-url');
                         if (urlElement) {
@@ -196,7 +195,6 @@ class QRCodePopup {
                 await this.generateCurrentPageQR();
             }
         } catch (error) {
-            console.error('Failed to check pending QR data:', error);
             // 出错时，生成当前页面的二维码
             await this.generateCurrentPageQR();
         }
@@ -220,7 +218,6 @@ class QRCodePopup {
                 this.showMessage(browserApi.i18n.getMessage('error_unable_get_current_page_url'), 'error');
             }
         } catch (error) {
-            console.error('Failed to generate QR code:', error);
             this.showMessage(browserApi.i18n.getMessage('error_failed_generate_qr'), 'error');
         }
     }
@@ -337,7 +334,7 @@ class QRCodePopup {
                         faviconUrl = tab.favIconUrl;
                     }
                 } catch (error) {
-                    console.warn('Failed to get favicon URL:', error);
+                    // 静默处理favicon获取失败
                 }
             }
             
@@ -349,8 +346,6 @@ class QRCodePopup {
                 timestamp: new Date().toISOString()
             });
         } catch (error) {
-            console.error('Failed to generate QR code:', error);
-            
             // 检查是否是长度溢出错误
             // 增加对 TypeError 的检查，处理库未抛出明确 overflow 错误的情况
             if ((error.message && error.message.includes('code length overflow')) || 
@@ -697,7 +692,6 @@ class QRCodePopup {
             // 清理临时容器
             document.body.removeChild(tempContainer);
         } catch (error) {
-            console.error('Download failed:', error);
             this.showMessage(browserApi.i18n.getMessage('error_download_failed'), 'error');
         }
     }
@@ -758,7 +752,6 @@ class QRCodePopup {
             // 清理临时容器
             document.body.removeChild(tempContainer);
         } catch (error) {
-            console.error('Copy failed:', error);
             this.showMessage(browserApi.i18n.getMessage('error_copy_qr_failed'), 'error');
         }
     }
@@ -845,7 +838,6 @@ class QRCodePopup {
                             this.showMessage(browserApi.i18n.getMessage('error_no_qr_found'), 'error');
                         }
                     } catch (error) {
-                        console.error('QR code scanning failed:', error);
                         this.showMessage(browserApi.i18n.getMessage('error_scan_failed', [error.message]), 'error');
                     }
                 };
@@ -863,7 +855,6 @@ class QRCodePopup {
             
             reader.readAsDataURL(file);
         } catch (error) {
-            console.error('File reading failed:', error);
             this.showMessage(browserApi.i18n.getMessage('error_read_file_failed_reason', [error.message]), 'error');
         }
     }
@@ -886,7 +877,6 @@ class QRCodePopup {
             
             return null;
         } catch (error) {
-            console.error('QR code decoding failed:', error);
             return null;
         }
     }
@@ -928,7 +918,7 @@ class QRCodePopup {
                     faviconUrl = faviconUrls[0];
                 }
             } catch (error) {
-                console.warn('Failed to get favicon URL for scanned URL:', error);
+                // 静默处理favicon获取失败
             }
         }
         
@@ -1246,7 +1236,7 @@ class QRCodePopup {
                 fallbackIcon.style.display = 'none';
             }
         } catch (error) {
-            console.warn('Failed to update favicon:', error);
+            // 静默处理favicon更新失败
         }
     }
 

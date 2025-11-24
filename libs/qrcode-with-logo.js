@@ -49,7 +49,6 @@ class QRCodeWithLogo {
         // 获取生成的canvas
         const canvas = tempContainer.querySelector('canvas');
         if (!canvas) {
-            console.error('QR码生成失败');
             return;
         }
         

@@ -241,9 +241,7 @@ browserApi.runtime.onMessage.addListener((request, sender, sendResponse) => {
 browserApi.permissions.contains({
     permissions: ['activeTab', 'contextMenus', 'storage', 'downloads', 'scripting']
 }, (result) => {
-    if (!result) {
-        console.warn('插件缺少必要权限');
-    }
+    // 权限检查完成
 });
 
 // 定期清理过期数据

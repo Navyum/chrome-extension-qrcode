@@ -1,0 +1,35 @@
+PixelQR: QR Code Generator & Scanner - Privacy-First & Offline
+
+Experience the fastest, most secure way to generate and scan QR codes directly in Chrome. Designed with a focus on privacy and ease of use, this extension runs completely offline using the latest Chrome Manifest V3 technology.
+
+✨ Key Features
+
+🚀 Instant Generation
+• One-Click Creation: Instantly generate a QR code for your current tab.
+• Smart Context Menu: Right-click any text, link, or image to convert it to a QR code immediately.
+• Custom Content: Create codes for free text, URLs, Wi-Fi credentials, emails, vCards, and more.
+• Live Preview: See your QR code update in real-time as you type.
+
+📷 Advanced Scanning
+• On-Screen Scanning: Detect and read QR codes from any webpage.
+• Camera Support: Scan physical codes using your webcam.
+• File Upload: Decode QR codes from local images.
+
+🎨 Professional Customization
+• Full Design Control: Adjust colors, sizes, and margins to match your brand.
+• Logo Integration: Upload your own logo or icon to the center of the QR code.
+• High-Quality Exports: Download in PNG, JPG, or SVG vector formats (up to 1024px).
+
+🔒 Privacy & Security (Featured Ready)
+• 100% Offline: All processing happens locally on your computer. Your data never leaves your device.
+• No Tracking: We do not collect user data, browsing history, or analytics.
+• Minimal Permissions: Built on the secure Manifest V3 architecture, requesting only strictly necessary permissions.
+• Safe & Clean: No ads, no hidden scripts, and no unnecessary background processes.
+
+💡 Why Choose Us?
+• Completely Free: No premium walls or sign-ups required.
+• User-Friendly: Modern, clean interface with Dark Mode support.
+• Productivity Boost: Supports keyboard shortcuts (Ctrl+Shift+Q) for rapid access.
+• Global Support: Fully localized in 12 languages.
+
+Perfect for quickly sharing links to mobile, saving text info, or creating professional QR codes for print. Install now for the most reliable QR code experience on Chrome!

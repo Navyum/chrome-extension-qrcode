@@ -1,9 +1,9 @@
 {
   "htmlLang": { "message": "en" },
   "htmlDir": { "message": "ltr" },
-  "extName": { "message": "QR Code Generator & Scanner, Free , Offline" },
+  "extName": { "message": "PixelQR - QR Code Generator & Scanner" },
   "extDescription": { "message": "Free QR Code Generator - Create and customize QR codes for URLs, text so on. Customize logo supported." },
-  "actionTitle": { "message": "QR Code Generator & Scanner, Free , Offline" },
+  "actionTitle": { "message": "PixelQR: QR Code Generator" },
   "commandGeneratePageDesc": { "message": "Generate QR code for current page" },
   "commandGenerateTextDesc": { "message": "Generate QR code for selected text" },
   "contextMenuGenerateText": { "message": "Generate Text QR" },

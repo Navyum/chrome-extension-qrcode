@@ -1,0 +1,36 @@
+PixelQR: Générateur et Scanner de QR Code - Confidentialité d'abord & Hors ligne
+
+Découvrez le moyen le plus rapide et le plus sécurisé de générer et scanner des codes QR directement dans Chrome. Conçue avec un accent sur la confidentialité et la facilité d'utilisation, cette extension fonctionne entièrement hors ligne en utilisant la dernière technologie Chrome Manifest V3.
+
+✨ Fonctionnalités Clés
+
+🚀 Génération Instantanée
+• Création en un clic : Générez instantanément un QR code pour votre onglet actuel.
+• Menu contextuel intelligent : Faites un clic droit sur n'importe quel texte, lien ou image pour le convertir immédiatement en QR code.
+• Contenu personnalisé : Créez des codes pour du texte libre, des URL, des identifiants Wi-Fi, des e-mails, des vCards, et plus encore.
+• Aperçu en direct : Voyez votre QR code se mettre à jour en temps réel pendant que vous tapez.
+
+📷 Scan Avancé
+• Scan à l'écran : Détectez et lisez les codes QR depuis n'importe quelle page web.
+• Support caméra : Scannez des codes physiques en utilisant votre webcam.
+• Téléchargement de fichier : Décodez des codes QR à partir d'images locales.
+
+🎨 Personnalisation Professionnelle
+• Contrôle total du design : Ajustez les couleurs, les tailles et les marges pour correspondre à votre marque.
+• Intégration de logo : Téléchargez votre propre logo ou icône au centre du QR code.
+• Exportations haute qualité : Téléchargez aux formats PNG, JPG ou vectoriel SVG (jusqu'à 1024px).
+
+🔒 Confidentialité et Sécurité
+• 100% Hors ligne : Tout le traitement se fait localement sur votre ordinateur. Vos données ne quittent jamais votre appareil.
+• Pas de suivi : Nous ne collectons pas de données utilisateur, d'historique de navigation ou d'analyses.
+• Permissions minimales : Construit sur l'architecture sécurisée Manifest V3, ne demandant que les permissions strictement nécessaires.
+• Sûr et propre : Pas de publicités, pas de scripts cachés et pas de processus d'arrière-plan inutiles.
+
+💡 Pourquoi nous choisir ?
+• Entièrement Gratuit : Pas de murs payants ni d'inscription requise.
+• Facile à utiliser : Interface moderne et propre avec support du Mode Sombre.
+• Gain de productivité : Supporte les raccourcis clavier (Ctrl+Shift+Q) pour un accès rapide.
+• Support mondial : Entièrement localisé en 12 langues.
+
+Parfait pour partager rapidement des liens vers un mobile, sauvegarder des informations textuelles ou créer des QR codes professionnels pour l'impression. Installez maintenant pour l'expérience QR code la plus fiable sur Chrome !
+

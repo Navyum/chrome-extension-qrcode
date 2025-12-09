@@ -537,15 +537,29 @@ class QRCodePopup {
             document.getElementById('generate-history').style.display = 'none';
         });
 
-        // 清除历史记录
+        // 清除历史记录 - 打开确认模态框
         document.getElementById('clear-history').addEventListener('click', () => {
-            if (confirm(browserApi.i18n.getMessage('confirm_clear_history'))) {
-                this.history.generated = [];
-                this.history.scanned = [];
-                this.saveHistory();
-                this.renderHistory();
-                this.showMessage(browserApi.i18n.getMessage('success_history_cleared'), 'success');
-            }
+            document.getElementById('confirm-clear-modal').style.display = 'flex';
+        });
+
+        // 确认清除
+        document.getElementById('confirm-clear-btn').addEventListener('click', () => {
+            this.history.generated = [];
+            this.history.scanned = [];
+            this.saveHistory();
+            this.renderHistory();
+            this.showMessage(browserApi.i18n.getMessage('success_history_cleared'), 'success');
+            document.getElementById('confirm-clear-modal').style.display = 'none';
+        });
+
+        // 取消清除
+        document.getElementById('cancel-clear-btn').addEventListener('click', () => {
+            document.getElementById('confirm-clear-modal').style.display = 'none';
+        });
+
+        // 关闭确认模态框
+        document.getElementById('close-confirm-modal').addEventListener('click', () => {
+            document.getElementById('confirm-clear-modal').style.display = 'none';
         });
 
         // 历史记录copy按钮事件委托

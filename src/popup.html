@@ -129,9 +129,9 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="action-btn primary" id="apply-edit" data-i18n="popup_edit_modal_apply">Apply</button>
                 <button class="action-btn secondary" id="cancel-edit" data-i18n="popup_common_cancel">Cancel</button>
                 <button class="action-btn secondary" id="reset-edit" data-i18n="popup_edit_modal_reset">Reset</button>
+                <button class="action-btn primary" id="apply-edit" data-i18n="popup_edit_modal_apply">Apply</button>
             </div>
         </div>
     </div>
@@ -170,8 +170,8 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="action-btn primary" id="copy-result" data-i18n="popup_scan_modal_copy">Copy</button>
                 <button class="action-btn secondary" id="open-result" data-i18n="popup_scan_modal_open">Open</button>
+                <button class="action-btn primary" id="copy-result" data-i18n="popup_scan_modal_copy">Copy</button>
             </div>
         </div>
     </div>
@@ -199,6 +199,23 @@
             </div>
             <div class="modal-footer">
                 <button class="action-btn secondary" id="clear-history" data-i18n="popup_history_clear_all">Clear All</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm Clear History Modal -->
+    <div class="modal" id="confirm-clear-modal" style="display: none;">
+        <div class="modal-content" style="max-width: 320px;">
+            <div class="modal-header">
+                <h3 data-i18n="popup_history_clear_all">Clear History?</h3>
+                <button class="close-btn" id="close-confirm-modal">×</button>
+            </div>
+            <div class="modal-body">
+                <p data-i18n="confirm_clear_history" style="color: #000000;">Are you sure you want to clear all history? This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="action-btn secondary" id="cancel-clear-btn" data-i18n="popup_common_cancel">Cancel</button>
+                <button class="action-btn primary" id="confirm-clear-btn" data-i18n="popup_edit_modal_apply">Confirm</button>
             </div>
         </div>
     </div>

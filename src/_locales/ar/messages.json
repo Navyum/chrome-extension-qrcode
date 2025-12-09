@@ -10,6 +10,7 @@
   "contextMenuGenerateLink": { "message": "إنشاء رمز QR للرابط" },
   "contextMenuGenerateImage": { "message": "إنشاء رمز QR للصورة" },
   "contextMenuGeneratePage": { "message": "إنشاء رمز QR للصفحة الحالية" },
+  "contextMenuScanImage": { "message": "مسح رمز QR من الصورة" },
   "popup_title_placeholder": { "message": "العنوان" },
   "popup_url_loading": { "message": "جارٍ التحميل..." },
   "popup_qr_generating": { "message": "جارٍ إنشاء رمز QR..." },
@@ -37,7 +38,7 @@
   "popup_common_cancel": { "message": "إلغاء" },
   "popup_edit_modal_reset": { "message": "إعادة الضبط" },
   "popup_scan_modal_title": { "message": "مسح رمز QR" },
-  "popup_scan_modal_upload_section": { "message": "ارفع صورة رمز QR" },
+  "popup_scan_modal_upload_section": { "message": "المسح من الجهاز المحلي" },
   "popup_scan_modal_choose_file": { "message": "اختر صورة رمز QR" },
   "popup_scan_modal_result_title": { "message": "نتيجة المسح" },
   "popup_scan_modal_result_type": { "message": "النوع:" },
@@ -95,6 +96,14 @@
   "time_just_now": { "message": "الآن" },
   "time_minutes_ago": { "message": "قبل $1 دقيقة" },
   "time_hours_ago": { "message": "قبل $1 ساعة" },
-  "time_days_ago": { "message": "قبل $1 يوم" }
+  "time_days_ago": { "message": "قبل $1 يوم" },
+  "popup_scan_option_url_title": { "message": "المسح من URL" },
+  "popup_scan_url_placeholder": { "message": "https://example.com/qrcode.png" },
+  "popup_scan_url_scan": { "message": "مسح" },
+  "popup_scan_preview_alt": { "message": "معاينة رمز QR" },
+  "popup_scan_icon_alt": { "message": "مسح" },
+  "popup_edit_icon_alt": { "message": "تعديل" },
+  "error_invalid_url": { "message": "عنوان URL غير صالح، يرجى إدخال عنوان URL للصورة صالح" },
+  "error_load_image_failed_cors": { "message": "فشل تحميل الصورة. قد تكون الصورة محظورة بواسطة سياسة CORS. يرجى محاولة تحميل ملف الصورة بدلاً من ذلك." }
 }
 

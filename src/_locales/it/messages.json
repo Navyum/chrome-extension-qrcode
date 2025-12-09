@@ -10,6 +10,7 @@
   "contextMenuGenerateLink": { "message": "Genera QR di link" },
   "contextMenuGenerateImage": { "message": "Genera QR di immagine" },
   "contextMenuGeneratePage": { "message": "Genera QR della pagina corrente" },
+  "contextMenuScanImage": { "message": "Scansiona codice QR dall'immagine" },
   "popup_title_placeholder": { "message": "Titolo" },
   "popup_url_loading": { "message": "Caricamento..." },
   "popup_qr_generating": { "message": "Generazione codice QR..." },
@@ -37,7 +38,7 @@
   "popup_common_cancel": { "message": "Annulla" },
   "popup_edit_modal_reset": { "message": "Reimposta" },
   "popup_scan_modal_title": { "message": "Scansiona codice QR" },
-  "popup_scan_modal_upload_section": { "message": "Carica immagine codice QR" },
+  "popup_scan_modal_upload_section": { "message": "Scansiona da locale" },
   "popup_scan_modal_choose_file": { "message": "Scegli immagine codice QR" },
   "popup_scan_modal_result_title": { "message": "Risultato scansione" },
   "popup_scan_modal_result_type": { "message": "Tipo:" },
@@ -95,6 +96,14 @@
   "time_just_now": { "message": "Proprio ora" },
   "time_minutes_ago": { "message": "$1 min fa" },
   "time_hours_ago": { "message": "$1 ora fa" },
-  "time_days_ago": { "message": "$1 giorno fa" }
+  "time_days_ago": { "message": "$1 giorno fa" },
+  "popup_scan_option_url_title": { "message": "Scansiona da URL" },
+  "popup_scan_url_placeholder": { "message": "https://example.com/qrcode.png" },
+  "popup_scan_url_scan": { "message": "Scansiona" },
+  "popup_scan_preview_alt": { "message": "Anteprima codice QR" },
+  "popup_scan_icon_alt": { "message": "Scansiona" },
+  "popup_edit_icon_alt": { "message": "Modifica" },
+  "error_invalid_url": { "message": "URL non valida, inserisci un URL immagine valido" },
+  "error_load_image_failed_cors": { "message": "Impossibile caricare l'immagine. L'immagine potrebbe essere bloccata dalla politica CORS. Prova invece a caricare il file immagine." }
 }
 

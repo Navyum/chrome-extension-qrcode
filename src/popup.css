@@ -124,6 +124,11 @@
         border-color: #3c4043;
     }
 
+    .scan-image-preview {
+        background: #202124;
+        border-color: #3c4043;
+    }
+
     .text-value {
         background: #292a2d;
         border-color: #3c4043;
@@ -151,6 +156,25 @@
 
     .tab-btn:hover {
         background: #3c4043;
+    }
+
+    /* Scan Tabs Dark Mode */
+    .scan-tabs {
+        border-bottom-color: #3c4043;
+    }
+
+    .scan-tabs .tab-btn {
+        color: #9aa0a6;
+    }
+
+    .scan-tabs .tab-btn.active {
+        color: #8ab4f8;
+        border-bottom-color: #8ab4f8;
+    }
+
+    .scan-tabs .tab-btn:hover {
+        background: #3c4043;
+        color: #8ab4f8;
     }
 
     .history-item {
@@ -482,6 +506,12 @@ body {
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
+/* 扫描模态框更大的宽度和高度 */
+#scan-modal .modal-content {
+    max-width: 550px;
+    max-height: 85vh;
+}
+
 .modal-header {
     display: flex;
     justify-content: space-between;
@@ -515,6 +545,11 @@ body {
 }
 .modal-body {
     padding: 20px;
+}
+
+/* 扫描模态框更紧凑的内边距 */
+#scan-modal .modal-body {
+    padding: 16px 20px;
 }
 
 .modal-footer {
@@ -587,6 +622,121 @@ input[type="color"]::-webkit-color-swatch {
     box-shadow: 0 0 0 2px rgba(107, 142, 35, 0.2);
 }
 
+.builtin-logo-section {
+    margin-bottom: 16px;
+}
+
+.builtin-logo-section label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #333;
+}
+
+.builtin-logo-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 4px;
+    padding: 4px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.builtin-logo-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    border: 1px solid #e9ecef;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: white;
+    aspect-ratio: 1;
+    box-sizing: border-box;
+    position: relative;
+}
+
+.builtin-logo-item:hover {
+    border-color: #47630f;
+    transform: translateY(-1px);
+    box-shadow: 0 1px 4px rgba(71, 99, 15, 0.2);
+}
+
+.builtin-logo-item.selected {
+    border-color: #2d4a0a;
+    background: #f0f4e8;
+    box-shadow: 0 0 0 1px rgba(45, 74, 10, 0.2);
+}
+
+.builtin-logo-icon {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.builtin-logo-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.builtin-logo-checkmark {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 16px;
+    height: 16px;
+    background: #2d4a0a;
+    color: white;
+    border-radius: 50%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: bold;
+    border: 2px solid white;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+}
+
+.builtin-logo-item.selected .builtin-logo-checkmark {
+    display: flex;
+}
+
+.logo-divider {
+    text-align: center;
+    margin: 16px 0;
+    color: #999;
+    font-size: 12px;
+    font-weight: 500;
+    position: relative;
+}
+
+.logo-divider::before,
+.logo-divider::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 40%;
+    height: 1px;
+    background: #e9ecef;
+}
+
+.logo-divider::before {
+    left: 0;
+}
+
+.logo-divider::after {
+    right: 0;
+}
+
 .file-input-wrapper {
     position: relative;
     width: 100%;
@@ -614,6 +764,8 @@ input[type="color"]::-webkit-color-swatch {
     cursor: pointer;
     transition: all 0.3s ease;
     text-align: center;
+    min-height: 56px;
+    box-sizing: border-box;
 }
 
 .file-input-label:hover {
@@ -636,6 +788,99 @@ input[type="color"]::-webkit-color-swatch {
 .file-input-wrapper input[type="file"]:focus + .file-input-label {
     border-color: #47630f;
     box-shadow: 0 0 0 2px rgba(71, 99, 15, 0.2);
+}
+
+.file-selected-display {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border: 2px solid #2d4a0a;
+    border-radius: 6px;
+    background: #f0f4e8;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-height: 56px;
+    box-sizing: border-box;
+}
+
+.file-selected-display:hover {
+    border-color: #1e3207;
+    background: #e8f0d8;
+}
+
+.file-selected-preview {
+    position: relative;
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    overflow: hidden;
+    background: white;
+    border: 1px solid #e9ecef;
+}
+
+.file-selected-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.file-selected-checkmark {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 16px;
+    height: 16px;
+    background: #2d4a0a;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: bold;
+    border: 2px solid white;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.file-selected-name {
+    flex: 1;
+    font-size: 14px;
+    color: #2d4a0a;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.file-selected-remove {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: transparent;
+    color: #2d4a0a;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: all 0.2s ease;
+    z-index: 10;
+}
+
+.file-selected-remove:hover {
+    background: rgba(45, 74, 10, 0.1);
+    color: #1e3207;
+}
+
+.file-selected-remove:active {
+    background: rgba(45, 74, 10, 0.2);
 }
 
 .logo-options {
@@ -747,15 +992,295 @@ input[type="color"]::-webkit-color-swatch {
 }
 
 /* Scan Modal Styles */
-.scan-section {
+.scan-tabs {
+    display: flex;
+    border-bottom: 1px solid #e9ecef;
     margin-bottom: 16px;
+    margin-top: -4px;
+}
+
+.scan-tabs .tab-btn {
+    flex: 1;
+    padding: 12px 16px;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    color: #6c757d;
+    transition: all 0.2s ease;
+}
+
+.scan-tabs .tab-btn.active {
+    color: #47630f;
+    border-bottom-color: #47630f;
+}
+
+.scan-tabs .tab-btn:hover {
+    background: #f8f9fa;
+    color: #47630f;
+}
+
+.scan-option-card {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 12px 16px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: white;
+    gap: 12px;
+}
+
+.scan-option-card:hover {
+    border-color: #47630f;
+    background: #f8f9fa;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.scan-option-icon {
+    font-size: 24px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+}
+
+.scan-option-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    text-align: left;
+    flex: 1;
+}
+
+.scan-back-btn {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    color: #47630f;
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 10px;
+    padding: 2px 0;
+    transition: color 0.2s ease;
+}
+
+.scan-back-btn:hover {
+    color: #5A7A1E;
+}
+
+.scan-section {
+    margin-bottom: 0;
 }
 
 .scan-section h4 {
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 500;
     color: #47630f;
+    margin-bottom: 6px;
+}
+
+.scan-upload-section,
+.scan-url-section,
+.scan-camera-section {
+    animation: fadeIn 0.3s ease;
+}
+
+/* 优化扫描页面的紧凑布局 */
+.scan-upload-section .scan-section,
+.scan-url-section .scan-section {
+    margin-bottom: 0;
+}
+
+.scan-upload-section .file-input-wrapper {
+    margin-top: 0;
+}
+
+.scan-upload-section .file-input-label {
+    padding: 10px;
+    min-height: 48px;
+}
+
+.scan-upload-section .file-input-text {
+    font-size: 13px;
+    margin-bottom: 2px;
+}
+
+.scan-upload-section .file-input-hint {
+    font-size: 11px;
+}
+
+/* URL输入和按钮布局 */
+.scan-url-section .scan-url-input {
+    width: 100%;
+    margin-top: 0;
+    margin-bottom: 12px;
+    height: 40px;
+}
+
+.scan-url-btn {
+    width: 100%;
+    height: 40px;
+    justify-content: center !important;
+    padding: 12px 20px !important;
+    box-sizing: border-box;
+}
+
+/* 图片预览区域 */
+.scan-image-preview {
+    margin-top: 6px;
+    margin-bottom: 6px;
+    text-align: center;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    padding: 6px;
+}
+
+.scan-image-preview img {
+    max-width: 100%;
+    max-height: 150px;
+    object-fit: contain;
+    border-radius: 4px;
+}
+
+/* 修复tab切换时的抖动 - 确保两个section有相同的最小高度 */
+.scan-upload-section,
+.scan-url-section {
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+}
+
+.camera-container {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+    background: #f8f9fa;
+    border-radius: 8px;
+    overflow: hidden;
+    aspect-ratio: 4/3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#camera-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    background: #000;
+}
+
+#camera-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.camera-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    color: #6c757d;
+}
+
+.camera-placeholder-icon {
+    font-size: 48px;
     margin-bottom: 8px;
+}
+
+.camera-placeholder-text {
+    font-size: 14px;
+    text-align: center;
+}
+
+.camera-permission-prompt {
+    background: #fff3cd;
+    border: 2px solid #ffc107;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+.permission-prompt-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.permission-prompt-icon {
+    font-size: 48px;
+    margin-bottom: 4px;
+}
+
+.permission-prompt-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #856404;
+    margin-bottom: 4px;
+}
+
+.permission-prompt-message {
+    font-size: 13px;
+    color: #856404;
+    line-height: 1.5;
+    margin-bottom: 8px;
+}
+
+.permission-prompt-hint {
+    font-size: 12px;
+    color: #856404;
+    background: #fffbf0;
+    padding: 8px 12px;
+    border-radius: 4px;
+    margin-top: 8px;
+    line-height: 1.4;
+    border-left: 3px solid #ffc107;
+}
+
+.permission-prompt-content .action-btn {
+    margin-top: 8px;
+    min-width: 200px;
+}
+
+/* Dark mode support for permission prompt */
+@media (prefers-color-scheme: dark) {
+    .camera-permission-prompt {
+        background: #3c4043;
+        border-color: #ffc107;
+    }
+
+    .permission-prompt-title {
+        color: #ffc107;
+    }
+
+    .permission-prompt-message {
+        color: #e8eaed;
+    }
+
+    .permission-prompt-hint {
+        color: #e8eaed;
+        background: #292a2d;
+        border-left-color: #ffc107;
+    }
 }
 
 .scan-result {
@@ -813,6 +1338,17 @@ input[type="color"]::-webkit-color-swatch {
     line-height: 1.3;
     max-height: 60px;
     overflow-y: auto;
+}
+
+/* 扫描结果区域保持合适的大小 */
+#scan-modal .scan-result {
+    max-width: 100%;
+}
+
+#scan-modal .text-value {
+    max-width: 100%;
+    overflow-wrap: break-word;
+    word-break: break-word;
 }
 
 /* 移除result-actions样式，因为按钮现在在modal-footer中 */

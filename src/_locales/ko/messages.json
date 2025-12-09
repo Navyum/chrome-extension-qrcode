@@ -10,6 +10,7 @@
   "contextMenuGenerateLink": { "message": "링크 QR 생성" },
   "contextMenuGenerateImage": { "message": "이미지 QR 생성" },
   "contextMenuGeneratePage": { "message": "현재 페이지 QR 생성" },
+  "contextMenuScanImage": { "message": "이미지에서 QR 코드 스캔" },
   "popup_title_placeholder": { "message": "제목" },
   "popup_url_loading": { "message": "로딩 중..." },
   "popup_qr_generating": { "message": "QR 코드 생성 중..." },
@@ -37,7 +38,7 @@
   "popup_common_cancel": { "message": "취소" },
   "popup_edit_modal_reset": { "message": "초기화" },
   "popup_scan_modal_title": { "message": "QR 코드 스캔" },
-  "popup_scan_modal_upload_section": { "message": "QR 코드 이미지 업로드" },
+  "popup_scan_modal_upload_section": { "message": "로컬에서 스캔" },
   "popup_scan_modal_choose_file": { "message": "QR 코드 이미지 선택" },
   "popup_scan_modal_result_title": { "message": "스캔 결과" },
   "popup_scan_modal_result_type": { "message": "유형:" },
@@ -95,6 +96,14 @@
   "time_just_now": { "message": "방금 전" },
   "time_minutes_ago": { "message": "$1분 전" },
   "time_hours_ago": { "message": "$1시간 전" },
-  "time_days_ago": { "message": "$1일 전" }
+  "time_days_ago": { "message": "$1일 전" },
+  "popup_scan_option_url_title": { "message": "URL에서 스캔" },
+  "popup_scan_url_placeholder": { "message": "https://example.com/qrcode.png" },
+  "popup_scan_url_scan": { "message": "스캔" },
+  "popup_scan_preview_alt": { "message": "QR 코드 미리보기" },
+  "popup_scan_icon_alt": { "message": "스캔" },
+  "popup_edit_icon_alt": { "message": "편집" },
+  "error_invalid_url": { "message": "유효하지 않은 URL입니다. 유효한 이미지 URL을 입력하세요" },
+  "error_load_image_failed_cors": { "message": "이미지를 로드하지 못했습니다. 이미지가 CORS 정책에 의해 차단되었을 수 있습니다. 대신 이미지 파일을 업로드해 보세요." }
 }
 

@@ -10,6 +10,7 @@
   "contextMenuGenerateLink": { "message": "QR-код для ссылки" },
   "contextMenuGenerateImage": { "message": "QR-код для картинки" },
   "contextMenuGeneratePage": { "message": "QR-код текущей страницы" },
+  "contextMenuScanImage": { "message": "Сканировать QR-код с изображения" },
   "popup_title_placeholder": { "message": "Заголовок" },
   "popup_url_loading": { "message": "Загрузка..." },
   "popup_qr_generating": { "message": "Генерация QR-кода..." },
@@ -37,7 +38,7 @@
   "popup_common_cancel": { "message": "Отмена" },
   "popup_edit_modal_reset": { "message": "Сброс" },
   "popup_scan_modal_title": { "message": "Сканировать QR-код" },
-  "popup_scan_modal_upload_section": { "message": "Загрузить изображение QR" },
+  "popup_scan_modal_upload_section": { "message": "Сканировать с локального устройства" },
   "popup_scan_modal_choose_file": { "message": "Выбрать изображение" },
   "popup_scan_modal_result_title": { "message": "Результат" },
   "popup_scan_modal_result_type": { "message": "Тип:" },
@@ -95,6 +96,14 @@
   "time_just_now": { "message": "Только что" },
   "time_minutes_ago": { "message": "$1 мин назад" },
   "time_hours_ago": { "message": "$1 ч назад" },
-  "time_days_ago": { "message": "$1 дн назад" }
+  "time_days_ago": { "message": "$1 дн назад" },
+  "popup_scan_option_url_title": { "message": "Сканировать с URL" },
+  "popup_scan_url_placeholder": { "message": "https://example.com/qrcode.png" },
+  "popup_scan_url_scan": { "message": "Сканировать" },
+  "popup_scan_preview_alt": { "message": "Предпросмотр QR-кода" },
+  "popup_scan_icon_alt": { "message": "Сканировать" },
+  "popup_edit_icon_alt": { "message": "Редактировать" },
+  "error_invalid_url": { "message": "Неверный URL, пожалуйста, введите действительный URL изображения" },
+  "error_load_image_failed_cors": { "message": "Не удалось загрузить изображение. Изображение может быть заблокировано политикой CORS. Пожалуйста, попробуйте загрузить файл изображения вместо этого." }
 }
 

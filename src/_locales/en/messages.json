@@ -10,6 +10,7 @@
   "contextMenuGenerateLink": { "message": "Generate QR Code for Link" },
   "contextMenuGenerateImage": { "message": "Generate QR Code for Image" },
   "contextMenuGeneratePage": { "message": "Generate QR Code for Page" },
+  "contextMenuScanImage": { "message": "Scan QR Code from Image" },
   "popup_title_placeholder": { "message": "Title" },
   "popup_url_loading": { "message": "Loading..." },
   "popup_qr_generating": { "message": "Generating QR Code..." },
@@ -30,6 +31,7 @@
   "popup_edit_modal_width_label": { "message": "Width:" },
   "popup_edit_modal_height_label": { "message": "Height:" },
   "popup_edit_modal_logo_section": { "message": "Logo Settings" },
+  "popup_edit_modal_logo_divider": { "message": "OR" },
   "popup_edit_modal_choose_logo": { "message": "Choose Logo File" },
   "popup_common_no_file_selected": { "message": "No file selected" },
   "popup_edit_modal_opacity_label": { "message": "Opacity:" },
@@ -37,7 +39,7 @@
   "popup_common_cancel": { "message": "Cancel" },
   "popup_edit_modal_reset": { "message": "Reset" },
   "popup_scan_modal_title": { "message": "Scan QR Code" },
-  "popup_scan_modal_upload_section": { "message": "Upload QR Code Image" },
+  "popup_scan_modal_upload_section": { "message": "Scan from Local" },
   "popup_scan_modal_choose_file": { "message": "Choose QR Code Image" },
   "popup_scan_modal_result_title": { "message": "Scan Result" },
   "popup_scan_modal_result_type": { "message": "Type:" },
@@ -97,6 +99,14 @@
   "time_just_now": { "message": "Just now" },
   "time_minutes_ago": { "message": "$1m ago" },
   "time_hours_ago": { "message": "$1h ago" },
-  "time_days_ago": { "message": "$1d ago" }
+  "time_days_ago": { "message": "$1d ago" },
+  "popup_scan_option_url_title": { "message": "Scan from URL" },
+  "popup_scan_url_placeholder": { "message": "https://example.com/qrcode.png" },
+  "popup_scan_url_scan": { "message": "Scan" },
+  "popup_scan_preview_alt": { "message": "QR Code Preview" },
+  "popup_scan_icon_alt": { "message": "Scan" },
+  "popup_edit_icon_alt": { "message": "Edit" },
+  "error_invalid_url": { "message": "Invalid URL, please enter a valid image URL" },
+  "error_load_image_failed_cors": { "message": "Failed to load image. The image may be blocked by CORS policy. Please try uploading the image file instead." }
 }
 

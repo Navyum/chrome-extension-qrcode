@@ -10,6 +10,7 @@
   "contextMenuGenerateLink": { "message": "生成链接二维码" },
   "contextMenuGenerateImage": { "message": "生成图片二维码" },
   "contextMenuGeneratePage": { "message": "生成当前页面二维码" },
+  "contextMenuScanImage": { "message": "扫描图片二维码" },
   "popup_title_placeholder": { "message": "标题" },
   "popup_url_loading": { "message": "加载中..." },
   "popup_qr_generating": { "message": "正在生成二维码..." },
@@ -37,7 +38,7 @@
   "popup_common_cancel": { "message": "取消" },
   "popup_edit_modal_reset": { "message": "重置" },
   "popup_scan_modal_title": { "message": "扫描二维码" },
-  "popup_scan_modal_upload_section": { "message": "上传二维码图片" },
+  "popup_scan_modal_upload_section": { "message": "从本地扫描" },
   "popup_scan_modal_choose_file": { "message": "选择二维码图片" },
   "popup_scan_modal_result_title": { "message": "扫描结果" },
   "popup_scan_modal_result_type": { "message": "类型：" },
@@ -95,6 +96,14 @@
   "time_just_now": { "message": "刚刚" },
   "time_minutes_ago": { "message": "$1 分钟前" },
   "time_hours_ago": { "message": "$1 小时前" },
-  "time_days_ago": { "message": "$1 天前" }
+  "time_days_ago": { "message": "$1 天前" },
+  "popup_scan_option_url_title": { "message": "从URL扫描" },
+  "popup_scan_url_placeholder": { "message": "https://example.com/qrcode.png" },
+  "popup_scan_url_scan": { "message": "扫描" },
+  "popup_scan_preview_alt": { "message": "二维码预览" },
+  "popup_scan_icon_alt": { "message": "扫描" },
+  "popup_edit_icon_alt": { "message": "编辑" },
+  "error_invalid_url": { "message": "无效的URL，请输入有效的图片URL" },
+  "error_load_image_failed_cors": { "message": "加载图片失败。图片可能被CORS策略阻止。请尝试上传图片文件代替。" }
 }
 

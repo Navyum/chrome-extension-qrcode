@@ -46,6 +46,13 @@ function createContextMenus() {
             title: browserApi.i18n.getMessage('contextMenuGeneratePage'),
             contexts: ['page']
         });
+
+        // 为扫描创建菜单
+        browserApi.contextMenus.create({
+            id: 'scan-qr-image',
+            title: browserApi.i18n.getMessage('contextMenuScanImage'),
+            contexts: ['image']
+        });
     });
 }
 
@@ -107,6 +114,13 @@ browserApi.contextMenus.onClicked.addListener(async (info, tab) => {
             content = tab.url || info.pageUrl;
             type = 'url';
             break;
+            
+        case 'scan-qr-image':
+            // 扫描图片中的二维码
+            if (info.srcUrl) {
+                await openScanModalWithUrl(info.srcUrl);
+            }
+            return; // 提前返回，不需要执行后续的openPopupWithData
     }
     
     if (content) {
@@ -131,6 +145,25 @@ async function openPopupWithData(content, type) {
     // openPopup 仅在 Firefox 或特定的 Chrome 版本/策略下有效，通常需要用户交互
     // 对于 commands 触发的，它是有效的。
     // 对于 contextMenu 触发的，它也是有效的。
+    try {
+        await actionApi.openPopup();
+    } catch (e) {
+        // Ignore popup open errors (usually due to lack of user gesture)
+    }
+}
+
+// 打开扫描模态框并传递图片URL
+async function openScanModalWithUrl(imageUrl) {
+    // 存储要扫描的图片URL
+    await browserApi.storage.local.set({
+        pendingScanUrl: {
+            url: imageUrl,
+            timestamp: Date.now()
+        }
+    });
+    
+    // 打开弹出窗口
+    const actionApi = browserApi.action || browserApi.browser_action;
     try {
         await actionApi.openPopup();
     } catch (e) {
@@ -211,6 +244,16 @@ browserApi.runtime.onMessage.addListener((request, sender, sendResponse) => {
             sendResponse(result.pendingQRData);
             // 清除待处理数据
             browserApi.storage.local.remove('pendingQRData');
+        });
+        return true;
+    }
+    
+    if (request.action === 'getPendingScanUrl') {
+        // 获取待扫描的图片URL
+        browserApi.storage.local.get('pendingScanUrl', (result) => {
+            sendResponse(result.pendingScanUrl);
+            // 清除待处理数据
+            browserApi.storage.local.remove('pendingScanUrl');
         });
         return true;
     }

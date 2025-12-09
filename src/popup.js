@@ -15,8 +15,25 @@ class QRCodePopup {
             height: 512, // 默认尺寸512px（包含20px边框）
             margin: 10,
             logo: null,
-            logoOpacity: 100
+            logoOpacity: 100,
+            builtinLogo: null // 内置 logo 路径
         };
+        
+        // 内置 logo 文件名列表（直接写死，12个，两行，每行6个）
+        this.builtinLogoFiles = [
+            'instagram.svg',
+            'line.svg',
+            'linkedin.svg',
+            'spotify.svg',
+            'telegram.svg',
+            'vimeo.svg',
+            'vkontakte.svg',
+            'wechat.svg',
+            'whatsapp.svg',
+            'x.svg',
+            'youtube.svg',
+            'zoom.svg'
+        ];
         
         // 历史记录相关
         this.history = {
@@ -34,8 +51,13 @@ class QRCodePopup {
         this.loadHistory();
         this.setupModalEvents();
         
-        // 检查是否有待处理的二维码数据（来自右键菜单）
-        await this.checkPendingQRData();
+        // 检查是否有待扫描的图片URL（来自右键菜单）
+        const hasPendingScan = await this.checkPendingScanUrl();
+        
+        // 如果没有待扫描的URL，检查是否有待处理的二维码数据（来自右键菜单）
+        if (!hasPendingScan) {
+            await this.checkPendingQRData();
+        }
         
         // 聚焦到URL输入框的末尾
         this.focusUrlInput();
@@ -117,6 +139,10 @@ class QRCodePopup {
             this.openFeedback();
         });
 
+        document.getElementById('sponsor-btn').addEventListener('click', () => {
+            this.openSponsor();
+        });
+
         // URL输入框事件
         document.getElementById('current-url').addEventListener('input', (e) => {
             this.currentContent = e.target.value;
@@ -143,6 +169,35 @@ class QRCodePopup {
             // 将光标移动到文本末尾
             const length = urlInput.value.length;
             urlInput.setSelectionRange(length, length);
+        }
+    }
+
+    // 检查是否有待扫描的图片URL（来自右键菜单）
+    async checkPendingScanUrl() {
+        try {
+            // 从background script获取待扫描的图片URL
+            const response = await browserApi.runtime.sendMessage({ action: 'getPendingScanUrl' });
+            
+            if (response && response.url) {
+                // 有待扫描的URL，打开扫描模态框并自动扫描
+                this.showScanModal();
+                // 切换到URL tab
+                this.switchScanTab('url');
+                // 填入URL
+                const urlInput = document.getElementById('scan-url-input');
+                if (urlInput) {
+                    urlInput.value = response.url;
+                    // 自动执行扫描
+                    setTimeout(() => {
+                        this.scanFromUrl();
+                    }, 100);
+                }
+                return true; // 返回true表示有待扫描的URL，不需要继续执行checkPendingQRData
+            }
+            return false; // 返回false表示没有待扫描的URL，继续执行checkPendingQRData
+        } catch (error) {
+            // 出错时，继续执行checkPendingQRData
+            return false;
         }
     }
 
@@ -387,12 +442,26 @@ class QRCodePopup {
         }
     }
 
+    async getLogoForQRCode() {
+        // 如果有内置 logo，返回其 URL
+        if (this.qrOptions.builtinLogo) {
+            return browserApi.runtime.getURL(`images/qr-icon/${this.qrOptions.builtinLogo}`);
+        }
+        // 如果有自定义 logo，返回文件对象
+        return this.qrOptions.logo;
+    }
+
     generateQRCodeWithFallback(content, container, size) {
         // 尝试不同的纠错级别，从M开始，如果失败则降低到L
         const errorLevels = [
             { level: QRCode.CorrectLevel.M, name: 'Medium' },
             { level: QRCode.CorrectLevel.L, name: 'Low' }
         ];
+        
+        // 获取 logo（内置或自定义）
+        const logo = this.qrOptions.builtinLogo 
+            ? browserApi.runtime.getURL(`images/qr-icon/${this.qrOptions.builtinLogo}`)
+            : this.qrOptions.logo;
         
         for (const errorLevel of errorLevels) {
             try {
@@ -402,7 +471,7 @@ class QRCodePopup {
                     colorDark: this.qrOptions.foreground,
                     colorLight: this.qrOptions.background,
                     correctLevel: errorLevel.level,
-                    logo: this.qrOptions.logo,
+                    logo: logo,
                     logoSize: 0.2,
                     logoOpacity: this.qrOptions.logoOpacity / 100
                 });
@@ -440,6 +509,162 @@ class QRCodePopup {
         document.getElementById('background-color').value = this.qrOptions.background;
         document.getElementById('qr-width').value = this.qrOptions.width;
         document.getElementById('qr-height').value = this.qrOptions.height;
+        
+        // 初始化内置 logo 网格
+        this.initBuiltinLogoGrid();
+        
+        // 更新 logo 选择状态
+        this.updateLogoSelectionState();
+    }
+    
+    initBuiltinLogoGrid() {
+        const grid = document.getElementById('builtin-logo-grid');
+        if (!grid) return;
+        
+        grid.innerHTML = '';
+        
+        // 直接写死文件名，添加内置 logo 选项（12个，两行，每行6个）
+        this.builtinLogoFiles.forEach(logoFile => {
+            const logoItem = document.createElement('div');
+            logoItem.className = 'builtin-logo-item';
+            logoItem.dataset.logo = logoFile;
+            logoItem.innerHTML = `
+                <div class="builtin-logo-icon">
+                    <img src="images/qr-icon/${logoFile}" alt="" onerror="this.style.display='none';">
+                </div>
+                <div class="builtin-logo-checkmark">✓</div>
+            `;
+            logoItem.addEventListener('click', () => this.selectBuiltinLogo(logoFile));
+            grid.appendChild(logoItem);
+        });
+    }
+    
+    selectBuiltinLogo(logoFile) {
+        // 清除自定义 logo
+        this.removeLogoFile();
+        
+        // 设置内置 logo
+        if (logoFile === null) {
+            this.qrOptions.logo = null;
+            this.qrOptions.builtinLogo = null;
+        } else {
+            this.qrOptions.logo = null; // 清除自定义 logo
+            this.qrOptions.builtinLogo = logoFile;
+        }
+        
+        // 更新 UI 状态
+        this.updateLogoSelectionState();
+        
+        // 如果有当前二维码，重新生成
+        if (this.currentContent) {
+            this.createQRCode(this.currentContent, this.currentType);
+        }
+    }
+    
+    handleLogoFileSelect(file) {
+        if (file) {
+            // 清除内置 logo
+            this.qrOptions.builtinLogo = null;
+            
+            // 清除内置 logo 选中状态
+            document.querySelectorAll('.builtin-logo-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            
+            // 设置自定义 logo
+            this.qrOptions.logo = file;
+            
+            // 隐藏选择按钮，显示文件名和取消按钮
+            const fileLabel = document.getElementById('logo-file-label');
+            const fileSelected = document.getElementById('logo-file-selected');
+            const fileName = document.getElementById('logo-file-name');
+            const filePreview = document.getElementById('logo-file-preview');
+            
+            if (fileLabel && fileSelected && fileName && filePreview) {
+                fileLabel.style.display = 'none';
+                fileSelected.style.display = 'flex';
+                fileName.textContent = file.name;
+                
+                // 创建预览图片
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    filePreview.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+            
+            // 显示透明度选项
+            document.querySelector('.logo-options').style.display = 'block';
+            
+            // 如果有当前二维码，重新生成
+            if (this.currentContent) {
+                this.createQRCode(this.currentContent, this.currentType);
+            }
+        }
+    }
+    
+    removeLogoFile() {
+        // 清除文件选择
+        document.getElementById('logo-file').value = '';
+        this.qrOptions.logo = null;
+        
+        // 清除预览图片
+        const filePreview = document.getElementById('logo-file-preview');
+        if (filePreview) {
+            filePreview.src = '';
+        }
+        
+        // 显示选择按钮，隐藏文件名显示
+        const fileLabel = document.getElementById('logo-file-label');
+        const fileSelected = document.getElementById('logo-file-selected');
+        
+        if (fileLabel && fileSelected) {
+            fileLabel.style.display = 'flex';
+            fileSelected.style.display = 'none';
+        }
+        
+        // 如果没有logo，隐藏透明度选项
+        if (!this.qrOptions.builtinLogo) {
+            document.querySelector('.logo-options').style.display = 'none';
+        }
+        
+        // 如果有当前二维码，重新生成
+        if (this.currentContent) {
+            this.createQRCode(this.currentContent, this.currentType);
+        }
+    }
+    
+    updateLogoSelectionState() {
+        // 更新内置 logo 选中状态
+        const logoItems = document.querySelectorAll('.builtin-logo-item');
+        logoItems.forEach(item => {
+            const logoFile = item.dataset.logo;
+            if (logoFile === this.qrOptions.builtinLogo) {
+                item.classList.add('selected');
+            } else {
+                item.classList.remove('selected');
+            }
+        });
+        
+        // 更新自定义 logo 显示
+        const fileHint = document.querySelector('.file-input-hint');
+        if (this.qrOptions.builtinLogo) {
+            // 如果有内置 logo，隐藏自定义 logo 提示
+            if (fileHint) {
+                fileHint.textContent = browserApi.i18n.getMessage('popup_common_no_file_selected');
+                fileHint.style.color = '#6c757d';
+            }
+            document.querySelector('.logo-options').style.display = 'block';
+        } else if (this.qrOptions.logo) {
+            // 如果有自定义 logo，显示文件名
+            if (fileHint) {
+                fileHint.textContent = this.qrOptions.logo.name || browserApi.i18n.getMessage('popup_common_no_file_selected');
+                fileHint.style.color = '#47630f';
+            }
+            document.querySelector('.logo-options').style.display = 'block';
+        } else {
+            document.querySelector('.logo-options').style.display = 'none';
+        }
     }
 
 
@@ -492,29 +717,41 @@ class QRCodePopup {
         // Logo文件选择
         document.getElementById('logo-file').addEventListener('change', (e) => {
             const file = e.target.files[0];
-            const fileHint = document.querySelector('.file-input-hint');
-            
-            if (file) {
-                document.querySelector('.logo-options').style.display = 'block';
-                this.qrOptions.logo = file;
-                
-                // 更新显示的文件名
-                fileHint.textContent = file.name;
-                fileHint.style.color = '#47630f';
-                
-                // 如果有当前二维码，重新生成
-                if (this.currentContent) {
-                    this.createQRCode(this.currentContent, this.currentType);
-                }
-            } else {
-                fileHint.textContent = browserApi.i18n.getMessage('popup_common_no_file_selected');
-                fileHint.style.color = '#6c757d';
-            }
+            this.handleLogoFileSelect(file);
+        });
+        
+        // Logo文件取消按钮
+        document.getElementById('logo-file-remove').addEventListener('click', (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            this.removeLogoFile();
         });
 
         // 扫描模态框事件
         document.getElementById('close-scan-modal').addEventListener('click', () => {
+            this.resetScanModal();
             document.getElementById('scan-modal').style.display = 'none';
+        });
+
+        // 扫描Tab切换事件
+        document.getElementById('scan-tab-local').addEventListener('click', () => {
+            this.switchScanTab('local');
+        });
+
+        document.getElementById('scan-tab-url').addEventListener('click', () => {
+            this.switchScanTab('url');
+        });
+
+        // URL扫描按钮
+        document.getElementById('scan-url-btn').addEventListener('click', () => {
+            this.scanFromUrl();
+        });
+
+        // URL输入框回车事件
+        document.getElementById('scan-url-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                this.scanFromUrl();
+            }
         });
 
         // 历史模态框事件
@@ -578,31 +815,103 @@ class QRCodePopup {
         document.getElementById('qr-file').addEventListener('change', (e) => {
             const file = e.target.files[0];
             const fileHint = document.querySelector('#scan-modal .file-input-hint');
+            const previewContainer = document.getElementById('scan-upload-preview');
+            const previewImage = document.getElementById('upload-preview-image');
+            
+            // 隐藏之前的结果
+            document.getElementById('scan-upload-result').style.display = 'none';
+            document.getElementById('copy-result').style.display = 'none';
+            document.getElementById('open-result').style.display = 'none';
             
             if (file) {
                 fileHint.textContent = file.name;
                 fileHint.style.color = '#47630f';
-                this.scanQRCode(file);
+                
+                // 使用同一个FileReader来显示预览和扫描
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    const dataUrl = e.target.result;
+                    // 确保预览容器和图片元素存在
+                    if (previewContainer && previewImage) {
+                        previewImage.src = dataUrl;
+                        previewImage.onload = () => {
+                            // 图片加载成功后显示预览
+                            previewContainer.style.display = 'block';
+                        };
+                        previewImage.onerror = () => {
+                            console.error('Failed to load preview image');
+                            previewContainer.style.display = 'none';
+                        };
+                    }
+                    // 扫描二维码
+                    await this.scanImageFromDataUrl(dataUrl, 'upload');
+                };
+                reader.onerror = () => {
+                    this.showMessage(browserApi.i18n.getMessage('error_read_file_failed'), 'error');
+                    if (previewContainer) {
+                        previewContainer.style.display = 'none';
+                    }
+                };
+                reader.readAsDataURL(file);
             } else {
                 fileHint.textContent = browserApi.i18n.getMessage('popup_common_no_file_selected');
                 fileHint.style.color = '#6c757d';
+                if (previewContainer) {
+                    previewContainer.style.display = 'none';
+                }
             }
         });
 
         // 扫描结果操作
         document.getElementById('copy-result').addEventListener('click', () => {
-            const content = document.getElementById('result-content').textContent;
-            navigator.clipboard.writeText(content).then(() => {
-                this.showMessage(browserApi.i18n.getMessage('success_result_copied'), 'success');
-            });
+            // 从data-content属性获取内容，如果没有则从可见的结果区域读取
+            let content = document.getElementById('copy-result').getAttribute('data-content');
+            if (!content) {
+                // 检查哪个结果区域可见
+                const uploadResult = document.getElementById('scan-upload-result');
+                const urlResult = document.getElementById('scan-url-result');
+                const oldResult = document.getElementById('scan-result');
+                
+                if (uploadResult.style.display !== 'none') {
+                    content = document.getElementById('upload-result-content').textContent;
+                } else if (urlResult.style.display !== 'none') {
+                    content = document.getElementById('url-result-content').textContent;
+                } else if (oldResult.style.display !== 'none') {
+                    content = document.getElementById('result-content').textContent;
+                }
+            }
+            
+            if (content) {
+                navigator.clipboard.writeText(content).then(() => {
+                    this.showMessage(browserApi.i18n.getMessage('success_result_copied'), 'success');
+                });
+            }
         });
 
         document.getElementById('open-result').addEventListener('click', () => {
-            const content = document.getElementById('result-content').textContent;
-            if (content.startsWith('http://') || content.startsWith('https://')) {
-                browserApi.tabs.create({ url: content });
-            } else {
-                this.showMessage(browserApi.i18n.getMessage('warning_cannot_open_non_url'), 'warning');
+            // 从data-content属性获取内容，如果没有则从可见的结果区域读取
+            let content = document.getElementById('open-result').getAttribute('data-content');
+            if (!content) {
+                // 检查哪个结果区域可见
+                const uploadResult = document.getElementById('scan-upload-result');
+                const urlResult = document.getElementById('scan-url-result');
+                const oldResult = document.getElementById('scan-result');
+                
+                if (uploadResult.style.display !== 'none') {
+                    content = document.getElementById('upload-result-content').textContent;
+                } else if (urlResult.style.display !== 'none') {
+                    content = document.getElementById('url-result-content').textContent;
+                } else if (oldResult.style.display !== 'none') {
+                    content = document.getElementById('result-content').textContent;
+                }
+            }
+            
+            if (content) {
+                if (content.startsWith('http://') || content.startsWith('https://')) {
+                    browserApi.tabs.create({ url: content });
+                } else {
+                    this.showMessage(browserApi.i18n.getMessage('warning_cannot_open_non_url'), 'warning');
+                }
             }
         });
 
@@ -610,6 +919,10 @@ class QRCodePopup {
         document.querySelectorAll('.modal').forEach(modal => {
             modal.addEventListener('click', (e) => {
                 if (e.target === modal) {
+                    // 如果是扫描模态框，需要重置
+                    if (modal.id === 'scan-modal') {
+                        this.resetScanModal();
+                    }
                     modal.style.display = 'none';
                 }
             });
@@ -644,7 +957,8 @@ class QRCodePopup {
             height: 512, // 默认尺寸512px（包含20px边框）
             margin: 10,
             logo: null,
-            logoOpacity: 100
+            logoOpacity: 100,
+            builtinLogo: null
         };
 
         // 更新表单
@@ -658,9 +972,13 @@ class QRCodePopup {
         document.getElementById('logo-file').value = '';
         
         // 重置文件名显示
-        const fileHint = document.querySelector('.file-input-hint');
-        fileHint.textContent = browserApi.i18n.getMessage('popup_common_no_file_selected');
-        fileHint.style.color = '#6c757d';
+        const fileLabel = document.getElementById('logo-file-label');
+        const fileSelected = document.getElementById('logo-file-selected');
+        if (fileLabel) fileLabel.style.display = 'flex';
+        if (fileSelected) fileSelected.style.display = 'none';
+        
+        // 更新 logo 选择状态
+        this.updateLogoSelectionState();
     }
 
     async downloadQRCode() {
@@ -689,6 +1007,11 @@ class QRCodePopup {
                 qrHeight = minSize;
             }
 
+            // 获取 logo（内置或自定义）
+            const logo = this.qrOptions.builtinLogo 
+                ? browserApi.runtime.getURL(`images/qr-icon/${this.qrOptions.builtinLogo}`)
+                : this.qrOptions.logo;
+
             // 使用计算后的尺寸生成下载用的二维码
             const downloadQRGenerator = new QRCodeWithLogo({
                 width: qrWidth,
@@ -696,7 +1019,7 @@ class QRCodePopup {
                 colorDark: this.qrOptions.foreground,
                 colorLight: this.qrOptions.background,
                 correctLevel: QRCode.CorrectLevel.H,
-                logo: this.qrOptions.logo,
+                logo: logo,
                 logoSize: 0.2,
                 logoOpacity: this.qrOptions.logoOpacity / 100
             });
@@ -751,6 +1074,11 @@ class QRCodePopup {
                 qrHeight = minSize;
             }
 
+            // 获取 logo（内置或自定义）
+            const logo = this.qrOptions.builtinLogo 
+                ? browserApi.runtime.getURL(`images/qr-icon/${this.qrOptions.builtinLogo}`)
+                : this.qrOptions.logo;
+
             // 使用计算后的尺寸生成复制用的二维码
             const copyQRGenerator = new QRCodeWithLogo({
                 width: qrWidth,
@@ -758,7 +1086,7 @@ class QRCodePopup {
                 colorDark: this.qrOptions.foreground,
                 colorLight: this.qrOptions.background,
                 correctLevel: QRCode.CorrectLevel.H,
-                logo: this.qrOptions.logo,
+                logo: logo,
                 logoSize: 0.2,
                 logoOpacity: this.qrOptions.logoOpacity / 100
             });
@@ -826,26 +1154,224 @@ class QRCodePopup {
 
     showScanModal() {
         document.getElementById('scan-modal').style.display = 'flex';
-        // 重置扫描结果
+        // 重置到选择页面
+        this.resetScanModal();
+    }
+
+    resetScanModal() {
+        // 默认显示local tab
+        this.switchScanTab('local');
+        
+        // 隐藏所有结果区域
+        document.getElementById('scan-upload-result').style.display = 'none';
+        document.getElementById('scan-url-result').style.display = 'none';
         document.getElementById('scan-result').style.display = 'none';
+        
+        // 隐藏所有预览区域
+        document.getElementById('scan-upload-preview').style.display = 'none';
+        document.getElementById('scan-url-preview').style.display = 'none';
+        
+        // 重置表单
         document.getElementById('qr-file').value = '';
-        document.querySelector('#scan-modal .file-input-hint').textContent = browserApi.i18n.getMessage('popup_common_no_file_selected');
-        document.querySelector('#scan-modal .file-input-hint').style.color = '#6c757d';
+        const fileHint = document.querySelector('#scan-modal .file-input-hint');
+        if (fileHint) {
+            fileHint.textContent = browserApi.i18n.getMessage('popup_common_no_file_selected');
+            fileHint.style.color = '#6c757d';
+        }
+        document.getElementById('scan-url-input').value = '';
         
         // 隐藏底部的Copy和Open按钮
         document.getElementById('copy-result').style.display = 'none';
         document.getElementById('open-result').style.display = 'none';
     }
 
-    async scanQRCode(file) {
+    switchScanTab(tab) {
+        const localTab = document.getElementById('scan-tab-local');
+        const urlTab = document.getElementById('scan-tab-url');
+        const uploadSection = document.getElementById('scan-upload-section');
+        const urlSection = document.getElementById('scan-url-section');
+        
+        // 重置tab状态
+        localTab.classList.remove('active');
+        urlTab.classList.remove('active');
+        
+        // 隐藏所有section
+        uploadSection.style.display = 'none';
+        urlSection.style.display = 'none';
+        
+        // 不隐藏结果区域和预览区域，保留它们以便切换tab时显示
+        // 只更新底部按钮的显示状态
+        
+        if (tab === 'local') {
+            localTab.classList.add('active');
+            uploadSection.style.display = 'block';
+            
+            // 检查是否有上传结果，如果有则显示底部按钮
+            const uploadResult = document.getElementById('scan-upload-result');
+            if (uploadResult && uploadResult.style.display !== 'none') {
+                document.getElementById('copy-result').style.display = 'flex';
+                document.getElementById('open-result').style.display = 'flex';
+            } else {
+                document.getElementById('copy-result').style.display = 'none';
+                document.getElementById('open-result').style.display = 'none';
+            }
+        } else if (tab === 'url') {
+            urlTab.classList.add('active');
+            urlSection.style.display = 'block';
+            
+            // 检查是否有URL结果，如果有则显示底部按钮
+            const urlResult = document.getElementById('scan-url-result');
+            if (urlResult && urlResult.style.display !== 'none') {
+                document.getElementById('copy-result').style.display = 'flex';
+                document.getElementById('open-result').style.display = 'flex';
+            } else {
+                document.getElementById('copy-result').style.display = 'none';
+                document.getElementById('open-result').style.display = 'none';
+            }
+            
+            // 聚焦到URL输入框
+            setTimeout(() => {
+                document.getElementById('scan-url-input').focus();
+            }, 100);
+        }
+    }
+
+    async scanQRCodeFromFile(file) {
         try {
             // 显示加载状态
             this.showMessage(browserApi.i18n.getMessage('info_scanning_qr'), 'info');
             
             const reader = new FileReader();
             reader.onload = async (e) => {
-                const img = new Image();
-                img.onload = async () => {
+                await this.scanImageFromDataUrl(e.target.result, 'upload');
+            };
+            
+            reader.onerror = () => {
+                this.showMessage(browserApi.i18n.getMessage('error_read_file_failed'), 'error');
+            };
+            
+            reader.readAsDataURL(file);
+        } catch (error) {
+            this.showMessage(browserApi.i18n.getMessage('error_read_file_failed_reason', [error.message]), 'error');
+        }
+    }
+
+    async scanFromUrl() {
+        const urlInput = document.getElementById('scan-url-input');
+        const url = urlInput.value.trim();
+        
+        if (!url) {
+            this.showMessage(browserApi.i18n.getMessage('error_invalid_url'), 'error');
+            return;
+        }
+        
+        // 验证URL格式
+        try {
+            new URL(url);
+        } catch (error) {
+            this.showMessage(browserApi.i18n.getMessage('error_invalid_url'), 'error');
+            return;
+        }
+        
+        // 隐藏之前的结果
+        document.getElementById('scan-url-result').style.display = 'none';
+        document.getElementById('copy-result').style.display = 'none';
+        document.getElementById('open-result').style.display = 'none';
+        
+        try {
+            // 显示加载状态
+            this.showMessage(browserApi.i18n.getMessage('info_scanning_qr'), 'info');
+            
+            // 使用fetch获取图片，但需要处理CORS
+            // 由于CORS限制，我们尝试直接加载图片
+            await this.scanImageFromUrl(url, 'url');
+        } catch (error) {
+            this.showMessage(browserApi.i18n.getMessage('error_load_image_failed'), 'error');
+            // 隐藏预览
+            document.getElementById('scan-url-preview').style.display = 'none';
+        }
+    }
+
+    async scanImageFromUrl(url, source) {
+        return new Promise((resolve, reject) => {
+            // 先尝试显示预览（即使可能因为CORS失败）
+            const previewContainer = document.getElementById('scan-url-preview');
+            const previewImage = document.getElementById('url-preview-image');
+            if (previewContainer && previewImage) {
+                previewImage.src = url;
+                previewContainer.style.display = 'block';
+            }
+            
+            const img = new Image();
+            img.crossOrigin = 'anonymous'; // 尝试跨域请求
+            
+            img.onload = async () => {
+                try {
+                    // 确保预览已显示
+                    if (previewContainer && previewImage) {
+                        previewImage.src = url;
+                        previewContainer.style.display = 'block';
+                    }
+                    
+                    await this.scanImageFromElement(img, source);
+                    resolve();
+                } catch (error) {
+                    reject(error);
+                }
+            };
+            
+            img.onerror = () => {
+                // 如果直接加载失败，尝试使用代理或提示用户
+                this.showMessage(browserApi.i18n.getMessage('error_load_image_failed_cors'), 'error');
+                // 隐藏预览
+                if (previewContainer) {
+                    previewContainer.style.display = 'none';
+                }
+                reject(new Error('Failed to load image'));
+            };
+            
+            img.src = url;
+        });
+    }
+
+    async scanImageFromDataUrl(dataUrl, source) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = async () => {
+                try {
+                    // 如果是upload source，确保预览已显示
+                    if (source === 'upload') {
+                        const previewContainer = document.getElementById('scan-upload-preview');
+                        const previewImage = document.getElementById('upload-preview-image');
+                        if (previewContainer && previewImage) {
+                            // 如果预览图片的src不同，更新它
+                            if (previewImage.src !== dataUrl) {
+                                previewImage.src = dataUrl;
+                            }
+                            // 确保预览容器显示
+                            if (previewContainer.style.display === 'none') {
+                                previewContainer.style.display = 'block';
+                            }
+                        }
+                    }
+                    
+                    await this.scanImageFromElement(img, source);
+                    resolve();
+                } catch (error) {
+                    reject(error);
+                }
+            };
+            
+            img.onerror = () => {
+                this.showMessage(browserApi.i18n.getMessage('error_load_image_failed'), 'error');
+                reject(new Error('Failed to load image'));
+            };
+            
+            img.src = dataUrl;
+        });
+    }
+
+    async scanImageFromElement(img, source) {
                     try {
                         // 检查图片尺寸
                         if (img.width < 50 || img.height < 50) {
@@ -862,11 +1388,11 @@ class QRCodePopup {
                         
                         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
                         
-                        // 使用jsQR库扫描二维码
+            // 使用改进的jsQR适配器扫描二维码
                         const result = await this.decodeQRCode(imageData);
                         
                         if (result) {
-                            this.showScanResult(result);
+                            this.showScanResult(result, source);
                             this.showMessage(browserApi.i18n.getMessage('success_scan_completed'), 'success');
                         } else {
                             this.showMessage(browserApi.i18n.getMessage('error_no_qr_found'), 'error');
@@ -874,24 +1400,8 @@ class QRCodePopup {
                     } catch (error) {
                         this.showMessage(browserApi.i18n.getMessage('error_scan_failed', [error.message]), 'error');
                     }
-                };
-                
-                img.onerror = () => {
-                    this.showMessage(browserApi.i18n.getMessage('error_load_image_failed'), 'error');
-                };
-                
-                img.src = e.target.result;
-            };
-            
-            reader.onerror = () => {
-                this.showMessage(browserApi.i18n.getMessage('error_read_file_failed'), 'error');
-            };
-            
-            reader.readAsDataURL(file);
-        } catch (error) {
-            this.showMessage(browserApi.i18n.getMessage('error_read_file_failed_reason', [error.message]), 'error');
-        }
     }
+
 
     async decodeQRCode(imageData) {
         try {
@@ -915,11 +1425,50 @@ class QRCodePopup {
         }
     }
 
-    showScanResult(result) {
-        document.getElementById('result-type').textContent = browserApi.i18n.getMessage(`type_${result.type.toLowerCase()}`) || result.type;
+    showScanResult(result, source) {
+        // 根据source确定显示在哪个section
+        let resultContainer, typeElement, contentElement;
+        const localTab = document.getElementById('scan-tab-local');
+        const urlTab = document.getElementById('scan-tab-url');
+        const uploadSection = document.getElementById('scan-upload-section');
+        const urlSection = document.getElementById('scan-url-section');
+        
+        if (source === 'upload') {
+            // 设置tab状态为local
+            localTab.classList.add('active');
+            urlTab.classList.remove('active');
+            uploadSection.style.display = 'block';
+            urlSection.style.display = 'none';
+            
+            resultContainer = document.getElementById('scan-upload-result');
+            typeElement = document.getElementById('upload-result-type');
+            contentElement = document.getElementById('upload-result-content');
+        } else if (source === 'url') {
+            // 设置tab状态为url
+            urlTab.classList.add('active');
+            localTab.classList.remove('active');
+            urlSection.style.display = 'block';
+            uploadSection.style.display = 'none';
+            
+            resultContainer = document.getElementById('scan-url-result');
+            typeElement = document.getElementById('url-result-type');
+            contentElement = document.getElementById('url-result-content');
+        } else {
+            // 兼容旧代码，使用原来的结果区域
+            localTab.classList.add('active');
+            urlTab.classList.remove('active');
+            uploadSection.style.display = 'block';
+            urlSection.style.display = 'none';
+            
+            resultContainer = document.getElementById('scan-result');
+            typeElement = document.getElementById('result-type');
+            contentElement = document.getElementById('result-content');
+        }
+        
+        // 设置结果类型
+        typeElement.textContent = browserApi.i18n.getMessage(`type_${result.type.toLowerCase()}`) || result.type;
         
         // 使用格式化后的显示数据
-        const contentElement = document.getElementById('result-content');
         if (result.displayData) {
             contentElement.textContent = result.displayData;
         } else {
@@ -935,11 +1484,16 @@ class QRCodePopup {
             contentElement.style.fontStyle = 'normal';
         }
         
-        document.getElementById('scan-result').style.display = 'block';
+        // 显示结果区域
+        resultContainer.style.display = 'block';
         
         // 显示底部的Copy和Open按钮
         document.getElementById('copy-result').style.display = 'flex';
         document.getElementById('open-result').style.display = 'flex';
+        
+        // 更新底部按钮的数据源
+        document.getElementById('copy-result').setAttribute('data-content', result.data);
+        document.getElementById('open-result').setAttribute('data-content', result.data);
         
         // 为URL类型的扫描结果获取favicon URL
         let faviconUrl = null;
@@ -1432,21 +1986,17 @@ class QRCodePopup {
         this.showMessage(browserApi.i18n.getMessage('success_thanks_rating'), 'success');
     }
     openFeedback() {
-        // 跳转到浏览器商店官方support页面
-        const extensionId = browserApi.runtime.id;
-        let supportUrl;
-        
-        if (typeof browser !== 'undefined' && browser.runtime) {
-            // Firefox - 使用Firefox Add-ons商店
-            supportUrl = `https://addons.mozilla.org/en-US/firefox/addon/${extensionId}/`;
-        } else {
-            // Chrome/Edge - 使用Chrome Web Store
-            supportUrl = `https://chrome.google.com/webstore/detail/${extensionId}/support`;
-        }
-
+        let supportUrl = 'https://docs.google.com/forms/d/e/1FAIpQLSdHfHweueYDQePclu-HRMOq0zpTYyDFi9hgcMoRJuh1sDTOdg/viewform?usp=dialog';
         browserApi.tabs.create({ url: supportUrl });
         this.showMessage(browserApi.i18n.getMessage('info_opening_support'), 'info');
     }
+
+    openSponsor() {
+        let sponsorUrl = 'https://ko-fi.com/navyum';
+        browserApi.tabs.create({ url: sponsorUrl });
+        this.showMessage(browserApi.i18n.getMessage('info_opening_sponsor'), 'info');
+    }
+
     showMessage(message, type = 'info') {
         // 创建消息元素
         const messageEl = document.createElement('div');

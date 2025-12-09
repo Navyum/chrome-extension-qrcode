@@ -74,6 +74,13 @@ module.exports = {
           }
         },
         {
+          from: 'images/qr-icon',
+          to: 'images/qr-icon',
+          globOptions: {
+            ignore: ['**/.*', '**/.*/**']
+          }
+        },
+        {
           from: 'src/_locales',
           to: '_locales',
           globOptions: {
@@ -91,6 +98,13 @@ module.exports = {
           from: 'robots.txt',
           to: 'robots.txt',
           noErrorOnMissing: true
+        },
+        {
+          from: 'src/utils',
+          to: 'utils',
+          globOptions: {
+            ignore: ['**/.*', '**/.*/**']
+          }
         }
       ]
     })

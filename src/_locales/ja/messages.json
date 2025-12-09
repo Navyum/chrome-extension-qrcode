@@ -10,6 +10,7 @@
   "contextMenuGenerateLink": { "message": "リンクのQRを生成" },
   "contextMenuGenerateImage": { "message": "画像のQRを生成" },
   "contextMenuGeneratePage": { "message": "現在のページのQRを生成" },
+  "contextMenuScanImage": { "message": "画像からQRコードをスキャン" },
   "popup_title_placeholder": { "message": "タイトル" },
   "popup_url_loading": { "message": "読み込み中..." },
   "popup_qr_generating": { "message": "QRコードを生成中..." },
@@ -37,7 +38,7 @@
   "popup_common_cancel": { "message": "キャンセル" },
   "popup_edit_modal_reset": { "message": "リセット" },
   "popup_scan_modal_title": { "message": "QRコードをスキャン" },
-  "popup_scan_modal_upload_section": { "message": "QRコード画像をアップロード" },
+  "popup_scan_modal_upload_section": { "message": "ローカルからスキャン" },
   "popup_scan_modal_choose_file": { "message": "QRコード画像を選択" },
   "popup_scan_modal_result_title": { "message": "スキャン結果" },
   "popup_scan_modal_result_type": { "message": "タイプ：" },
@@ -95,6 +96,14 @@
   "time_just_now": { "message": "たった今" },
   "time_minutes_ago": { "message": "$1分前" },
   "time_hours_ago": { "message": "$1時間前" },
-  "time_days_ago": { "message": "$1日前" }
+  "time_days_ago": { "message": "$1日前" },
+  "popup_scan_option_url_title": { "message": "URLからスキャン" },
+  "popup_scan_url_placeholder": { "message": "https://example.com/qrcode.png" },
+  "popup_scan_url_scan": { "message": "スキャン" },
+  "popup_scan_preview_alt": { "message": "QRコードプレビュー" },
+  "popup_scan_icon_alt": { "message": "スキャン" },
+  "popup_edit_icon_alt": { "message": "編集" },
+  "error_invalid_url": { "message": "無効なURLです。有効な画像URLを入力してください" },
+  "error_load_image_failed_cors": { "message": "画像の読み込みに失敗しました。画像がCORSポリシーによってブロックされている可能性があります。代わりに画像ファイルをアップロードしてください。" }
 }
 

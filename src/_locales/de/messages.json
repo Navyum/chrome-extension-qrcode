@@ -10,6 +10,7 @@
   "contextMenuGenerateLink": { "message": "Link-QR-Code generieren" },
   "contextMenuGenerateImage": { "message": "Bild-QR-Code generieren" },
   "contextMenuGeneratePage": { "message": "Seiten-QR-Code generieren" },
+  "contextMenuScanImage": { "message": "QR-Code aus Bild scannen" },
   "popup_title_placeholder": { "message": "Titel" },
   "popup_url_loading": { "message": "Lädt..." },
   "popup_qr_generating": { "message": "QR-Code wird generiert..." },
@@ -37,7 +38,7 @@
   "popup_common_cancel": { "message": "Abbrechen" },
   "popup_edit_modal_reset": { "message": "Zurücksetzen" },
   "popup_scan_modal_title": { "message": "QR-Code scannen" },
-  "popup_scan_modal_upload_section": { "message": "QR-Code-Bild hochladen" },
+  "popup_scan_modal_upload_section": { "message": "Vom lokalen Gerät scannen" },
   "popup_scan_modal_choose_file": { "message": "QR-Code-Bild auswählen" },
   "popup_scan_modal_result_title": { "message": "Scan-Ergebnis" },
   "popup_scan_modal_result_type": { "message": "Typ:" },
@@ -95,6 +96,14 @@
   "time_just_now": { "message": "Gerade eben" },
   "time_minutes_ago": { "message": "Vor $1 Min." },
   "time_hours_ago": { "message": "Vor $1 Std." },
-  "time_days_ago": { "message": "Vor $1 Tag" }
+  "time_days_ago": { "message": "Vor $1 Tag" },
+  "popup_scan_option_url_title": { "message": "Von URL scannen" },
+  "popup_scan_url_placeholder": { "message": "https://example.com/qrcode.png" },
+  "popup_scan_url_scan": { "message": "Scannen" },
+  "popup_scan_preview_alt": { "message": "QR-Code-Vorschau" },
+  "popup_scan_icon_alt": { "message": "Scannen" },
+  "popup_edit_icon_alt": { "message": "Bearbeiten" },
+  "error_invalid_url": { "message": "Ungültige URL. Bitte geben Sie eine gültige Bild-URL ein" },
+  "error_load_image_failed_cors": { "message": "Fehler beim Laden des Bildes. Das Bild kann durch die CORS-Richtlinie blockiert sein. Bitte versuchen Sie stattdessen, die Bilddatei hochzuladen." }
 }
 

@@ -50,11 +50,11 @@
             </div>
             <div class="secondary-buttons">
                 <button class="action-btn secondary" id="edit-btn">
-                    <img src="assets/palette.svg" alt="Edit" class="icon">
+                    <img src="assets/palette.svg" alt="Edit" class="icon" data-i18n-alt="popup_edit_icon_alt">
                     <span data-i18n="popup_edit_button">Edit QR Code</span>
                 </button>
                 <button class="action-btn secondary" id="scan-btn">
-                    <img src="assets/scan.svg" alt="Scan" class="icon">
+                    <img src="assets/scan.svg" alt="Scan" class="icon" data-i18n-alt="popup_scan_icon_alt">
                     <span data-i18n="popup_scan_button">Scan QR Code</span>
                 </button>
             </div>
@@ -68,6 +68,9 @@
                     </button>
                     <button class="bottom-icon-btn" id="feedback-btn" title="Feedback" data-i18n-title="popup_feedback_button_title">
                         <img src="assets/feedback.svg" alt="Feedback" width="16" height="16">
+                    </button>
+                    <button class="bottom-icon-btn" id="sponsor-btn" title="Sponsor" data-i18n-title="popup_sponsor_button_title">
+                        <img src="assets/sponsors.svg" alt="Sponsor" width="16" height="16">
                     </button>
                 </div>
             </div>
@@ -113,12 +116,27 @@
                 <div class="edit-section">
                     <h4 data-i18n="popup_edit_modal_logo_section">Logo Settings</h4>
                     <div class="logo-inputs">
+                        <!-- 内置 Logo 选择 -->
+                        <div class="builtin-logo-section">
+                            <div class="builtin-logo-grid" id="builtin-logo-grid">
+                                <!-- Logo 选项将通过 JavaScript 动态生成 -->
+                            </div>
+                        </div>
+                        <div class="logo-divider" data-i18n="popup_edit_modal_logo_divider">OR</div>
+                        <!-- 自定义 Logo 上传 -->
                         <div class="file-input-wrapper">
                             <input type="file" id="logo-file" accept="image/*">
-                            <label for="logo-file" class="file-input-label">
+                            <label for="logo-file" class="file-input-label" id="logo-file-label">
                                 <span class="file-input-text" data-i18n="popup_edit_modal_choose_logo">Choose Logo File</span>
                                 <span class="file-input-hint" data-i18n="popup_common_no_file_selected">No file selected</span>
                             </label>
+                            <div class="file-selected-display" id="logo-file-selected" style="display: none;">
+                                <div class="file-selected-preview">
+                                    <img id="logo-file-preview" src="" alt="Logo preview" class="file-selected-image">
+                                </div>
+                                <span class="file-selected-name" id="logo-file-name"></span>
+                                <button type="button" class="file-selected-remove" id="logo-file-remove" title="Remove">×</button>
+                            </div>
                         </div>
                         <div class="logo-options" style="display: none;">
                             <label data-i18n="popup_edit_modal_opacity_label">Opacity:</label>
@@ -144,17 +162,70 @@
                 <button class="close-btn" id="close-scan-modal">×</button>
             </div>
             <div class="modal-body">
-                <div class="scan-section">
-                    <h4 data-i18n="popup_scan_modal_upload_section">Upload QR Code Image</h4>
-                    <div class="file-input-wrapper">
-                        <input type="file" id="qr-file" accept="image/*">
-                        <label for="qr-file" class="file-input-label">
-                            <span class="file-input-text" data-i18n="popup_scan_modal_choose_file">Choose QR Code Image</span>
-                            <span class="file-input-hint" data-i18n="popup_common_no_file_selected">No file selected</span>
-                        </label>
+                <!-- 扫描方式Tab导航 -->
+                <div class="scan-tabs">
+                    <button class="tab-btn active" id="scan-tab-local" data-i18n="popup_scan_modal_upload_section">Scan from Local</button>
+                    <button class="tab-btn" id="scan-tab-url" data-i18n="popup_scan_option_url_title">Scan from URL</button>
+                </div>
+
+                <!-- 上传图片页面 -->
+                <div class="scan-upload-section" id="scan-upload-section">
+                    <div class="scan-section">
+                        <div class="file-input-wrapper">
+                            <input type="file" id="qr-file" accept="image/*">
+                            <label for="qr-file" class="file-input-label">
+                                <span class="file-input-text" data-i18n="popup_scan_modal_choose_file">Choose QR Code Image</span>
+                                <span class="file-input-hint" data-i18n="popup_common_no_file_selected">No file selected</span>
+                            </label>
+                        </div>
+                    </div>
+                    <!-- 图片预览区域 -->
+                    <div class="scan-image-preview" id="scan-upload-preview" style="display: none;">
+                        <img id="upload-preview-image" src="" alt="QR Code Preview" data-i18n-alt="popup_scan_preview_alt">
+                    </div>
+                    <!-- 上传扫描结果 -->
+                    <div class="scan-result" id="scan-upload-result" style="display: none;">
+                        <h4 data-i18n="popup_scan_modal_result_title">Scan Result</h4>
+                        <div class="result-content">
+                            <div class="result-type">
+                                <span class="type-label" data-i18n="popup_scan_modal_result_type">Type:</span>
+                                <span class="type-value" id="upload-result-type">URL</span>
+                            </div>
+                            <div class="result-text">
+                                <span class="text-label" data-i18n="popup_scan_modal_result_content">Content:</span>
+                                <div class="text-value" id="upload-result-content"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                
+
+                <!-- URL输入页面 -->
+                <div class="scan-url-section" id="scan-url-section" style="display: none;">
+                    <div class="scan-section">
+                        <input type="text" class="url-input scan-url-input" id="scan-url-input" placeholder="https://example.com/qrcode.png" data-i18n-placeholder="popup_scan_url_placeholder">
+                        <button class="action-btn primary scan-url-btn" id="scan-url-btn" data-i18n="popup_scan_url_scan">Scan</button>
+                    </div>
+                    <!-- 图片预览区域 -->
+                    <div class="scan-image-preview" id="scan-url-preview" style="display: none;">
+                        <img id="url-preview-image" src="" alt="QR Code Preview" data-i18n-alt="popup_scan_preview_alt">
+                    </div>
+                    <!-- URL扫描结果 -->
+                    <div class="scan-result" id="scan-url-result" style="display: none;">
+                        <h4 data-i18n="popup_scan_modal_result_title">Scan Result</h4>
+                        <div class="result-content">
+                            <div class="result-type">
+                                <span class="type-label" data-i18n="popup_scan_modal_result_type">Type:</span>
+                                <span class="type-value" id="url-result-type">URL</span>
+                            </div>
+                            <div class="result-text">
+                                <span class="text-label" data-i18n="popup_scan_modal_result_content">Content:</span>
+                                <div class="text-value" id="url-result-content"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 扫描结果 -->
                 <div class="scan-result" id="scan-result" style="display: none;">
                     <h4 data-i18n="popup_scan_modal_result_title">Scan Result</h4>
                     <div class="result-content">

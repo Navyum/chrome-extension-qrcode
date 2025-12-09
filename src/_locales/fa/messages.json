@@ -10,6 +10,7 @@
   "contextMenuGenerateLink": { "message": "ساخت کد QR از پیوند" },
   "contextMenuGenerateImage": { "message": "ساخت کد QR از تصویر" },
   "contextMenuGeneratePage": { "message": "ساخت کد QR برای این صفحه" },
+  "contextMenuScanImage": { "message": "اسکن کد QR از تصویر" },
   "popup_title_placeholder": { "message": "عنوان" },
   "popup_url_loading": { "message": "در حال بارگیری..." },
   "popup_qr_generating": { "message": "در حال ساخت کد QR..." },
@@ -37,7 +38,7 @@
   "popup_common_cancel": { "message": "انصراف" },
   "popup_edit_modal_reset": { "message": "بازنشانی" },
   "popup_scan_modal_title": { "message": "اسکن کد QR" },
-  "popup_scan_modal_upload_section": { "message": "بارگذاری تصویر کد QR" },
+  "popup_scan_modal_upload_section": { "message": "اسکن از دستگاه محلی" },
   "popup_scan_modal_choose_file": { "message": "انتخاب تصویر کد QR" },
   "popup_scan_modal_result_title": { "message": "نتیجه اسکن" },
   "popup_scan_modal_result_type": { "message": "نوع:" },
@@ -95,6 +96,14 @@
   "time_just_now": { "message": "همین حالا" },
   "time_minutes_ago": { "message": "$1 دقیقه پیش" },
   "time_hours_ago": { "message": "$1 ساعت پیش" },
-  "time_days_ago": { "message": "$1 روز پیش" }
+  "time_days_ago": { "message": "$1 روز پیش" },
+  "popup_scan_option_url_title": { "message": "اسکن از URL" },
+  "popup_scan_url_placeholder": { "message": "https://example.com/qrcode.png" },
+  "popup_scan_url_scan": { "message": "اسکن" },
+  "popup_scan_preview_alt": { "message": "پیش‌نمایش کد QR" },
+  "popup_scan_icon_alt": { "message": "اسکن" },
+  "popup_edit_icon_alt": { "message": "ویرایش" },
+  "error_invalid_url": { "message": "URL نامعتبر است، لطفاً یک URL تصویر معتبر وارد کنید" },
+  "error_load_image_failed_cors": { "message": "بارگذاری تصویر ناموفق بود. تصویر ممکن است توسط سیاست CORS مسدود شده باشد. لطفاً به جای آن فایل تصویر را آپلود کنید." }
 }
 

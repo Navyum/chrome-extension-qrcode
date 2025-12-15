@@ -57,6 +57,10 @@
                     <img src="assets/scan.svg" alt="Scan" class="icon" data-i18n-alt="popup_scan_icon_alt">
                     <span data-i18n="popup_scan_button">Scan QR Code</span>
                 </button>
+                <button class="action-btn secondary" id="upload-drive-btn">
+                    <img src="assets/download.svg" alt="Upload" class="icon" data-i18n-alt="popup_upload_icon_alt">
+                    <span data-i18n="popup_upload_button">上传到Google Drive</span>
+                </button>
             </div>
             <div class="bottom-icons">
                 <button class="bottom-icon-btn" id="history-btn" title="History" data-i18n-title="popup_history_button_title">
@@ -291,10 +295,66 @@
         </div>
     </div>
 
+    <!-- Upload to Google Drive Modal -->
+    <div class="modal" id="upload-drive-modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 data-i18n="popup_upload_modal_title">上传文件到Google Drive</h3>
+                <div class="header-right">
+                    <div class="user-avatar-container" id="user-avatar-container" style="display: none;">
+                        <img id="user-avatar" src="" alt="User Avatar" class="user-avatar" title="点击打开PixelQR文件夹">
+                    </div>
+                    <button class="close-btn" id="close-upload-modal">×</button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="upload-section">
+                    <!-- 可见性选择 -->
+                    <div class="visibility-section" style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 500;" data-i18n="popup_upload_visibility_label">文件可见性：</label>
+                        <div class="visibility-options">
+                            <label class="visibility-option">
+                                <input type="radio" name="file-visibility" value="owner" checked>
+                                <span data-i18n="popup_upload_visibility_owner">仅所有者</span>
+                            </label>
+                            <label class="visibility-option">
+                                <input type="radio" name="file-visibility" value="anyone">
+                                <span data-i18n="popup_upload_visibility_anyone">任何有链接的人</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="file-input-wrapper">
+                        <input type="file" id="drive-upload-file" multiple>
+                        <label for="drive-upload-file" class="file-input-label" id="drive-file-label">
+                            <span class="file-input-text" data-i18n="popup_upload_choose_file">选择文件</span>
+                            <span class="file-input-hint" data-i18n="popup_common_no_file_selected">未选择文件</span>
+                        </label>
+                    </div>
+                    <div id="upload-progress" style="display: none; margin-top: 10px;">
+                        <div class="upload-progress-bar">
+                            <div class="upload-progress-fill" id="upload-progress-fill"></div>
+                        </div>
+                        <div class="upload-progress-text" id="upload-progress-text"></div>
+                    </div>
+                    <div id="upload-result" style="display: none; margin-top: 10px;">
+                        <div class="upload-success" id="upload-success-message"></div>
+                        <div class="upload-link" id="upload-link-display"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="action-btn secondary" id="cancel-upload" data-i18n="popup_common_cancel">取消</button>
+                <button class="action-btn primary" id="start-upload" data-i18n="popup_upload_start">开始上传</button>
+            </div>
+        </div>
+    </div>
+
     <script src="libs/qrcode.js"></script>
     <script src="libs/qrcode-with-logo.js"></script>
     <script src="libs/jsqr.js"></script>
     <script src="libs/jsqr-improve.js"></script>
+    <script src="utils/google-drive-api.js"></script>
     <script src="popup.js"></script>
 </body>
 </html> 

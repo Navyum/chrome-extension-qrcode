@@ -260,7 +260,7 @@ body {
 /* Header Section */
 .header {
     background: white;
-    padding: 20px;
+    padding: 15px;
     border-bottom: 1px solid #f0f0f0;
 }
 
@@ -336,7 +336,7 @@ body {
 
 /* QR Code Display Section */
 .qr-display-section {
-    padding: 30px 20px;
+    padding: 15px 20px;
     text-align: center;
 }
 
@@ -502,7 +502,7 @@ body {
     width: 90%;
     max-width: 400px;
     max-height: 80vh;
-    overflow-y: auto;
+    overflow-y: hidden;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
@@ -520,10 +520,79 @@ body {
     border-bottom: 1px solid #e9ecef;
 }
 
+.modal-header .header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
 .modal-header h3 {
     color: #333;
     font-size: 16px;
     font-weight: 600;
+    margin: 0;
+}
+
+/* 用户头像样式 */
+.user-avatar-container {
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.user-avatar-container:hover {
+    transform: scale(1.1);
+}
+
+.user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid #e9ecef;
+    object-fit: cover;
+    display: block;
+}
+
+.user-avatar:hover {
+    border-color: #6B8E23;
+}
+
+/* 可见性选择样式 */
+.visibility-section {
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    margin-bottom: 15px;
+}
+
+.visibility-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.visibility-option {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.visibility-option:hover {
+    background-color: #e9ecef;
+}
+
+.visibility-option input[type="radio"] {
+    margin-right: 8px;
+    cursor: pointer;
+}
+
+.visibility-option span {
+    font-size: 14px;
+    color: #333;
+    user-select: none;
 }
 
 .close-btn {

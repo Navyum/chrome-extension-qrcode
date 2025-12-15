@@ -10,7 +10,8 @@
     "storage",
     "downloads",
     "scripting",
-    "favicon"
+    "favicon",
+    "identity"
   ],
   "action": {
     "default_popup": "popup.html",
@@ -33,6 +34,13 @@
   "background": {
     "service_worker": "background.js"
   },
+  "oauth2": {
+    "client_id": "218937796520-mparpteknls03pef340tkouv6bn6u11m.apps.googleusercontent.com",
+    "scopes": [
+      "https://www.googleapis.com/auth/drive.file",
+      "https://www.googleapis.com/auth/userinfo.profile"
+    ]
+  },
   
   "commands": {
     "_execute_action": {
@@ -42,6 +50,7 @@
       },
       "description": "__MSG_commandGeneratePageDesc__"
     },
+    
     "generate-text-qr": {
       "suggested_key": {
         "default": "Ctrl+Shift+T",

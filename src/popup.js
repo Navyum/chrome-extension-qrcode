@@ -1,6 +1,7 @@
 // QR Code Generator Chrome Extension - Popup Script
 
 const browserApi = require('./utils/browser-api');
+const GoogleDriveAPI = require('./utils/google-drive-api');
 
 class QRCodePopup {
     constructor() {
@@ -40,6 +41,10 @@ class QRCodePopup {
             generated: [],
             scanned: []
         };
+        
+        // Google Drive API实例
+        this.googleDriveAPI = new GoogleDriveAPI();
+        this.selectedFiles = [];
         
         this.init();
     }
@@ -141,6 +146,11 @@ class QRCodePopup {
 
         document.getElementById('sponsor-btn').addEventListener('click', () => {
             this.openSponsor();
+        });
+
+        // 上传到Google Drive按钮
+        document.getElementById('upload-drive-btn').addEventListener('click', () => {
+            this.showUploadDriveModal();
         });
 
         // URL输入框事件
@@ -915,6 +925,26 @@ class QRCodePopup {
             }
         });
 
+        // 上传到Google Drive模态框事件
+        document.getElementById('close-upload-modal').addEventListener('click', () => {
+            document.getElementById('upload-drive-modal').style.display = 'none';
+            this.resetUploadModal();
+        });
+
+        document.getElementById('cancel-upload').addEventListener('click', () => {
+            document.getElementById('upload-drive-modal').style.display = 'none';
+            this.resetUploadModal();
+        });
+
+        document.getElementById('start-upload').addEventListener('click', () => {
+            this.uploadFilesToDrive();
+        });
+
+        // 文件选择事件
+        document.getElementById('drive-upload-file').addEventListener('change', (e) => {
+            this.handleFileSelect(e.target.files);
+        });
+
         // 点击模态框外部关闭
         document.querySelectorAll('.modal').forEach(modal => {
             modal.addEventListener('click', (e) => {
@@ -922,6 +952,10 @@ class QRCodePopup {
                     // 如果是扫描模态框，需要重置
                     if (modal.id === 'scan-modal') {
                         this.resetScanModal();
+                    }
+                    // 如果是上传模态框，需要重置
+                    if (modal.id === 'upload-drive-modal') {
+                        this.resetUploadModal();
                     }
                     modal.style.display = 'none';
                 }
@@ -1974,11 +2008,22 @@ class QRCodePopup {
         const extensionId = browserApi.runtime.id;
         let reviewUrl;
         
-        if (typeof browser !== 'undefined' && browser.runtime) {
+        // 检查是否是Firefox（使用browserApi而不是直接使用browser）
+        const isFirefox = typeof browserApi !== 'undefined' && 
+                         browserApi.runtime && 
+                         browserApi.runtime.getBrowserInfo;
+        
+        try {
+            // 尝试检测Firefox（Firefox有getBrowserInfo方法）
+            if (isFirefox || (typeof browser !== 'undefined' && browser.runtime)) {
             // Firefox - 使用Firefox Add-ons商店
             reviewUrl = `https://addons.mozilla.org/en-US/firefox/addon/${extensionId}/reviews/`;
         } else {
             // Chrome/Edge - 使用Chrome Web Store
+                reviewUrl = `https://chrome.google.com/webstore/detail/${extensionId}/reviews`;
+            }
+        } catch (e) {
+            // 默认使用Chrome Web Store
             reviewUrl = `https://chrome.google.com/webstore/detail/${extensionId}/reviews`;
         }
 
@@ -2035,6 +2080,348 @@ class QRCodePopup {
                 }
             }, 300);
         }, duration);
+    }
+
+    // Google Drive上传相关方法
+    async showUploadDriveModal() {
+        document.getElementById('upload-drive-modal').style.display = 'flex';
+        this.resetUploadModal();
+        
+        // 检查是否已授权，如果已授权则加载用户信息
+        try {
+            const isAuthenticated = await this.googleDriveAPI.isAuthenticated();
+            if (isAuthenticated) {
+                await this.loadUserAvatar();
+            } else {
+                // 隐藏头像
+                document.getElementById('user-avatar-container').style.display = 'none';
+            }
+        } catch (error) {
+            console.error('[Upload] 加载用户信息失败:', error);
+            document.getElementById('user-avatar-container').style.display = 'none';
+        }
+    }
+
+    resetUploadModal() {
+        this.selectedFiles = [];
+        document.getElementById('drive-upload-file').value = '';
+        document.getElementById('drive-file-label').querySelector('.file-input-hint').textContent = 
+            browserApi.i18n.getMessage('popup_common_no_file_selected');
+        document.getElementById('drive-file-label').querySelector('.file-input-hint').style.color = '#6c757d';
+        document.getElementById('upload-progress').style.display = 'none';
+        document.getElementById('upload-result').style.display = 'none';
+        document.getElementById('start-upload').disabled = false;
+        
+        // 重置可见性选择为默认值
+        const ownerRadio = document.querySelector('input[name="file-visibility"][value="owner"]');
+        if (ownerRadio) {
+            ownerRadio.checked = true;
+        }
+    }
+    
+    async loadUserAvatar() {
+        try {
+            await this.googleDriveAPI.init();
+            const userInfo = await this.googleDriveAPI.getUserInfo();
+            
+            if (userInfo && userInfo.picture) {
+                const avatarContainer = document.getElementById('user-avatar-container');
+                const avatarImg = document.getElementById('user-avatar');
+                
+                avatarImg.src = userInfo.picture;
+                avatarImg.alt = userInfo.name || 'User Avatar';
+                avatarImg.title = userInfo.name || '点击打开PixelQR文件夹';
+                avatarContainer.style.display = 'block';
+                
+                // 点击头像跳转到文件夹
+                avatarContainer.onclick = async () => {
+                    const folderLink = await this.googleDriveAPI.getFolderLink();
+                    if (folderLink) {
+                        browserApi.tabs.create({ url: folderLink });
+                    } else {
+                        this.showMessage(browserApi.i18n.getMessage('error_folder_not_found'), 'error');
+                    }
+                };
+            } else {
+                document.getElementById('user-avatar-container').style.display = 'none';
+            }
+        } catch (error) {
+            console.error('[Upload] 加载用户头像失败:', error);
+            document.getElementById('user-avatar-container').style.display = 'none';
+        }
+    }
+
+    handleFileSelect(files) {
+        if (files && files.length > 0) {
+            this.selectedFiles = Array.from(files);
+            const fileHint = document.getElementById('drive-file-label').querySelector('.file-input-hint');
+            if (this.selectedFiles.length === 1) {
+                fileHint.textContent = this.selectedFiles[0].name;
+            } else {
+                fileHint.textContent = browserApi.i18n.getMessage('popup_upload_files_selected', [this.selectedFiles.length]);
+            }
+            fileHint.style.color = '#47630f';
+        } else {
+            this.selectedFiles = [];
+            const fileHint = document.getElementById('drive-file-label').querySelector('.file-input-hint');
+            fileHint.textContent = browserApi.i18n.getMessage('popup_common_no_file_selected');
+            fileHint.style.color = '#6c757d';
+        }
+    }
+
+    async uploadFilesToDrive() {
+        console.log('[Upload] 开始上传流程');
+        console.log('[Upload] 选中文件数量:', this.selectedFiles.length);
+        console.log('[Upload] 文件列表:', this.selectedFiles.map(f => ({
+            name: f.name,
+            size: f.size,
+            type: f.type
+        })));
+
+        if (this.selectedFiles.length === 0) {
+            console.warn('[Upload] 没有选中文件');
+            this.showMessage(browserApi.i18n.getMessage('error_no_file_selected'), 'error');
+            return;
+        }
+
+        try {
+            // 初始化Google Drive API
+            console.log('[Upload] 初始化Google Drive API...');
+            await this.googleDriveAPI.init();
+            console.log('[Upload] Google Drive API初始化成功');
+
+            // 检查是否已授权，如果没有则先获取授权
+            console.log('[Upload] 检查授权状态...');
+            const isAuthenticated = await this.googleDriveAPI.isAuthenticated();
+            if (!isAuthenticated) {
+                console.log('[Upload] 未授权，开始获取授权...');
+                this.showMessage(browserApi.i18n.getMessage('info_requesting_auth'), 'info');
+                
+                // 获取访问令牌（会触发授权流程）
+                try {
+                    await this.googleDriveAPI.getAccessToken();
+                    console.log('[Upload] 授权成功');
+                    this.showMessage(browserApi.i18n.getMessage('success_auth_granted'), 'success');
+                    
+                    // 授权成功后加载用户头像
+                    await this.loadUserAvatar();
+                } catch (authError) {
+                    console.error('[Upload] 授权失败:', authError);
+                    this.showMessage(
+                        browserApi.i18n.getMessage('error_auth_failed', [authError.message || authError.toString()]), 
+                        'error'
+                    );
+                    document.getElementById('upload-progress').style.display = 'none';
+                    document.getElementById('start-upload').disabled = false;
+                    return;
+                }
+            } else {
+                console.log('[Upload] 已授权，使用现有令牌');
+                // 加载用户头像
+                await this.loadUserAvatar();
+            }
+
+            // 显示进度条
+            document.getElementById('upload-progress').style.display = 'block';
+            document.getElementById('upload-result').style.display = 'none';
+            document.getElementById('start-upload').disabled = true;
+
+            const totalFiles = this.selectedFiles.length;
+            const uploadedFiles = [];
+            let uploadedCount = 0;
+
+            // 上传每个文件
+            for (let i = 0; i < this.selectedFiles.length; i++) {
+                const file = this.selectedFiles[i];
+                
+                console.log(`[Upload] 开始上传文件 ${i + 1}/${totalFiles}:`, file.name);
+                
+                // 更新文件选择进度
+                const fileProgress = Math.round((uploadedCount / totalFiles) * 100);
+                document.getElementById('upload-progress-fill').style.width = fileProgress + '%';
+                document.getElementById('upload-progress-text').textContent = 
+                    browserApi.i18n.getMessage('popup_upload_progress', [uploadedCount + 1, totalFiles, file.name]);
+
+                try {
+                    // 获取选择的可见性
+                    const visibilityRadio = document.querySelector('input[name="file-visibility"]:checked');
+                    const visibility = visibilityRadio ? visibilityRadio.value : 'anyone';
+                    console.log(`[Upload] 文件可见性设置:`, visibility);
+                    
+                    // 上传文件，带进度回调
+                    const result = await this.googleDriveAPI.uploadFile(file, null, (progress) => {
+                        // 计算总体进度：已完成文件 + 当前文件进度
+                        const fileProgressPercent = progress / 100;
+                        const overallProgress = Math.round(
+                            (uploadedCount / totalFiles) * 100 + (fileProgressPercent / totalFiles) * 100
+                        );
+                        document.getElementById('upload-progress-fill').style.width = overallProgress + '%';
+                        
+                        // 更新进度文本
+                        if (progress < 100) {
+                            const fileSizeMB = (file.size / 1024 / 1024).toFixed(2);
+                            document.getElementById('upload-progress-text').textContent = 
+                                browserApi.i18n.getMessage('popup_upload_progress_detail', [
+                                    uploadedCount + 1, 
+                                    totalFiles, 
+                                    file.name,
+                                    progress,
+                                    fileSizeMB
+                                ]);
+                        }
+                    });
+                    
+                    console.log(`[Upload] 文件 "${file.name}" 上传成功:`, result);
+                    
+                    // 根据选择的可见性设置文件权限
+                    if (visibility !== 'owner') {
+                        await this.googleDriveAPI.setFileVisibility(result.id, visibility);
+                    }
+                    
+                    uploadedFiles.push(result);
+                    uploadedCount++;
+                } catch (error) {
+                    console.error(`[Upload] 文件 "${file.name}" 上传失败:`, error);
+                    console.error('[Upload] 错误详情:', {
+                        message: error.message,
+                        stack: error.stack
+                    });
+                    // 继续上传其他文件
+                }
+            }
+
+            // 完成上传
+            document.getElementById('upload-progress-fill').style.width = '100%';
+            document.getElementById('upload-progress-text').textContent = 
+                browserApi.i18n.getMessage('popup_upload_completed', [uploadedCount, totalFiles]);
+
+            if (uploadedFiles.length > 0) {
+                // 显示结果
+                const resultContainer = document.getElementById('upload-result');
+                const successMessage = document.getElementById('upload-success-message');
+                const linkDisplay = document.getElementById('upload-link-display');
+
+                if (uploadedFiles.length === 1) {
+                    // 单个文件：显示链接并生成二维码
+                    const file = uploadedFiles[0];
+                    successMessage.textContent = browserApi.i18n.getMessage('popup_upload_success', [file.name]);
+                    
+                    // 显示链接
+                    const linkElement = document.createElement('div');
+                    linkElement.style.marginTop = '10px';
+                    linkElement.style.wordBreak = 'break-all';
+                    linkElement.innerHTML = `
+                        <div style="margin-bottom: 5px; font-weight: bold;">${browserApi.i18n.getMessage('popup_upload_link')}:</div>
+                        <a href="${this.escapeHtmlForAttribute(file.shareLink)}" target="_blank" style="color: #007bff; text-decoration: underline;">
+                            ${this.escapeHtml(file.shareLink)}
+                        </a>
+                    `;
+                    linkDisplay.innerHTML = '';
+                    linkDisplay.appendChild(linkElement);
+                    
+                    resultContainer.style.display = 'block';
+
+                    // 生成二维码（根据可见性决定是否生成链接）
+                    const visibilityRadio = document.querySelector('input[name="file-visibility"]:checked');
+                    const visibility = visibilityRadio ? visibilityRadio.value : 'anyone';
+                    
+                    // 只有anyone可见性才生成二维码（因为只有这个有公开链接）
+                    if (visibility === 'anyone') {
+                        console.log('[Upload] 准备生成二维码，链接:', file.shareLink);
+                        setTimeout(() => {
+                            this.currentContent = file.shareLink;
+                            this.currentType = 'url';
+                            const urlElement = document.getElementById('current-url');
+                            if (urlElement) {
+                                urlElement.value = file.shareLink;
+                            }
+                            console.log('[Upload] 调用createQRCode生成二维码');
+                            this.createQRCode(file.shareLink, 'url');
+                            // 关闭上传模态框
+                            document.getElementById('upload-drive-modal').style.display = 'none';
+                            this.showMessage(browserApi.i18n.getMessage('success_qr_generated'), 'success');
+                            console.log('[Upload] 二维码生成完成');
+                        }, 500);
+                    } else {
+                        // 其他可见性不生成二维码，只显示成功消息
+                        document.getElementById('upload-drive-modal').style.display = 'none';
+                        this.showMessage(browserApi.i18n.getMessage('success_file_uploaded'), 'success');
+                    }
+                } else {
+                    // 多个文件：显示所有链接，并为第一个文件生成二维码
+                    successMessage.textContent = browserApi.i18n.getMessage('popup_upload_success_multiple', [uploadedFiles.length]);
+                    
+                    const linksElement = document.createElement('div');
+                    linksElement.style.marginTop = '10px';
+                    linksElement.innerHTML = '<div style="margin-bottom: 5px; font-weight: bold;">' + 
+                        browserApi.i18n.getMessage('popup_upload_links') + ':</div>';
+                    
+                    uploadedFiles.forEach((file, index) => {
+                        const linkDiv = document.createElement('div');
+                        linkDiv.style.marginBottom = '5px';
+                        linkDiv.style.wordBreak = 'break-all';
+                        linkDiv.innerHTML = `
+                            <span style="font-weight: bold;">${index + 1}. ${this.escapeHtml(file.name)}:</span><br>
+                            <a href="${this.escapeHtmlForAttribute(file.shareLink)}" target="_blank" style="color: #007bff; text-decoration: underline;">
+                                ${this.escapeHtml(file.shareLink)}
+                            </a>
+                        `;
+                        linksElement.appendChild(linkDiv);
+                    });
+                    
+                    linkDisplay.innerHTML = '';
+                    linkDisplay.appendChild(linksElement);
+                    resultContainer.style.display = 'block';
+
+                    // 为第一个文件生成二维码（如果可见性允许）
+                    const visibilityRadio = document.querySelector('input[name="file-visibility"]:checked');
+                    const visibility = visibilityRadio ? visibilityRadio.value : 'anyone';
+                    
+                    if (visibility === 'anyone') {
+                        const firstFile = uploadedFiles[0];
+                        console.log('[Upload] 为第一个文件生成二维码，链接:', firstFile.shareLink);
+                        setTimeout(() => {
+                            this.currentContent = firstFile.shareLink;
+                            this.currentType = 'url';
+                            const urlElement = document.getElementById('current-url');
+                            if (urlElement) {
+                                urlElement.value = firstFile.shareLink;
+                            }
+                            console.log('[Upload] 调用createQRCode生成二维码');
+                            this.createQRCode(firstFile.shareLink, 'url');
+                            // 关闭上传模态框
+                            document.getElementById('upload-drive-modal').style.display = 'none';
+                            this.showMessage(browserApi.i18n.getMessage('success_qr_generated'), 'success');
+                            console.log('[Upload] 二维码生成完成');
+                        }, 500);
+                    } else {
+                        // 其他可见性不生成二维码
+                        document.getElementById('upload-drive-modal').style.display = 'none';
+                        this.showMessage(browserApi.i18n.getMessage('success_file_uploaded'), 'success');
+                    }
+                }
+
+                document.getElementById('start-upload').disabled = false;
+            } else {
+                // 所有文件上传失败
+                this.showMessage(browserApi.i18n.getMessage('error_upload_all_failed'), 'error');
+                document.getElementById('upload-progress').style.display = 'none';
+                document.getElementById('start-upload').disabled = false;
+            }
+        } catch (error) {
+            console.error('[Upload] 上传流程失败:', error);
+            console.error('[Upload] 错误详情:', {
+                message: error.message,
+                stack: error.stack,
+                name: error.name
+            });
+            this.showMessage(
+                browserApi.i18n.getMessage('error_upload_failed', [error.message || error.toString()]), 
+                'error'
+            );
+            document.getElementById('upload-progress').style.display = 'none';
+            document.getElementById('start-upload').disabled = false;
+        }
     }
 }
 

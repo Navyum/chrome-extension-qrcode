@@ -305,10 +305,10 @@
     <div class="modal" id="upload-drive-modal" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 data-i18n="popup_upload_modal_title">使用Google Drive以生成QR</h3>
+                <h3 data-i18n="popup_upload_modal_title">Use Google Drive to Generate QR</h3>
                 <div class="header-right">
                     <div class="user-avatar-container" id="user-avatar-container" style="display: none;">
-                        <img id="user-avatar" src="" alt="User Avatar" class="user-avatar" title="管理文件">
+                        <img id="user-avatar" src="" alt="User Avatar" class="user-avatar" title="Manage Files">
                     </div>
                     <button class="close-btn" id="close-upload-modal">×</button>
                 </div>
@@ -320,11 +320,11 @@
                         <div class="auth-icon">
                             <img src="images/qr-icon/google.svg" style="width:48px;height:48px">
                         </div>
-                        <h3 class="auth-title" data-i18n="popup_upload_auth_title">授权使用Google Drive</h3>
-                        <p class="auth-desc" data-i18n="popup_upload_auth_desc">请先授权您的Google账户以使用文件上传并生成二维码</p>
+                        <h3 class="auth-title" data-i18n="popup_upload_auth_title">Authorize Google Drive</h3>
+                        <p class="auth-desc" data-i18n="popup_upload_auth_desc">Please authorize your Google account to use file upload and generate QR codes</p>
                         <button class="google-signin-btn" id="google-signin-btn">
                             <img src="images/qr-icon/google.svg" style="width:18px;height:18px" class="google-icon">
-                            <span data-i18n="popup_upload_auth_button">使用Google账户</span>
+                            <span data-i18n="popup_upload_auth_button">Sign in with Google</span>
                         </button>
                     </div>
                 </div>
@@ -334,7 +334,7 @@
                     <!-- 文件选择 -->
                     <!-- 上传方式 -->
                     <div class="upload-mode-section">
-                        <label class="upload-mode-label" data-i18n="popup_upload_mode_label">上传方式</label>
+                        <label class="upload-mode-label" data-i18n="popup_upload_mode_label">Upload Mode</label>
                         <div class="upload-mode-options">
                             <label class="upload-mode-option" data-mode="file">
                                 <input type="radio" name="upload-mode" value="file" checked>
@@ -342,7 +342,7 @@
                                     <img src="images/qr-icon/file.svg" alt="File" width="20" height="20">
                                 </div>
                                 <div class="upload-mode-content">
-                                    <span class="upload-mode-title" data-i18n="popup_upload_mode_file">文件</span>
+                                    <span class="upload-mode-title" data-i18n="popup_upload_mode_file">File</span>
                                 </div>
                             </label>
                             <label class="upload-mode-option" data-mode="folder">
@@ -351,7 +351,7 @@
                                     <img src="images/qr-icon/folder.svg" alt="Folder" width="20" height="20">
                                 </div>
                                 <div class="upload-mode-content">
-                                    <span class="upload-mode-title" data-i18n="popup_upload_mode_folder">文件夹</span>
+                                    <span class="upload-mode-title" data-i18n="popup_upload_mode_folder">Folder</span>
                                 </div>
                             </label>
                         </div>
@@ -361,14 +361,14 @@
                         <input type="file" id="drive-upload-file" multiple style="display: none;">
                         <input type="file" id="drive-upload-folder" webkitdirectory multiple style="display: none;">
                         <label for="drive-upload-file" class="file-input-label" id="drive-file-label">
-                            <span class="file-input-text" data-i18n="popup_upload_choose_file">选择文件</span>
-                            <span class="file-input-hint" data-i18n="popup_common_no_file_selected">未选择文件</span>
+                            <span class="file-input-text" data-i18n="popup_upload_choose_file">Click to select files</span>
+                            <span class="file-input-hint" data-i18n="popup_common_no_file_selected">No file selected</span>
                         </label>
                     </div>
                     
                     <!-- 可见性选择 -->
                     <div class="visibility-section">
-                        <label class="visibility-label" data-i18n="popup_upload_visibility_label">文件可见性</label>
+                        <label class="visibility-label" data-i18n="popup_upload_visibility_label">File Visibility</label>
                         <div class="visibility-options">
                             <label class="visibility-option" data-visibility="owner">
                                 <input type="radio" name="file-visibility" value="owner">
@@ -376,7 +376,7 @@
                                     <img src="images/qr-icon/user.svg" alt="User" width="20" height="20">
                                 </div>
                                 <div class="visibility-content">
-                                    <span class="visibility-title" data-i18n="popup_upload_visibility_owner">仅所有者</span>
+                                    <span class="visibility-title" data-i18n="popup_upload_visibility_owner">Owner Only</span>
                                 </div>
                             </label>
                             <label class="visibility-option" data-visibility="anyone">
@@ -385,7 +385,7 @@
                                     <img src="images/qr-icon/users.svg" alt="Users" width="20" height="20">
                                 </div>
                                 <div class="visibility-content">
-                                    <span class="visibility-title" data-i18n="popup_upload_visibility_anyone">任何有链接的人</span>
+                                    <span class="visibility-title" data-i18n="popup_upload_visibility_anyone">Anyone with the link</span>
                                 </div>
                             </label>
                         </div>
@@ -403,8 +403,8 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="action-btn secondary" id="cancel-upload" data-i18n="popup_common_cancel">取消</button>
-                <button class="action-btn primary" id="start-upload" data-i18n="popup_upload_start" style="display: none;">开始上传</button>
+                <button class="action-btn secondary" id="cancel-upload" data-i18n="popup_common_cancel">Cancel</button>
+                <button class="action-btn primary" id="start-upload" data-i18n="popup_upload_start" style="display: none;">Start Generating</button>
             </div>
         </div>
     </div>
@@ -413,7 +413,7 @@
     <div class="modal" id="user-info-modal" style="display: none;">
         <div class="modal-content user-info-modal-content">
             <div class="modal-header">
-                <h3 data-i18n="popup_user_info_title">账户信息</h3>
+                <h3 data-i18n="popup_user_info_title">Account Info</h3>
                 <button class="close-btn" id="close-user-info-modal">×</button>
             </div>
             <div class="modal-body">
@@ -426,14 +426,14 @@
                     <div class="user-info-actions">
                         <button class="action-btn primary" id="open-drive-folder-btn">
                             <img src="images/qr-icon/folder.svg" alt="Folder" width="16" height="16" style="margin-right: 6px;">
-                            <span data-i18n="popup_user_info_open_folder">管理文件</span>
+                            <span data-i18n="popup_user_info_open_folder">Manage Files</span>
                         </button>
                         <button class="action-btn secondary" id="logout-drive-btn">
                             <img src="images/qr-icon/logout.svg" alt="Logout" width="16" height="16" style="margin-right: 6px;">
-                            <span data-i18n="popup_user_info_logout">退出登录</span>
+                            <span data-i18n="popup_user_info_logout">Sign Out</span>
                         </button>
                         <div class="user-info-revoke-link">
-                            <a href="#" id="revoke-google-auth-link" data-i18n="popup_user_info_revoke_auth">撤销 Google 授权</a>
+                            <a href="#" id="revoke-google-auth-link" data-i18n="popup_user_info_revoke_auth">Revoke Google Authorization</a>
                         </div>
                     </div>
                 </div>

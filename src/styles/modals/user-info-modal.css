@@ -92,7 +92,23 @@
 /* 深色模式支持 */
 @media (prefers-color-scheme: dark) {
     .user-info-avatar {
-        border-color: #3c4043;
+        border-color: #8ab4f8;
+        animation: avatarBreathingLargeDark 2s ease-in-out infinite;
+    }
+
+    @keyframes avatarBreathingLargeDark {
+        0%, 100% {
+            box-shadow: 
+                0 0 0 0 rgba(138, 180, 248, 0.4),
+                0 0 0 0 rgba(138, 180, 248, 0.2);
+            border-color: #8ab4f8;
+        }
+        50% {
+            box-shadow: 
+                0 0 0 6px rgba(138, 180, 248, 0),
+                0 0 0 10px rgba(138, 180, 248, 0);
+            border-color: #9bc5fa;
+        }
     }
 
     .user-info-name {
@@ -104,11 +120,11 @@
     }
 
     .user-info-revoke-link a {
-        color: #9aa0a6;
+        color: #8ab4f8;
     }
 
     .user-info-revoke-link a:hover {
-        color: #e8eaed;
+        color: #aecbfa;
     }
 
     /* 深色模式下退出登录按钮的图标适配 */

@@ -69,7 +69,6 @@ class UserInfoModal extends BaseModal {
                 await this.googleDriveAPI.init();
                 userInfo = await this.googleDriveAPI.getUserInfo();
             } catch (error) {
-                console.error('[User Info] 获取用户信息失败:', error);
                 if (this.showMessage) {
                     this.showMessage(
                         browserApi.i18n.getMessage('error_drive_init_failed', [error.message || error.toString()]), 
@@ -94,7 +93,6 @@ class UserInfoModal extends BaseModal {
      */
     async handleOpenDriveFolder() {
         if (!this.googleDriveAPI) {
-            console.error('[User Info] GoogleDriveAPI未初始化');
             return;
         }
         
@@ -109,7 +107,6 @@ class UserInfoModal extends BaseModal {
                 }
             }
         } catch (error) {
-            console.error('[User Info] 打开文件夹失败:', error);
             if (this.showMessage) {
                 this.showMessage(browserApi.i18n.getMessage('error_folder_not_found'), 'error');
             }
@@ -121,7 +118,6 @@ class UserInfoModal extends BaseModal {
      */
     async handleLogoutDrive() {
         if (!this.googleDriveAPI) {
-            console.error('[User Info] GoogleDriveAPI未初始化');
             return;
         }
         
@@ -140,7 +136,6 @@ class UserInfoModal extends BaseModal {
                 this.showMessage(browserApi.i18n.getMessage('success_logout'), 'success');
             }
         } catch (error) {
-            console.error('[User Info] 登出失败:', error);
             if (this.showMessage) {
                 this.showMessage(browserApi.i18n.getMessage('error_logout_failed'), 'error');
             }
@@ -152,7 +147,6 @@ class UserInfoModal extends BaseModal {
      */
     async handleRevokeGoogleAuth() {
         if (!this.googleDriveAPI) {
-            console.error('[User Info] GoogleDriveAPI未初始化');
             return;
         }
         
@@ -160,7 +154,7 @@ class UserInfoModal extends BaseModal {
             // 先清除本地授权并尝试移除权限
             await this.googleDriveAPI.logout(true);
         } catch (err) {
-            console.error('[User Info] 清除本地授权失败:', err);
+            // Ignore local auth clear errors
         }
         
         // 跳转到 Google 授权管理页面

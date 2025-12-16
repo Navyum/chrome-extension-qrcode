@@ -52,35 +52,18 @@
 }
 
 .history-list {
-    display: flex;
+    display: none;
     flex-direction: column;
     gap: 8px;
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    overflow-y: auto;
-    visibility: hidden;
-    opacity: 0;
+    padding: 0;
     /* 使用 transition 而不是 animation，避免与子元素动画冲突 */
     transition: opacity 0.2s ease, visibility 0.2s ease;
-    /* 确保子元素在父容器隐藏时也不显示 */
-    pointer-events: none;
-}
-
-#generate-history {
-    position: relative;
-    min-height: 100%;
 }
 
 .history-list.active {
-    visibility: visible;
+    display: flex;
     opacity: 1;
-    z-index: 1;
-    position: relative;
-    /* 恢复指针事件 */
-    pointer-events: auto;
+    visibility: visible;
 }
 
 .empty-history {

@@ -228,7 +228,7 @@ class QRCodePopup {
                 }
             }
         } catch (error) {
-            console.error('[Init] 检查待处理授权失败:', error);
+            // Ignore pending auth check errors
         }
     }
 
@@ -1410,7 +1410,6 @@ class QRCodePopup {
             await this.googleDriveAPI.init();
                 isAuthenticated = await this.googleDriveAPI.isAuthenticated();
         } catch (error) {
-                console.error('[Upload] 检查登录状态失败:', error);
                 isAuthenticated = false;
             }
         }

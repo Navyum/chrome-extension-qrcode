@@ -473,7 +473,6 @@ class ScanModal extends BaseModal {
     async decodeQRCode(imageData) {
         try {
             if (!window.jsQRImproved) {
-                console.error('jsQRImproved not available');
                 return null;
             }
             
@@ -491,7 +490,6 @@ class ScanModal extends BaseModal {
             
             return null;
         } catch (error) {
-            console.error('Decode QR code error:', error);
             return null;
         }
     }

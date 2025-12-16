@@ -1,36 +1,68 @@
-PixelQR: Generador y Escáner de Códigos QR - Privacidad Primero y Offline
+PixelQR: Generador y Escáner de Códigos QR - Privacidad Primero y Disponible Offline
 
-Experimenta la forma más rápida y segura de generar y escanear códigos QR directamente en Chrome. Diseñada con un enfoque en la privacidad y la facilidad de uso, esta extensión funciona completamente offline utilizando la última tecnología Manifest V3 de Chrome.
+Experimenta la forma más rápida y segura de generar y escanear códigos QR directamente en Chrome. Diseñada con un enfoque en la privacidad y la facilidad de uso, esta extensión utiliza la última tecnología Manifest V3 de Chrome, con funciones principales que funcionan completamente offline.
 
-✨ Características Clave
+✨ Últimas Funciones
 
-🚀 Generación Instantánea
-• Creación con un clic: Genera instantáneamente un código QR para tu pestaña actual.
-• Menú contextual inteligente: Haz clic derecho en cualquier texto, enlace o imagen para convertirlo en un código QR inmediatamente.
-• Contenido personalizado: Crea códigos para texto libre, URLs, credenciales Wi-Fi, correos electrónicos, vCards y más.
-• Vista previa en vivo: Mira cómo tu código QR se actualiza en tiempo real mientras escribes.
+☁️ Crear Códigos QR para Archivos/Carpetas Locales para Compartir Fácilmente
+• Subida de archivos: Sube archivos o carpetas a Google Drive y genera automáticamente códigos QR para enlaces de compartir
+• Control de visibilidad: Elige la visibilidad del archivo (solo propietario o cualquiera con el enlace)
+• Procesamiento por lotes: Soporte para subir múltiples archivos o carpetas completas simultáneamente
+• Generación automática de QR: Genera automáticamente códigos QR para enlaces de compartir después de la subida para compartir rápidamente
+
+🎨 Soporte de Logo Integrado
+• Iconos preestablecidos: 12 logos integrados de plataformas populares (Instagram, YouTube, WeChat, Telegram, etc.)
+• Embellecimiento rápido: Selección con un clic de logos integrados para embellecer rápidamente los códigos QR
+• Subida personalizada: Sigue soportando la subida de imágenes de logo personalizadas
+• Control de transparencia: Ajusta la transparencia del logo para asegurar la escaneabilidad del código QR
+
+🔍 Función de Escaneo por URL
+• Escaneo remoto: Soporte para escanear códigos QR remotamente ingresando URLs de imágenes
+• Escaneo local: Sigue soportando la subida de archivos de imagen locales para escanear
+• Reconocimiento inteligente: Identifica automáticamente los tipos de contenido del código QR y muestra resultados
+
+🌙 Modo Oscuro del Sistema con Adaptación Automática
+• Cambio inteligente: Detecta automáticamente la configuración del tema del sistema para una adaptación fluida al modo oscuro/claro
+• Experiencia amigable para los ojos: Proporciona una experiencia visual cómoda en modo oscuro, reduciendo la fatiga visual
+• Adaptación perfecta: Los elementos de la interfaz se ajustan automáticamente para asegurar claridad y legibilidad en cualquier modo
+
+🚀 Funciones Principales
+
+⚡ Generación Instantánea
+• Creación con un clic: Genera instantáneamente un código QR para tu pestaña actual
+• Menú contextual inteligente: Haz clic derecho en cualquier texto, enlace o imagen para convertirlo en un código QR inmediatamente
+• Contenido personalizado: Crea códigos para texto libre, URLs, credenciales Wi-Fi, correos electrónicos, vCards y más
+• Atajos de teclado: Ctrl+Shift+Q para generar rápidamente el código QR de la página actual, Ctrl+Shift+T para texto seleccionado
 
 📷 Escaneo Avanzado
-• Escaneo en pantalla: Detecta y lee códigos QR de cualquier página web.
-• Soporte de cámara: Escanea códigos físicos usando tu cámara web.
-• Subida de archivos: Decodifica códigos QR de imágenes locales.
+• Subida de archivo local: Decodifica códigos QR desde archivos de imagen locales
+• Escaneo por URL: Escanea códigos QR remotamente vía URLs de imágenes
+• Reconocimiento inteligente: Identifica automáticamente los tipos de contenido del código QR (URL, texto, etc.)
+• Acciones de resultado: Soporte para copiar resultados de escaneo o abrir enlaces directamente
 
 🎨 Personalización Profesional
-• Control total de diseño: Ajusta colores, tamaños y márgenes para que coincidan con tu marca.
-• Integración de logo: Sube tu propio logo o icono al centro del código QR.
-• Exportaciones de alta calidad: Descarga en formatos PNG, JPG o vectorial SVG (hasta 1024px).
+• Control total de diseño: Ajusta colores, tamaños y márgenes para que coincidan con el estilo de tu marca
+• Integración de logo: Soporta logos integrados o sube logos personalizados al centro del código QR
+• Control de transparencia: Ajusta la transparencia del logo (0-100%) para asegurar la escaneabilidad del código QR
+• Exportación de alta calidad: Soporte para descargar en formato PNG (hasta 1024px)
+
+📚 Historial
+• Historial de generación: Registra automáticamente todos los códigos QR generados para acceso rápido
+• Historial de escaneo: Registra todo el contenido de códigos QR escaneados
+• Acciones rápidas: Regenera o copia rápidamente códigos QR desde el historial
 
 🔒 Privacidad y Seguridad
-• 100% Offline: Todo el procesamiento ocurre localmente en tu computadora. Tus datos nunca salen de tu dispositivo.
-• Sin rastreo: No recopilamos datos de usuarios, historial de navegación ni análisis.
-• Permisos mínimos: Construido sobre la arquitectura segura Manifest V3, solicitando solo los permisos estrictamente necesarios.
-• Seguro y limpio: Sin anuncios, sin scripts ocultos y sin procesos en segundo plano innecesarios.
+• Offline primero: Las funciones principales de generación y escaneo de códigos QR se realizan completamente localmente, sin conexión a internet requerida
+• Privacidad de datos: Las funciones de Google Drive solo se conectan a los servicios de Google cuando los usuarios las usan activamente
+• Sin rastreo: No recopilamos datos de usuarios, historial de navegación ni análisis
+• Permisos mínimos: Construido sobre la arquitectura segura Manifest V3, solicitando solo los permisos estrictamente necesarios
+• Seguro y limpio: Sin anuncios, sin scripts ocultos y sin procesos en segundo plano innecesarios
 
 💡 ¿Por qué elegirnos?
-• Completamente Gratis: Sin muros de pago ni registros requeridos.
-• Fácil de usar: Interfaz moderna y limpia con soporte para Modo Oscuro.
-• Aumento de productividad: Soporta atajos de teclado (Ctrl+Shift+Q) para acceso rápido.
-• Soporte global: Totalmente localizado en 12 idiomas.
+• Completamente Gratis: Sin muros de pago ni registros requeridos
+• Fácil de usar: Diseño de interfaz moderna y limpia con soporte perfecto para Modo Oscuro
+• Aumento de productividad: Soporta atajos de teclado para acceso rápido, menú contextual para generación rápida
+• Soporte global: Totalmente localizado en 12 idiomas
+• Soporte multi-navegador: Soporta navegadores Chrome, Firefox, Edge
 
-Perfecto para compartir enlaces rápidamente al móvil, guardar información de texto o crear códigos QR profesionales para impresión. ¡Instala ahora para la experiencia de códigos QR más confiable en Chrome!
-
+Ya sea para compartir enlaces rápidamente al móvil, guardar información de texto, crear códigos QR profesionales para impresión o compartir archivos vía Google Drive, PixelQR satisface todas tus necesidades. ¡Instala ahora para la experiencia de códigos QR más confiable en Chrome!

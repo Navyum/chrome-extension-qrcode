@@ -181,6 +181,20 @@ input[type="color"]::-webkit-color-swatch {
     width: 100%;
 }
 
+.logo-inputs .file-input-wrapper input[type="file"] {
+    position: absolute;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    z-index: 2;
+}
+
+.logo-inputs .file-input-wrapper input[type="file"]:focus + .file-input-label {
+    border-color: #47630f;
+    box-shadow: 0 0 0 2px rgba(71, 99, 15, 0.2);
+}
+
 .logo-inputs .file-input-label {
     display: flex;
     flex-direction: column;
@@ -414,6 +428,11 @@ input[type="color"]::-webkit-color-swatch {
 
     .logo-inputs .file-input-hint {
         color: #9aa0a6;
+    }
+
+    .logo-inputs .file-input-wrapper input[type="file"]:focus + .file-input-label {
+        border-color: #8ab4f8;
+        box-shadow: 0 0 0 2px rgba(138, 180, 248, 0.3);
     }
 
     .logo-inputs .file-selected-display {

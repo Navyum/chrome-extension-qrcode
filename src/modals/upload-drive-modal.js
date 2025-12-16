@@ -153,7 +153,6 @@ class UploadDriveModal extends BaseModal {
                 this.showAuthSection();
             }
         } catch (error) {
-            console.error('[Upload] 初始化失败:', error);
             this.showAuthSection();
         }
         
@@ -389,7 +388,6 @@ class UploadDriveModal extends BaseModal {
      */
     async handleGoogleSignIn() {
         if (!this.googleDriveAPI) {
-            console.error('[Upload] GoogleDriveAPI未初始化');
             return;
         }
         
@@ -417,8 +415,6 @@ class UploadDriveModal extends BaseModal {
                 this.showMessage(browserApi.i18n.getMessage('success_auth_granted'), 'success');
             }
         } catch (authError) {
-            console.error('[Upload] 授权失败:', authError);
-            
             await browserApi.storage.local.remove('pendingAuthAction');
             
             if (this.showMessage) {
@@ -466,7 +462,6 @@ class UploadDriveModal extends BaseModal {
                 this.updateUploadButtonAuthState(false);
             }
         } catch (error) {
-            console.error('[Upload] 加载用户头像失败:', error);
             const avatarContainer = this.querySelector('#user-avatar-container');
             if (avatarContainer) avatarContainer.style.display = 'none';
             this.updateUploadButtonAuthState(false);
@@ -650,7 +645,7 @@ class UploadDriveModal extends BaseModal {
                         uploadedFiles.push(result);
                         uploadedCount++;
                     } catch (error) {
-                        console.error(`[Upload] 文件 "${file.name}" 上传失败:`, error);
+                        // Ignore individual file upload errors
                     }
                 }
             } else {
@@ -683,7 +678,6 @@ class UploadDriveModal extends BaseModal {
                             await this.googleDriveAPI.setFileVisibility(folderResult.id, visibility);
                         }
                     } catch (error) {
-                        console.error('[Upload] 文件夹上传失败:', error);
                         throw error;
                     }
                 }
@@ -700,8 +694,6 @@ class UploadDriveModal extends BaseModal {
             this.emit('uploadComplete', { files: uploadedFiles, folder: dateFolderInfo });
             
         } catch (error) {
-            console.error('[Upload] 上传失败:', error);
-            
             if (this.showMessage) {
                 this.showMessage(
                     browserApi.i18n.getMessage('error_upload_failed', [error.message || error.toString()]) || '上传失败',

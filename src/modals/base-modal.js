@@ -23,7 +23,6 @@ class BaseModal {
         this.eventListeners = {};
         
         if (!this.modalElement) {
-            console.error(`Modal element with id "${modalId}" not found`);
             return;
         }
         
@@ -199,7 +198,7 @@ class BaseModal {
             try {
                 callback(data);
             } catch (error) {
-                console.error(`Error in event listener for "${event}":`, error);
+                // Ignore event listener errors
             }
         });
     }

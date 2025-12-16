@@ -1,35 +1,68 @@
-PixelQR: QR Code Generator & Scanner - Privacy-First & Offline
+PixelQR: QR Code Generator & Scanner - Privacy-First & Offline Available
 
-Experience the fastest, most secure way to generate and scan QR codes directly in Chrome. Designed with a focus on privacy and ease of use, this extension runs completely offline using the latest Chrome Manifest V3 technology.
+Experience the fastest, most secure way to generate and scan QR codes directly in Chrome. Designed with a focus on privacy and ease of use, this extension uses the latest Chrome Manifest V3 technology, with core features running completely offline.
 
-✨ Key Features
+✨ Latest Features
 
-🚀 Instant Generation
-• One-Click Creation: Instantly generate a QR code for your current tab.
-• Smart Context Menu: Right-click any text, link, or image to convert it to a QR code immediately.
-• Custom Content: Create codes for free text, URLs, Wi-Fi credentials, emails, vCards, and more.
-• Live Preview: See your QR code update in real-time as you type.
+☁️ Create QR Codes for Local Files/Folders for Easy Sharing
+• File Upload: Upload files or folders to Google Drive and automatically generate QR codes for sharing links
+• Visibility Control: Choose file visibility (owner only or anyone with the link)
+• Batch Processing: Support for uploading multiple files or entire folders simultaneously
+• Auto QR Generation: Automatically generate QR codes for sharing links after upload for quick sharing
+
+🎨 Built-in Logo Support
+• Preset Icons: 12 popular platform built-in logos (Instagram, YouTube, WeChat, Telegram, etc.)
+• Quick Beautification: One-click selection of built-in logos to quickly beautify QR codes
+• Custom Upload: Still supports uploading custom logo images
+• Transparency Control: Adjust logo transparency to ensure QR code scannability
+
+🔍 URL Scanning Feature
+• Remote Scanning: Support scanning QR codes remotely by entering image URLs
+• Local Scanning: Continue to support uploading local image files for scanning
+• Smart Recognition: Automatically identify QR code content types and display results
+
+🌙 Auto-Adaptive System Dark Mode
+• Smart Switching: Automatically detect system theme settings for seamless dark/light mode adaptation
+• Eye-Friendly Experience: Provides comfortable visual experience in dark mode, reducing eye strain
+• Perfect Adaptation: Interface elements automatically adjust to ensure clarity and readability in any mode
+
+🚀 Core Features
+
+⚡ Instant Generation
+• One-Click Creation: Instantly generate a QR code for your current tab
+• Smart Context Menu: Right-click any text, link, or image to convert it to a QR code immediately
+• Custom Content: Create codes for free text, URLs, Wi-Fi credentials, emails, vCards, and more
+• Keyboard Shortcuts: Ctrl+Shift+Q to quickly generate QR code for current page, Ctrl+Shift+T for selected text
 
 📷 Advanced Scanning
-• On-Screen Scanning: Detect and read QR codes from any webpage.
-• Camera Support: Scan physical codes using your webcam.
-• File Upload: Decode QR codes from local images.
+• Local File Upload: Decode QR codes from local image files
+• URL Scanning: Scan QR codes remotely via image URLs
+• Smart Recognition: Automatically identify QR code content types (URL, text, etc.)
+• Result Actions: Support copying scan results or directly opening links
 
 🎨 Professional Customization
-• Full Design Control: Adjust colors, sizes, and margins to match your brand.
-• Logo Integration: Upload your own logo or icon to the center of the QR code.
-• High-Quality Exports: Download in PNG, JPG, or SVG vector formats (up to 1024px).
+• Full Design Control: Adjust colors, sizes, and margins to match your brand style
+• Logo Integration: Support built-in logos or upload custom logos to QR code center
+• Transparency Control: Adjust logo transparency (0-100%) to ensure QR code scannability
+• High-Quality Export: Support downloading in PNG format (up to 1024px)
 
-🔒 Privacy & Security (Featured Ready)
-• 100% Offline: All processing happens locally on your computer. Your data never leaves your device.
-• No Tracking: We do not collect user data, browsing history, or analytics.
-• Minimal Permissions: Built on the secure Manifest V3 architecture, requesting only strictly necessary permissions.
-• Safe & Clean: No ads, no hidden scripts, and no unnecessary background processes.
+📚 History
+• Generation History: Automatically record all generated QR codes for quick access
+• Scan History: Record all scanned QR code content
+• Quick Actions: Quickly regenerate or copy QR codes from history
+
+🔒 Privacy & Security
+• Offline-First: Core QR code generation and scanning features are completely done locally, no network connection required
+• Data Privacy: Google Drive features only connect to Google services when users actively use them
+• No Tracking: We do not collect any user data, browsing history, or analytics
+• Minimal Permissions: Built on secure Manifest V3 architecture, requesting only strictly necessary permissions
+• Safe & Clean: No ads, no hidden scripts, no unnecessary background processes
 
 💡 Why Choose Us?
-• Completely Free: No premium walls or sign-ups required.
-• User-Friendly: Modern, clean interface with Dark Mode support.
-• Productivity Boost: Supports keyboard shortcuts (Ctrl+Shift+Q) for rapid access.
-• Global Support: Fully localized in 12 languages.
+• Completely Free: No paywalls, no registration required
+• User-Friendly: Modern, clean interface design with perfect Dark Mode support
+• Productivity Boost: Support keyboard shortcuts for quick access, right-click menu for quick generation
+• Global Support: Fully localized in 12 languages
+• Multi-Browser Support: Support Chrome, Firefox, Edge browsers
 
-Perfect for quickly sharing links to mobile, saving text info, or creating professional QR codes for print. Install now for the most reliable QR code experience on Chrome!
+Whether you need to quickly share links to mobile, save text information, create professional QR codes for printing, or share files via Google Drive, PixelQR meets all your needs. Install now for the most reliable QR code experience on Chrome!

@@ -81,7 +81,7 @@ class GoogleDriveAPI {
      * @param {...any} args - 要输出的参数
      */
     _error(...args) {
-        console.error('[Drive API Error]', ...args);
+        // Error logging disabled
     }
     
     /**

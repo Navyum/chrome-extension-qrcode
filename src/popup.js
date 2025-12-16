@@ -44,7 +44,9 @@ class QRCodePopup {
         
         // Google Drive API实例
         this.googleDriveAPI = new GoogleDriveAPI();
-        this.selectedFiles = [];
+        this.selectedFiles = []; // 选中的文件列表
+        this.selectedFolders = []; // 选中的文件夹列表，每个元素包含 {name, files}
+        this.uploadMode = 'file'; // 上传模式：'file' 或 'folder'
         this.defaultVisibility = 'anyone'; // 默认可见性
         
         this.init();
@@ -57,6 +59,12 @@ class QRCodePopup {
         this.loadHistory();
         this.setupModalEvents();
         
+        // 检查是否有待处理的授权操作（授权过程中popup关闭的情况）
+        await this.checkPendingAuth();
+        
+        // 初始化时检查登录状态并更新上传按钮样式
+        await this.updateUploadButtonAuthState();
+        
         // 检查是否有待扫描的图片URL（来自右键菜单）
         const hasPendingScan = await this.checkPendingScanUrl();
         
@@ -67,6 +75,44 @@ class QRCodePopup {
         
         // 聚焦到URL输入框的末尾
         this.focusUrlInput();
+    }
+    
+    /**
+     * 检查是否有待处理的授权操作
+     * 如果授权过程中popup关闭，重新打开时需要恢复状态
+     */
+    async checkPendingAuth() {
+        try {
+            const result = await browserApi.storage.local.get(['pendingAuthAction', 'pendingAuthTimestamp']);
+            if (result.pendingAuthAction && result.pendingAuthTimestamp) {
+                const timeDiff = Date.now() - result.pendingAuthTimestamp;
+                // 如果超过5分钟，清除待处理状态（可能是旧的残留数据）
+                if (timeDiff > 5 * 60 * 1000) {
+                    await browserApi.storage.local.remove('pendingAuthAction');
+                    return;
+                }
+                
+                // 检查是否已授权
+                const isAuthenticated = await this.googleDriveAPI.isAuthenticated();
+                if (isAuthenticated) {
+                    // 授权成功，清除待处理状态
+                    await browserApi.storage.local.remove('pendingAuthAction');
+                    
+                    // 根据操作类型恢复界面
+                    if (result.pendingAuthAction === 'signin') {
+                        // 如果是登录操作，显示上传界面
+                        this.showUploadSection();
+                        this.showMessage(browserApi.i18n.getMessage('success_auth_granted'), 'success');
+                    } else if (result.pendingAuthAction === 'upload') {
+                        // 如果是上传操作，显示上传界面并提示可以继续上传
+                        this.showUploadSection();
+                        this.showMessage(browserApi.i18n.getMessage('success_auth_granted'), 'success');
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('[Init] 检查待处理授权失败:', error);
+        }
     }
 
     initI18n() {
@@ -367,10 +413,7 @@ class QRCodePopup {
     }
 
     getDefaultIconSvg() {
-        return `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M18 10H16.74C16.3659 7.49025 14.2356 5.5 11.64 5.5C9.17347 5.5 7.12647 7.22729 6.5 9.5C4.5 9.5 3 11 3 13C3 15 4.5 16.5 6.5 16.5H18C19.6569 16.5 21 15.1569 21 13.5C21 11.8431 19.6569 10.5 18 10Z" fill="#87CEEB"/>
-                    <path d="M20 12C20 13.1046 19.1046 14 18 14C16.8954 14 16 13.1046 16 12C16 10.8954 16.8954 10 18 10C19.1046 10 20 10.8954 20 12Z" fill="#4682B4"/>
-                </svg>`;
+        return `<img src="images/qr-icon/cloud.svg" alt="Cloud" width="24" height="24">`;
     }
 
     async createQRCode(content, type) {
@@ -787,15 +830,15 @@ class QRCodePopup {
         document.getElementById('generate-tab').addEventListener('click', () => {
             document.getElementById('generate-tab').classList.add('active');
             document.getElementById('scan-tab').classList.remove('active');
-            document.getElementById('generate-history').style.display = 'block';
-            document.getElementById('scan-history').style.display = 'none';
+            document.getElementById('generate-history').classList.add('active');
+            document.getElementById('scan-history').classList.remove('active');
         });
 
         document.getElementById('scan-tab').addEventListener('click', () => {
             document.getElementById('scan-tab').classList.add('active');
             document.getElementById('generate-tab').classList.remove('active');
-            document.getElementById('scan-history').style.display = 'block';
-            document.getElementById('generate-history').style.display = 'none';
+            document.getElementById('scan-history').classList.add('active');
+            document.getElementById('generate-history').classList.remove('active');
         });
 
         // 清除历史记录 - 打开确认模态框
@@ -826,7 +869,8 @@ class QRCodePopup {
         // 历史记录copy按钮事件委托
         document.addEventListener('click', (e) => {
             if (e.target.classList.contains('copy-btn')) {
-                const content = e.target.getAttribute('data-content');
+                // 使用 dataset.content 自动解码 HTML 实体，而不是 getAttribute
+                const content = e.target.dataset.content;
                 if (content) {
                     this.copyHistoryContent(content);
                 } else {
@@ -954,9 +998,44 @@ class QRCodePopup {
             this.uploadFilesToDrive();
         });
 
+        // 上传模式选择事件
+        document.querySelectorAll('input[name="upload-mode"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                this.uploadMode = e.target.value;
+                this.updateUploadMode();
+                this.saveSettings();
+            });
+        });
+
+        // 统一的文件/文件夹选择入口
+        const fileInput = document.getElementById('drive-upload-file');
+        const folderInput = document.getElementById('drive-upload-folder');
+        const fileLabel = document.getElementById('drive-file-label');
+        
+        // 点击标签时根据模式触发对应的选择器
+        fileLabel.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (this.uploadMode === 'file') {
+                fileInput.click();
+            } else {
+                folderInput.click();
+            }
+        });
+
         // 文件选择事件
-        document.getElementById('drive-upload-file').addEventListener('change', (e) => {
-            this.handleFileSelect(e.target.files);
+        fileInput.addEventListener('change', (e) => {
+            if (this.uploadMode === 'file') {
+                this.handleFileSelect(e.target.files, 'file');
+            }
+            e.target.value = ''; // 重置，允许重复选择
+        });
+        
+        // 文件夹选择事件
+        folderInput.addEventListener('change', (e) => {
+            if (this.uploadMode === 'folder') {
+                this.handleFileSelect(e.target.files, 'folder');
+            }
+            e.target.value = ''; // 重置，允许重复选择
         });
 
         // 可见性选择事件
@@ -966,6 +1045,31 @@ class QRCodePopup {
                 this.updateVisibilityOptions(e.target.value);
                 this.saveSettings(); // 保存可见性选择
             });
+        });
+
+        // 用户信息模态框事件
+        document.getElementById('close-user-info-modal').addEventListener('click', () => {
+            this.hideUserInfoModal();
+        });
+
+        document.getElementById('open-drive-folder-btn').addEventListener('click', () => {
+            this.handleOpenDriveFolder();
+        });
+
+        document.getElementById('logout-drive-btn').addEventListener('click', () => {
+            this.handleLogoutDrive();
+        });
+
+        document.getElementById('revoke-google-auth-link').addEventListener('click', (e) => {
+            e.preventDefault();
+            this.handleRevokeGoogleAuth();
+        });
+
+        // 点击模态框外部关闭
+        document.getElementById('user-info-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'user-info-modal') {
+                this.hideUserInfoModal();
+            }
         });
 
         // 点击模态框外部关闭
@@ -1578,19 +1682,32 @@ class QRCodePopup {
     }
 
     async loadSettings() {
-        const result = await browserApi.storage.local.get(['qrOptions', 'defaultVisibility']);
+        const result = await browserApi.storage.local.get(['qrOptions', 'defaultVisibility', 'uploadMode']);
         if (result.qrOptions) {
             this.qrOptions = { ...this.qrOptions, ...result.qrOptions };
         }
         if (result.defaultVisibility) {
             this.defaultVisibility = result.defaultVisibility;
         }
+        if (result.uploadMode) {
+            this.uploadMode = result.uploadMode;
+        }
+        
+        // 更新UI（延迟执行，确保DOM已加载）
+        setTimeout(() => {
+            const radio = document.querySelector(`input[name="upload-mode"][value="${this.uploadMode}"]`);
+            if (radio) {
+                radio.checked = true;
+            }
+            this.updateUploadMode();
+        }, 0);
     }
 
     async saveSettings() {
         await browserApi.storage.local.set({ 
             qrOptions: this.qrOptions,
-            defaultVisibility: this.defaultVisibility
+            defaultVisibility: this.defaultVisibility,
+            uploadMode: this.uploadMode
         });
     }
 
@@ -2177,21 +2294,31 @@ class QRCodePopup {
     }
 
     copyHistoryContent(content) {
-        // 检查navigator.clipboard是否可用
-        if (!navigator.clipboard) {
-            this.showMessage(browserApi.i18n.getMessage('error_clipboard_not_supported'), 'error');
+        // 检查内容是否有效（包括空字符串）
+        if (content === null || content === undefined || (typeof content === 'string' && content.trim() === '')) {
+            const errorMsg = browserApi.i18n.getMessage('error_no_content_to_copy') || '没有可复制的内容';
+            this.showMessage(errorMsg, 'error');
             return;
         }
         
-        // 检查内容是否有效
-        if (!content || typeof content !== 'string') {
-            this.showMessage(browserApi.i18n.getMessage('error_invalid_copy_content'), 'error');
+        // 确保内容是字符串类型
+        if (typeof content !== 'string') {
+            const errorMsg = browserApi.i18n.getMessage('error_invalid_copy_content') || '无法复制该内容';
+            this.showMessage(errorMsg, 'error');
+            return;
+        }
+        
+        // 检查navigator.clipboard是否可用
+        if (!navigator.clipboard) {
+            const errorMsg = browserApi.i18n.getMessage('error_clipboard_not_supported') || '剪贴板不支持';
+            this.showMessage(errorMsg, 'error');
             return;
         }
         
         navigator.clipboard.writeText(content)
             .then(() => {
-                this.showMessage(browserApi.i18n.getMessage('success_text_copied'), 'success');
+                const successMsg = browserApi.i18n.getMessage('success_text_copied') || '内容已复制到剪贴板';
+                this.showMessage(successMsg, 'success');
             })
             .catch((error) => {
                 // 尝试使用备用方法
@@ -2214,12 +2341,15 @@ class QRCodePopup {
             document.body.removeChild(textArea);
             
             if (successful) {
-                this.showMessage(browserApi.i18n.getMessage('success_text_copied'), 'success');
+                const successMsg = browserApi.i18n.getMessage('success_text_copied') || '内容已复制到剪贴板';
+                this.showMessage(successMsg, 'success');
             } else {
-                this.showMessage(browserApi.i18n.getMessage('error_copy_failed'), 'error');
+                const errorMsg = browserApi.i18n.getMessage('error_copy_failed') || '复制失败';
+                this.showMessage(errorMsg, 'error');
             }
         } catch (error) {
-            this.showMessage(browserApi.i18n.getMessage('error_copy_failed'), 'error');
+            const errorMsg = browserApi.i18n.getMessage('error_copy_failed') || '复制失败';
+            this.showMessage(errorMsg, 'error');
         }
     }
 
@@ -2271,6 +2401,17 @@ class QRCodePopup {
     }
 
     showMessage(message, type = 'info') {
+        // 如果消息为空，使用默认消息
+        if (!message || (typeof message === 'string' && message.trim() === '')) {
+            const defaultMessages = {
+                success: '操作成功',
+                error: '操作失败',
+                warning: '警告',
+                info: '提示'
+            };
+            message = defaultMessages[type] || '提示';
+        }
+        
         // 创建消息元素
         const messageEl = document.createElement('div');
         messageEl.className = `message message-${type}`;
@@ -2347,6 +2488,12 @@ class QRCodePopup {
         document.getElementById('upload-section').style.display = 'none';
         document.getElementById('start-upload').style.display = 'none';
         document.getElementById('user-avatar-container').style.display = 'none';
+        
+        // 移除登录状态的绿色样式
+        const uploadBtn = document.getElementById('upload-drive-btn');
+        if (uploadBtn) {
+            uploadBtn.classList.remove('authenticated');
+        }
     }
 
     /**
@@ -2356,6 +2503,13 @@ class QRCodePopup {
         document.getElementById('auth-section').style.display = 'none';
         document.getElementById('upload-section').style.display = 'block';
         document.getElementById('start-upload').style.display = 'inline-block';
+        
+        // 恢复保存的上传模式选择
+        const uploadModeRadio = document.querySelector(`input[name="upload-mode"][value="${this.uploadMode}"]`);
+        if (uploadModeRadio) {
+            uploadModeRadio.checked = true;
+        }
+        this.updateUploadMode();
         
         // 恢复保存的可见性选择
         const savedVisibility = this.defaultVisibility || 'anyone';
@@ -2374,6 +2528,35 @@ class QRCodePopup {
         
         // 加载用户信息
         this.loadUserAvatar();
+        
+        // 更新上传按钮的登录状态样式
+        this.updateUploadButtonAuthState(true);
+    }
+    
+    /**
+     * 更新上传按钮的登录状态样式
+     * @param {boolean} isAuthenticated - 是否已登录
+     */
+    async updateUploadButtonAuthState(isAuthenticated) {
+        const uploadBtn = document.getElementById('upload-drive-btn');
+        if (!uploadBtn) return;
+        
+        // 如果未传入参数，自动检测登录状态
+        if (isAuthenticated === undefined) {
+            try {
+                await this.googleDriveAPI.init();
+                isAuthenticated = await this.googleDriveAPI.isAuthenticated();
+            } catch (error) {
+                console.error('[Upload] 检查登录状态失败:', error);
+                isAuthenticated = false;
+            }
+        }
+        
+        if (isAuthenticated) {
+            uploadBtn.classList.add('authenticated');
+        } else {
+            uploadBtn.classList.remove('authenticated');
+        }
     }
 
     /**
@@ -2388,15 +2571,28 @@ class QRCodePopup {
         }
         
         try {
+            // 保存当前状态，防止popup关闭后丢失
+            await browserApi.storage.local.set({
+                pendingAuthAction: 'signin',
+                pendingAuthTimestamp: Date.now()
+            });
+            
             // 获取访问令牌（会触发授权流程）
             await this.googleDriveAPI.getAccessToken();
             console.log('[Upload] 授权成功');
+            
+            // 清除待处理状态
+            await browserApi.storage.local.remove('pendingAuthAction');
             
             // 授权成功后，切换到文件上传界面
             this.showUploadSection();
             this.showMessage(browserApi.i18n.getMessage('success_auth_granted'), 'success');
         } catch (authError) {
             console.error('[Upload] 授权失败:', authError);
+            
+            // 清除待处理状态
+            await browserApi.storage.local.remove('pendingAuthAction');
+            
             this.showMessage(
                 browserApi.i18n.getMessage('error_auth_failed', [authError.message || authError.toString()]), 
                 'error'
@@ -2410,11 +2606,9 @@ class QRCodePopup {
     }
 
     resetUploadModal() {
-        this.selectedFiles = [];
+        this.clearSelection();
         document.getElementById('drive-upload-file').value = '';
-        document.getElementById('drive-file-label').querySelector('.file-input-hint').textContent = 
-            browserApi.i18n.getMessage('popup_common_no_file_selected');
-        document.getElementById('drive-file-label').querySelector('.file-input-hint').style.color = '#6c757d';
+        document.getElementById('drive-upload-folder').value = '';
         document.getElementById('upload-progress').style.display = 'none';
         document.getElementById('upload-result').style.display = 'none';
         document.getElementById('start-upload').disabled = false;
@@ -2461,56 +2655,290 @@ class QRCodePopup {
                 
                 avatarImg.src = userInfo.picture;
                 avatarImg.alt = userInfo.name || 'User Avatar';
-                avatarImg.title = userInfo.name || '点击打开PixelQR文件夹';
+                avatarImg.title = userInfo.name || '点击查看账户信息';
                 avatarContainer.style.display = 'block';
                 
-                // 点击头像跳转到文件夹
-                avatarContainer.onclick = async () => {
-                    const folderLink = await this.googleDriveAPI.getFolderLink();
-                    if (folderLink) {
-                        browserApi.tabs.create({ url: folderLink });
-                    } else {
-                        this.showMessage(browserApi.i18n.getMessage('error_folder_not_found'), 'error');
-                    }
+                // 点击头像打开用户信息模态框
+                avatarContainer.onclick = () => {
+                    this.showUserInfoModal(userInfo);
                 };
+                
+                // 更新上传按钮的登录状态样式
+                this.updateUploadButtonAuthState(true);
             } else {
                 document.getElementById('user-avatar-container').style.display = 'none';
+                // 更新上传按钮的登录状态样式
+                this.updateUploadButtonAuthState(false);
             }
         } catch (error) {
             console.error('[Upload] 加载用户头像失败:', error);
             document.getElementById('user-avatar-container').style.display = 'none';
+            // 更新上传按钮的登录状态样式
+            this.updateUploadButtonAuthState(false);
         }
     }
 
-    handleFileSelect(files) {
-        if (files && files.length > 0) {
-            this.selectedFiles = Array.from(files);
-            const fileHint = document.getElementById('drive-file-label').querySelector('.file-input-hint');
-            if (this.selectedFiles.length === 1) {
+    /**
+     * 显示用户信息模态框
+     */
+    async showUserInfoModal(userInfo = null) {
+        const modal = document.getElementById('user-info-modal');
+        const avatarImg = document.getElementById('user-info-avatar');
+        const nameEl = document.getElementById('user-info-name');
+        const emailEl = document.getElementById('user-info-email');
+        
+        // 如果没有传入userInfo，尝试从API获取
+        if (!userInfo) {
+            try {
+                await this.googleDriveAPI.init();
+                userInfo = await this.googleDriveAPI.getUserInfo();
+            } catch (error) {
+                console.error('[User Info] 获取用户信息失败:', error);
+                this.showMessage(browserApi.i18n.getMessage('error_drive_init_failed', [error.message || error.toString()]), 'error');
+                return;
+            }
+        }
+        
+        if (userInfo) {
+            if (avatarImg) avatarImg.src = userInfo.picture || '';
+            if (nameEl) nameEl.textContent = userInfo.name || '';
+            if (emailEl) emailEl.textContent = userInfo.email || '';
+        }
+        
+        modal.style.display = 'flex';
+    }
+
+    /**
+     * 隐藏用户信息模态框
+     */
+    hideUserInfoModal() {
+        const modal = document.getElementById('user-info-modal');
+        modal.style.display = 'none';
+    }
+
+    /**
+     * 处理打开Drive文件夹
+     */
+    async handleOpenDriveFolder() {
+        try {
+            const folderLink = await this.googleDriveAPI.getFolderLink();
+            if (folderLink) {
+                browserApi.tabs.create({ url: folderLink });
+                this.hideUserInfoModal();
+            } else {
+                this.showMessage(browserApi.i18n.getMessage('error_folder_not_found'), 'error');
+            }
+        } catch (error) {
+            console.error('[User Info] 打开文件夹失败:', error);
+            this.showMessage(browserApi.i18n.getMessage('error_folder_not_found'), 'error');
+        }
+    }
+
+    /**
+     * 处理登出（清除本地授权）
+     */
+    async handleLogoutDrive() {
+        try {
+            await this.googleDriveAPI.logout();
+            this.hideUserInfoModal();
+            // 隐藏头像
+            document.getElementById('user-avatar-container').style.display = 'none';
+            // 显示授权界面
+            this.showAuthSection();
+            // 更新上传按钮的登录状态样式
+            this.updateUploadButtonAuthState(false);
+            this.showMessage(browserApi.i18n.getMessage('success_logout'), 'success');
+        } catch (error) {
+            console.error('[User Info] 登出失败:', error);
+            this.showMessage(browserApi.i18n.getMessage('error_logout_failed'), 'error');
+        }
+    }
+
+    /**
+     * 处理撤销 Google 授权（跳转到授权管理页面）
+     */
+    async handleRevokeGoogleAuth() {
+        try {
+            // 先清除本地授权并尝试移除权限
+            await this.googleDriveAPI.logout(true);
+        } catch (err) {
+            console.error('[User Info] 清除本地授权失败:', err);
+        }
+        
+        // 跳转到 Google 授权管理页面
+        const revokeUrl = 'https://myaccount.google.com/connections';
+        browserApi.tabs.create({ url: revokeUrl });
+        
+        this.hideUserInfoModal();
+        // 隐藏头像
+        document.getElementById('user-avatar-container').style.display = 'none';
+        // 显示授权界面
+        this.showAuthSection();
+        
+        this.showMessage(browserApi.i18n.getMessage('info_revoke_auth_opened'), 'info');
+    }
+
+    /**
+     * 更新上传模式UI
+     */
+    updateUploadMode() {
+        const fileLabel = document.getElementById('drive-file-label');
+        const fileInputText = fileLabel.querySelector('.file-input-text');
+        
+        // 清除之前的选择
+        this.clearSelection();
+        
+        // 更新标签文本
+        if (this.uploadMode === 'file') {
+            fileInputText.textContent = browserApi.i18n.getMessage('popup_upload_choose_file') || '选择文件';
+            fileLabel.setAttribute('for', 'drive-upload-file');
+        } else {
+            fileInputText.textContent = browserApi.i18n.getMessage('popup_upload_choose_folder') || '选择文件夹';
+            fileLabel.setAttribute('for', 'drive-upload-folder');
+        }
+        
+        // 更新上传模式选项的选中状态样式
+        this.updateUploadModeOptions(this.uploadMode);
+    }
+    
+    /**
+     * 更新上传模式选项的选中状态
+     * @param {string} selectedValue - 选中的模式值 ('file' 或 'folder')
+     */
+    updateUploadModeOptions(selectedValue) {
+        document.querySelectorAll('.upload-mode-option').forEach(option => {
+            const radio = option.querySelector('input[type="radio"]');
+            if (radio && radio.value === selectedValue) {
+                option.classList.add('checked');
+            } else {
+                option.classList.remove('checked');
+            }
+        });
+    }
+    
+    /**
+     * 处理文件或文件夹选择
+     * @param {FileList} files - 选择的文件列表
+     * @param {string} type - 'file' 或 'folder'
+     */
+    handleFileSelect(files, type) {
+        if (!files || files.length === 0) {
+            this.updateSelectionDisplay();
+            return;
+        }
+        
+        // 检查类型是否匹配当前模式
+        if ((type === 'file' && this.uploadMode !== 'file') || 
+            (type === 'folder' && this.uploadMode !== 'folder')) {
+            return; // 类型不匹配，忽略
+        }
+        
+        const fileArray = Array.from(files);
+        
+        if (type === 'folder') {
+            // 文件夹选择：提取文件夹名和文件列表
+            const firstFile = fileArray[0];
+            let folderName = '文件夹';
+            
+            if (firstFile.webkitRelativePath) {
+                const pathParts = firstFile.webkitRelativePath.split('/');
+                folderName = pathParts[0];
+            }
+            
+            // 文件夹模式：只保留一个文件夹
+            this.selectedFolders = [{
+                name: folderName,
+                files: fileArray
+            }];
+            this.selectedFiles = []; // 清除文件选择
+        } else {
+            // 文件选择：添加到文件列表（去重）
+            fileArray.forEach(file => {
+                const exists = this.selectedFiles.some(f => 
+                    f.name === file.name && f.size === file.size && f.lastModified === file.lastModified
+                );
+                if (!exists) {
+                    this.selectedFiles.push(file);
+                }
+            });
+            this.selectedFolders = []; // 清除文件夹选择
+        }
+        
+        this.updateSelectionDisplay();
+    }
+    
+    /**
+     * 更新选择显示
+     */
+    updateSelectionDisplay() {
+        const fileHint = document.getElementById('drive-file-label').querySelector('.file-input-hint');
+        
+        if (this.uploadMode === 'file') {
+            // 文件模式
+            if (this.selectedFiles.length === 0) {
+                fileHint.textContent = browserApi.i18n.getMessage('popup_common_no_file_selected');
+                fileHint.style.color = '#6c757d';
+            } else if (this.selectedFiles.length === 1) {
                 fileHint.textContent = this.selectedFiles[0].name;
+                fileHint.style.color = '#47630f';
             } else {
                 fileHint.textContent = browserApi.i18n.getMessage('popup_upload_files_selected', [this.selectedFiles.length]);
+                fileHint.style.color = '#47630f';
             }
-            fileHint.style.color = '#47630f';
         } else {
-            this.selectedFiles = [];
-            const fileHint = document.getElementById('drive-file-label').querySelector('.file-input-hint');
-            fileHint.textContent = browserApi.i18n.getMessage('popup_common_no_file_selected');
-            fileHint.style.color = '#6c757d';
+            // 文件夹模式
+            if (this.selectedFolders.length === 0) {
+                fileHint.textContent = browserApi.i18n.getMessage('popup_common_no_file_selected');
+                fileHint.style.color = '#6c757d';
+            } else {
+                const folder = this.selectedFolders[0];
+                fileHint.textContent = `${folder.name} (${folder.files.length} 个文件)`;
+                fileHint.style.color = '#47630f';
+            }
         }
+    }
+    
+    /**
+     * 清除选择
+     */
+    clearSelection() {
+        this.selectedFiles = [];
+        this.selectedFolders = [];
+        this.updateSelectionDisplay();
+    }
+    
+    /**
+     * 生成日期时间戳文件夹名
+     * @returns {string} 格式：2025-11-20_18:34:12
+     */
+    generateDateFolderName() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        return `${year}-${month}-${day}_${hours}:${minutes}:${seconds}`;
     }
 
     async uploadFilesToDrive() {
         console.log('[Upload] 开始上传流程');
         console.log('[Upload] 选中文件数量:', this.selectedFiles.length);
+        console.log('[Upload] 选中文件夹数量:', this.selectedFolders.length);
         console.log('[Upload] 文件列表:', this.selectedFiles.map(f => ({
             name: f.name,
             size: f.size,
             type: f.type
         })));
+        console.log('[Upload] 文件夹列表:', this.selectedFolders.map(f => ({
+            name: f.name,
+            fileCount: f.files.length
+        })));
 
-        if (this.selectedFiles.length === 0) {
-            console.warn('[Upload] 没有选中文件');
+        // 检查是否有选择
+        if (this.selectedFiles.length === 0 && this.selectedFolders.length === 0) {
+            console.warn('[Upload] 没有选中文件或文件夹');
             this.showMessage(browserApi.i18n.getMessage('error_no_file_selected'), 'error');
             return;
         }
@@ -2528,16 +2956,30 @@ class QRCodePopup {
                 console.log('[Upload] 未授权，开始获取授权...');
                 this.showMessage(browserApi.i18n.getMessage('info_requesting_auth'), 'info');
                 
+                // 保存当前状态，防止popup关闭后丢失
+                await browserApi.storage.local.set({
+                    pendingAuthAction: 'upload',
+                    pendingAuthTimestamp: Date.now()
+                });
+                
                 // 获取访问令牌（会触发授权流程）
                 try {
                     await this.googleDriveAPI.getAccessToken();
                     console.log('[Upload] 授权成功');
+                    
+                    // 清除待处理状态
+                    await browserApi.storage.local.remove('pendingAuthAction');
+                    
                     this.showMessage(browserApi.i18n.getMessage('success_auth_granted'), 'success');
                     
                     // 授权成功后加载用户头像
                     await this.loadUserAvatar();
                 } catch (authError) {
                     console.error('[Upload] 授权失败:', authError);
+                    
+                    // 清除待处理状态
+                    await browserApi.storage.local.remove('pendingAuthAction');
+                    
                     this.showMessage(
                         browserApi.i18n.getMessage('error_auth_failed', [authError.message || authError.toString()]), 
                         'error'
@@ -2557,79 +2999,155 @@ class QRCodePopup {
             document.getElementById('upload-result').style.display = 'none';
             document.getElementById('start-upload').disabled = true;
             
-            // 初始化进度条为0%
-            document.getElementById('upload-progress-fill').style.width = '0%';
-            document.getElementById('upload-progress-text').textContent = 
-                browserApi.i18n.getMessage('popup_upload_progress', [0, this.selectedFiles.length, '']);
-
-            const totalFiles = this.selectedFiles.length;
-            const uploadedFiles = [];
-            let uploadedCount = 0;
-
-            // 上传每个文件
-            for (let i = 0; i < this.selectedFiles.length; i++) {
-                const file = this.selectedFiles[i];
+            // 获取选择的可见性
+            const visibilityRadio = document.querySelector('input[name="file-visibility"]:checked');
+            const visibility = visibilityRadio ? visibilityRadio.value : 'anyone';
+            console.log(`[Upload] 可见性设置:`, visibility);
+            
+            // 获取PixelQR文件夹ID
+            const accessToken = await this.googleDriveAPI.getAccessToken();
+            const pixelQRFolderId = await this.googleDriveAPI.getOrCreateFolder(accessToken);
+            
+            let uploadedFiles = [];
+            let dateFolderInfo = null; // 日期文件夹信息，用于多文件上传
+            
+            if (this.uploadMode === 'file') {
+                // 文件上传模式
+                const totalFiles = this.selectedFiles.length;
+                let uploadedCount = 0;
                 
-                console.log(`[Upload] 开始上传文件 ${i + 1}/${totalFiles}:`, file.name);
-                
-                // 更新文件选择进度
-                const fileProgress = Math.round((uploadedCount / totalFiles) * 100);
-                document.getElementById('upload-progress-fill').style.width = fileProgress + '%';
-                document.getElementById('upload-progress-text').textContent = 
-                    browserApi.i18n.getMessage('popup_upload_progress', [uploadedCount + 1, totalFiles, file.name]);
-
-                try {
-                    // 获取选择的可见性
-                    const visibilityRadio = document.querySelector('input[name="file-visibility"]:checked');
-                    const visibility = visibilityRadio ? visibilityRadio.value : 'anyone';
-                    console.log(`[Upload] 文件可见性设置:`, visibility);
+                // 如果选择多个文件，先创建日期文件夹
+                let targetFolderId = pixelQRFolderId;
+                if (totalFiles > 1) {
+                    // 生成日期时间格式的文件夹名称：PixelQR-2025-11-12_12:11:10
+                    const now = new Date();
+                    const year = now.getFullYear();
+                    const month = String(now.getMonth() + 1).padStart(2, '0');
+                    const day = String(now.getDate()).padStart(2, '0');
+                    const hours = String(now.getHours()).padStart(2, '0');
+                    const minutes = String(now.getMinutes()).padStart(2, '0');
+                    const seconds = String(now.getSeconds()).padStart(2, '0');
+                    const dateFolderName = `PixelQR-${year}-${month}-${day}_${hours}:${minutes}:${seconds}`;
                     
-                    // 上传文件，带进度回调
-                    const result = await this.googleDriveAPI.uploadFile(file, null, (progress) => {
-                        // 计算总体进度：已完成文件 + 当前文件进度
-                        const fileProgressPercent = progress / 100;
-                        const overallProgress = Math.round(
-                            (uploadedCount / totalFiles) * 100 + (fileProgressPercent / totalFiles) * 100
-                        );
-                        document.getElementById('upload-progress-fill').style.width = overallProgress + '%';
+                    console.log(`[Upload] 创建日期文件夹: ${dateFolderName}`);
+                    document.getElementById('upload-progress-text').textContent = 
+                        `正在创建文件夹 "${dateFolderName}"...`;
+                    
+                    // 创建日期文件夹，获取完整信息（包括webViewLink）
+                    const folderResult = await this.googleDriveAPI.createFolder(dateFolderName, pixelQRFolderId, true);
+                    if (folderResult && folderResult.id) {
+                        targetFolderId = folderResult.id;
+                        dateFolderInfo = folderResult;
+                        console.log(`[Upload] 日期文件夹创建成功，ID: ${targetFolderId}`);
                         
-                        // 更新进度文本
-                        if (progress < 100) {
-                            const fileSizeMB = (file.size / 1024 / 1024).toFixed(2);
-                            document.getElementById('upload-progress-text').textContent = 
-                                browserApi.i18n.getMessage('popup_upload_progress_detail', [
-                                    uploadedCount + 1, 
-                                    totalFiles, 
-                                    file.name,
-                                    progress,
-                                    fileSizeMB
-                                ]);
+                        // 为日期文件夹设置可见性权限
+                        if (visibility !== 'owner') {
+                            await this.googleDriveAPI.setFileVisibility(targetFolderId, visibility);
+                            console.log(`[Upload] 日期文件夹权限设置完成: ${visibility}`);
                         }
-                    });
-                    
-                    console.log(`[Upload] 文件 "${file.name}" 上传成功:`, result);
-                    
-                    // 根据选择的可见性设置文件权限
-                    if (visibility !== 'owner') {
-                        await this.googleDriveAPI.setFileVisibility(result.id, visibility);
+                    } else {
+                        console.warn('[Upload] 日期文件夹创建失败，将使用PixelQR根文件夹');
+                        // 如果创建失败，继续使用PixelQR根文件夹
                     }
+                }
+                
+                for (let i = 0; i < this.selectedFiles.length; i++) {
+                    const file = this.selectedFiles[i];
                     
-                    uploadedFiles.push(result);
-                    uploadedCount++;
-                } catch (error) {
-                    console.error(`[Upload] 文件 "${file.name}" 上传失败:`, error);
-                    console.error('[Upload] 错误详情:', {
-                        message: error.message,
-                        stack: error.stack
-                    });
-                    // 继续上传其他文件
+                    console.log(`[Upload] 开始上传文件 ${i + 1}/${totalFiles}:`, file.name);
+                    
+                    // 更新文件选择进度
+                    const fileProgress = Math.round((uploadedCount / totalFiles) * 100);
+                    document.getElementById('upload-progress-fill').style.width = fileProgress + '%';
+                    document.getElementById('upload-progress-text').textContent = 
+                        browserApi.i18n.getMessage('popup_upload_progress', [uploadedCount + 1, totalFiles, file.name]);
+
+                    try {
+                        // 上传文件到目标文件夹，带进度回调
+                        const result = await this.googleDriveAPI.uploadFile(file, null, (progress) => {
+                            // 计算总体进度：已完成文件 + 当前文件进度
+                            const fileProgressPercent = progress / 100;
+                            const overallProgress = Math.round(
+                                (uploadedCount / totalFiles) * 100 + (fileProgressPercent / totalFiles) * 100
+                            );
+                            document.getElementById('upload-progress-fill').style.width = overallProgress + '%';
+                            
+                            // 更新进度文本
+                            if (progress < 100) {
+                                const fileSizeMB = (file.size / 1024 / 1024).toFixed(2);
+                                document.getElementById('upload-progress-text').textContent = 
+                                    browserApi.i18n.getMessage('popup_upload_progress_detail', [
+                                        uploadedCount + 1, 
+                                        totalFiles, 
+                                        file.name,
+                                        progress,
+                                        fileSizeMB
+                                    ]);
+                            }
+                        }, targetFolderId);
+                        
+                        console.log(`[Upload] 文件 "${file.name}" 上传成功:`, result);
+                        
+                        // 根据选择的可见性设置文件权限
+                        if (visibility !== 'owner') {
+                            await this.googleDriveAPI.setFileVisibility(result.id, visibility);
+                        }
+                        
+                        uploadedFiles.push(result);
+                        uploadedCount++;
+                    } catch (error) {
+                        console.error(`[Upload] 文件 "${file.name}" 上传失败:`, error);
+                        console.error('[Upload] 错误详情:', {
+                            message: error.message,
+                            stack: error.stack
+                        });
+                        // 继续上传其他文件
+                    }
+                }
+            } else {
+                // 文件夹上传模式
+                if (this.selectedFolders.length > 0) {
+                    const folder = this.selectedFolders[0];
+                    console.log('[Upload] 文件夹上传模式，文件夹名:', folder.name);
+                    console.log('[Upload] 文件数量:', folder.files.length);
+                    
+                    document.getElementById('upload-progress-text').textContent = 
+                        `正在上传文件夹 "${folder.name}"...`;
+                    
+                    try {
+                        // 上传文件夹
+                        const folderResult = await this.googleDriveAPI.uploadFolder(
+                            folder.name,
+                            folder.files,
+                            pixelQRFolderId,
+                            (progress) => {
+                                document.getElementById('upload-progress-fill').style.width = progress + '%';
+                                document.getElementById('upload-progress-text').textContent = 
+                                    `正在上传文件夹 "${folder.name}": ${progress}%`;
+                            }
+                        );
+                        
+                        console.log('[Upload] 文件夹上传成功:', folderResult);
+                        
+                        // 根据选择的可见性设置文件夹权限
+                        if (visibility !== 'owner') {
+                            await this.googleDriveAPI.setFileVisibility(folderResult.id, visibility);
+                        }
+                        
+                        uploadedFiles.push(folderResult);
+                    } catch (error) {
+                        console.error('[Upload] 文件夹上传失败:', error);
+                        throw error;
+                    }
                 }
             }
 
             // 完成上传
             document.getElementById('upload-progress-fill').style.width = '100%';
+            const completedCount = uploadedFiles.length;
+            const totalCount = this.uploadMode === 'file' ? this.selectedFiles.length : 1;
             document.getElementById('upload-progress-text').textContent = 
-                browserApi.i18n.getMessage('popup_upload_completed', [uploadedCount, totalFiles]);
+                browserApi.i18n.getMessage('popup_upload_completed', [completedCount, totalCount]);
 
             if (uploadedFiles.length > 0) {
                 // 显示结果
@@ -2657,61 +3175,131 @@ class QRCodePopup {
                     
                     resultContainer.style.display = 'block';
 
-                    // 生成二维码（根据可见性决定是否生成链接）
-                    const visibilityRadio = document.querySelector('input[name="file-visibility"]:checked');
-                    const visibility = visibilityRadio ? visibilityRadio.value : 'anyone';
+                    // 总是生成二维码，使用分享链接
+                    console.log('[Upload] 准备生成二维码，链接:', file.shareLink);
+                    setTimeout(() => {
+                        // 设置当前内容和类型
+                        this.currentContent = file.shareLink;
+                        this.currentType = 'url';
+                        
+                        // 更新URL输入框
+                        const urlElement = document.getElementById('current-url');
+                        if (urlElement) {
+                            urlElement.value = file.shareLink;
+                        }
+                        
+                        // 更新页面标题为Google Drive链接的域名
+                        const titleElement = document.querySelector('.title');
+                        if (titleElement) {
+                            try {
+                                const urlObj = new URL(file.shareLink);
+                                titleElement.textContent = urlObj.hostname;
+                            } catch (error) {
+                                titleElement.textContent = 'Google Drive';
+                            }
+                        }
+                        
+                        console.log('[Upload] 调用createQRCode生成二维码，内容:', file.shareLink);
+                        
+                        // 添加到历史记录，包含文件信息
+                        const isFolder = this.uploadMode === 'folder';
+                        const fileExtension = isFolder ? 'folder' : (file.name.split('.').pop().toLowerCase() || 'file');
+                        this.addToHistory('generated', {
+                            content: file.shareLink,
+                            type: 'url',
+                            fileName: file.name,
+                            fileType: fileExtension,
+                            isGoogleDrive: true,
+                            faviconUrl: null, // Google Drive链接使用本地icon
+                            timestamp: new Date().toISOString()
+                        });
+                        
+                        // 生成二维码
+                        this.createQRCode(file.shareLink, 'url');
+                        
+                        // 关闭上传模态框
+                        document.getElementById('upload-drive-modal').style.display = 'none';
+                        this.showMessage(browserApi.i18n.getMessage('success_qr_generated'), 'success');
+                        console.log('[Upload] 二维码生成完成');
+                    }, 100);
+                } else {
+                    // 多个文件：检查是否有日期文件夹
+                    const hasDateFolder = this.uploadMode === 'file' && this.selectedFiles.length > 1 && dateFolderInfo;
                     
-                    // 只有anyone可见性才生成二维码（因为只有这个有公开链接）
-                    if (visibility === 'anyone') {
-                        console.log('[Upload] 准备生成二维码，链接:', file.shareLink);
+                    if (hasDateFolder) {
+                        // 多个文件上传到日期文件夹：显示文件夹链接并生成文件夹二维码
+                        successMessage.textContent = browserApi.i18n.getMessage('popup_upload_success_multiple', [uploadedFiles.length]);
+                        
+                        // 获取文件夹的分享链接
+                        const folderShareInfo = await this.googleDriveAPI.getFolderShareLink(dateFolderInfo.id);
+                        const folderShareLink = folderShareInfo.shareLink;
+                        
+                        console.log('[Upload] 获取文件夹分享链接:', folderShareLink);
+                        
+                        // 显示文件夹链接
+                        const linkElement = document.createElement('div');
+                        linkElement.style.marginTop = '10px';
+                        linkElement.style.wordBreak = 'break-all';
+                        linkElement.innerHTML = `
+                            <div style="margin-bottom: 5px; font-weight: bold;">${browserApi.i18n.getMessage('popup_upload_folder_link') || '文件夹链接'}:</div>
+                            <a href="${this.escapeHtmlForAttribute(folderShareLink)}" target="_blank" style="color: #007bff; text-decoration: underline;">
+                                ${this.escapeHtml(folderShareLink)}
+                            </a>
+                            <div style="margin-top: 10px; font-size: 12px; color: #666;">
+                                ${browserApi.i18n.getMessage('popup_upload_files_in_folder') || '包含'} ${uploadedFiles.length} ${browserApi.i18n.getMessage('popup_upload_files') || '个文件'}
+                            </div>
+                        `;
+                        linkDisplay.innerHTML = '';
+                        linkDisplay.appendChild(linkElement);
+                        resultContainer.style.display = 'block';
+                        
+                        // 为文件夹生成二维码
+                        console.log('[Upload] 为文件夹生成二维码，链接:', folderShareLink);
                         setTimeout(() => {
-                            this.currentContent = file.shareLink;
+                            // 设置当前内容和类型
+                            this.currentContent = folderShareLink;
                             this.currentType = 'url';
                             
                             // 更新URL输入框
                             const urlElement = document.getElementById('current-url');
                             if (urlElement) {
-                                urlElement.value = file.shareLink;
+                                urlElement.value = folderShareLink;
                             }
                             
                             // 更新页面标题为Google Drive链接的域名
                             const titleElement = document.querySelector('.title');
                             if (titleElement) {
                                 try {
-                                    const urlObj = new URL(file.shareLink);
+                                    const urlObj = new URL(folderShareLink);
                                     titleElement.textContent = urlObj.hostname;
                                 } catch (error) {
                                     titleElement.textContent = 'Google Drive';
                                 }
                             }
                             
-                            console.log('[Upload] 调用createQRCode生成二维码');
+                            console.log('[Upload] 调用createQRCode生成二维码，内容:', folderShareLink);
                             
-                            // 添加到历史记录，包含文件信息
-                            const fileExtension = file.name.split('.').pop().toLowerCase();
+                            // 添加到历史记录，包含文件夹信息
                             this.addToHistory('generated', {
-                                content: file.shareLink,
+                                content: folderShareLink,
                                 type: 'url',
-                                fileName: file.name,
-                                fileType: fileExtension,
+                                fileName: dateFolderInfo.name,
+                                fileType: 'folder',
                                 isGoogleDrive: true,
                                 faviconUrl: null, // Google Drive链接使用本地icon
                                 timestamp: new Date().toISOString()
                             });
                             
-                            this.createQRCode(file.shareLink, 'url');
+                            // 生成二维码
+                            this.createQRCode(folderShareLink, 'url');
+                            
                             // 关闭上传模态框
                             document.getElementById('upload-drive-modal').style.display = 'none';
                             this.showMessage(browserApi.i18n.getMessage('success_qr_generated'), 'success');
-                            console.log('[Upload] 二维码生成完成');
-                        }, 500);
+                            console.log('[Upload] 文件夹二维码生成完成');
+                        }, 100);
                     } else {
-                        // 其他可见性不生成二维码，只显示成功消息
-                        document.getElementById('upload-drive-modal').style.display = 'none';
-                        this.showMessage(browserApi.i18n.getMessage('success_file_uploaded'), 'success');
-                    }
-                } else {
-                    // 多个文件：显示所有链接，并为第一个文件生成二维码
+                        // 多个文件但没有日期文件夹（理论上不应该发生，但保留兼容性）：显示所有链接，并为第一个文件生成二维码
                     successMessage.textContent = browserApi.i18n.getMessage('popup_upload_success_multiple', [uploadedFiles.length]);
                     
                     const linksElement = document.createElement('div');
@@ -2736,24 +3324,21 @@ class QRCodePopup {
                     linkDisplay.appendChild(linksElement);
                     resultContainer.style.display = 'block';
 
-                    // 为第一个文件生成二维码（如果可见性允许）
-                    const visibilityRadio = document.querySelector('input[name="file-visibility"]:checked');
-                    const visibility = visibilityRadio ? visibilityRadio.value : 'anyone';
-                    
-                    if (visibility === 'anyone') {
-                        const firstFile = uploadedFiles[0];
-                        console.log('[Upload] 为第一个文件生成二维码，链接:', firstFile.shareLink);
-                        setTimeout(() => {
-                            this.currentContent = firstFile.shareLink;
-                            this.currentType = 'url';
-                            
-                            // 更新URL输入框
-                            const urlElement = document.getElementById('current-url');
-                            if (urlElement) {
-                                urlElement.value = firstFile.shareLink;
-                            }
-                            
-                            // 更新页面标题为Google Drive链接的域名
+                    // 为第一个文件生成二维码
+                    const firstFile = uploadedFiles[0];
+                    console.log('[Upload] 为第一个文件生成二维码，链接:', firstFile.shareLink);
+                    setTimeout(() => {
+                        // 设置当前内容和类型
+                        this.currentContent = firstFile.shareLink;
+                        this.currentType = 'url';
+                        
+                        // 更新URL输入框
+                        const urlElement = document.getElementById('current-url');
+                        if (urlElement) {
+                            urlElement.value = firstFile.shareLink;
+                        }
+                        
+                        // 更新页面标题为Google Drive链接的域名
                             const titleElement = document.querySelector('.title');
                             if (titleElement) {
                                 try {
@@ -2764,7 +3349,7 @@ class QRCodePopup {
                                 }
                             }
                             
-                            console.log('[Upload] 调用createQRCode生成二维码');
+                            console.log('[Upload] 调用createQRCode生成二维码，内容:', firstFile.shareLink);
                             
                             // 添加到历史记录，包含文件信息
                             const fileExtension = firstFile.name.split('.').pop().toLowerCase();
@@ -2778,16 +3363,14 @@ class QRCodePopup {
                                 timestamp: new Date().toISOString()
                             });
                             
+                            // 生成二维码
                             this.createQRCode(firstFile.shareLink, 'url');
+                            
                             // 关闭上传模态框
                             document.getElementById('upload-drive-modal').style.display = 'none';
                             this.showMessage(browserApi.i18n.getMessage('success_qr_generated'), 'success');
                             console.log('[Upload] 二维码生成完成');
-                        }, 500);
-                    } else {
-                        // 其他可见性不生成二维码
-                        document.getElementById('upload-drive-modal').style.display = 'none';
-                        this.showMessage(browserApi.i18n.getMessage('success_file_uploaded'), 'success');
+                        }, 100);
                     }
                 }
 

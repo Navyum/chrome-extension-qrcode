@@ -242,6 +242,59 @@ class GoogleDriveAPI {
     }
     
     /**
+     * 请求 identity 权限（如果尚未授予）
+     * @private
+     * @returns {Promise<boolean>} 如果权限已授予或成功请求返回true
+     */
+    async _requestIdentityPermission() {
+        const runtime = this._getRuntimeAPI();
+        if (!runtime || !runtime.permissions) {
+            // 如果没有 permissions API，假设权限已授予（必需权限的情况）
+            this._debug('没有 permissions API，假设 identity 权限已授予');
+            return true;
+        }
+        
+        try {
+            // 检查是否已有权限
+            const hasPermission = await new Promise((resolve) => {
+                if (runtime.permissions.contains) {
+                    runtime.permissions.contains({ permissions: ['identity'] }, resolve);
+                } else {
+                    // 如果没有 contains 方法，假设没有权限
+                    resolve(false);
+                }
+            });
+            
+            if (hasPermission) {
+                this._debug('identity 权限已授予');
+                return true;
+            }
+            
+            // 请求权限
+            this._debug('请求 identity 权限...');
+            const granted = await new Promise((resolve) => {
+                if (runtime.permissions.request) {
+                    runtime.permissions.request({ permissions: ['identity'] }, resolve);
+                } else {
+                    // 如果没有 request 方法，拒绝请求
+                    resolve(false);
+                }
+            });
+            
+            if (granted) {
+                this._debug('identity 权限已授予');
+                return true;
+            } else {
+                this._error('用户拒绝了 identity 权限请求');
+                throw new Error('需要 identity 权限才能使用 Google Drive 功能');
+            }
+        } catch (error) {
+            this._error('请求 identity 权限失败:', error);
+            throw error;
+        }
+    }
+    
+    /**
      * 获取访问令牌
      * 如果已有有效令牌则返回缓存的，否则触发OAuth授权流程
      * @returns {Promise<string>} 访问令牌
@@ -260,6 +313,9 @@ class GoogleDriveAPI {
             expiry: this.tokenExpiry ? new Date(this.tokenExpiry).toLocaleString() : '未设置',
             isValid: this.tokenExpiry && Date.now() < this.tokenExpiry
         });
+        
+        // 请求 identity 权限（如果尚未授予）
+        await this._requestIdentityPermission();
         
         const identity = this._getIdentityAPI();
         if (!identity) {
@@ -430,6 +486,35 @@ class GoogleDriveAPI {
     }
     
     /**
+     * 构建文件夹的分享链接
+     * @private
+     * @param {string} folderId - 文件夹ID
+     * @returns {string} 文件夹分享链接
+     */
+    _buildFolderShareLink(folderId) {
+        return `https://drive.google.com/drive/folders/${folderId}`;
+    }
+    
+    /**
+     * 获取文件夹的分享链接
+     * @param {string} folderId - 文件夹ID
+     * @returns {Promise<object>} 包含文件夹ID和分享链接的对象
+     */
+    async getFolderShareLink(folderId) {
+        try {
+            const shareLink = this._buildFolderShareLink(folderId);
+            return {
+                id: folderId,
+                shareLink: shareLink,
+                webViewLink: shareLink
+            };
+        } catch (error) {
+            this._error('获取文件夹分享链接失败:', error);
+            throw error;
+        }
+    }
+    
+    /**
      * 查询文件夹是否存在
      * @private
      * @param {string} folderName - 文件夹名称
@@ -480,18 +565,29 @@ class GoogleDriveAPI {
      * @private
      * @param {string} folderName - 文件夹名称
      * @param {string} accessToken - 访问令牌
-     * @returns {Promise<string|null>} 文件夹ID或null
+     * @param {string} [parentFolderId] - 可选的父文件夹ID
+     * @param {boolean} [returnFullInfo=false] - 是否返回完整信息（包括webViewLink）
+     * @returns {Promise<string|object|null>} 文件夹ID、完整信息对象或null
      */
-    async _createFolder(folderName, accessToken) {
+    async _createFolder(folderName, accessToken, parentFolderId = null, returnFullInfo = false) {
         try {
-            this._debug('创建文件夹:', folderName);
+            this._debug('创建文件夹:', folderName, parentFolderId ? `(父文件夹: ${parentFolderId})` : '');
             
             const metadata = {
                 name: folderName,
                 mimeType: 'application/vnd.google-apps.folder'
             };
             
-            const response = await fetch(DRIVE_API_CONFIG.DRIVE_API_ENDPOINT, {
+            // 如果指定了父文件夹，添加到元数据中
+            if (parentFolderId) {
+                metadata.parents = [parentFolderId];
+            }
+            
+            // 如果需要返回完整信息，添加fields参数
+            const fields = returnFullInfo ? '?fields=id,name,webViewLink' : '';
+            const url = DRIVE_API_CONFIG.DRIVE_API_ENDPOINT + fields;
+            
+            const response = await fetch(url, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${accessToken}`,
@@ -507,11 +603,38 @@ class GoogleDriveAPI {
             }
             
             const folderData = await response.json();
+            
+            if (returnFullInfo) {
+                this._debug('文件夹创建成功:', folderData);
+                return {
+                    id: folderData.id,
+                    name: folderData.name,
+                    webViewLink: folderData.webViewLink || null
+                };
+            } else {
             const folderId = folderData.id;
             this._debug('文件夹创建成功:', folderId);
             return folderId;
+            }
         } catch (error) {
             this._error('创建文件夹时出错:', error);
+            return null;
+        }
+    }
+    
+    /**
+     * 创建文件夹（公共方法）
+     * @param {string} folderName - 文件夹名称
+     * @param {string} [parentFolderId] - 可选的父文件夹ID
+     * @param {boolean} [returnFullInfo=false] - 是否返回完整信息（包括webViewLink）
+     * @returns {Promise<string|object|null>} 文件夹ID、完整信息对象或null
+     */
+    async createFolder(folderName, parentFolderId = null, returnFullInfo = false) {
+        try {
+            const accessToken = await this.getAccessToken();
+            return await this._createFolder(folderName, accessToken, parentFolderId, returnFullInfo);
+        } catch (error) {
+            this._error('创建文件夹失败:', error);
             return null;
         }
     }
@@ -766,10 +889,11 @@ class GoogleDriveAPI {
      * @param {File} file - 要上传的文件对象
      * @param {string} [fileName] - 可选的自定义文件名
      * @param {Function} [onProgress] - 进度回调函数 (progress: number) => void
+     * @param {string} [parentFolderId] - 可选的父文件夹ID（如果不提供则使用PixelQR文件夹）
      * @returns {Promise<object>} 包含文件信息的对象
      * @throws {Error} 如果上传失败
      */
-    async uploadFile(file, fileName = null, onProgress = null) {
+    async uploadFile(file, fileName = null, onProgress = null, parentFolderId = null) {
         try {
             const fileSize = file.size || 0;
             const isLargeFile = fileSize >= DRIVE_API_CONFIG.SMALL_FILE_THRESHOLD;
@@ -799,8 +923,12 @@ class GoogleDriveAPI {
             const name = fileName || file.name || 'uploaded_file';
             this._debug('文件名:', name);
             
-            // 获取或创建PixelQR文件夹
-            const folderId = await this.getOrCreateFolder(accessToken);
+            // 确定父文件夹ID
+            let targetFolderId = parentFolderId;
+            if (!targetFolderId) {
+                // 如果没有指定父文件夹，使用PixelQR文件夹
+                targetFolderId = await this.getOrCreateFolder(accessToken);
+            }
             
             // 创建文件元数据
             const metadata = {
@@ -809,9 +937,9 @@ class GoogleDriveAPI {
             };
             
             // 如果找到文件夹，设置父文件夹
-            if (folderId) {
-                metadata.parents = [folderId];
-                this._debug('文件将上传到文件夹:', DRIVE_API_CONFIG.FOLDER_NAME, folderId);
+            if (targetFolderId) {
+                metadata.parents = [targetFolderId];
+                this._debug('文件将上传到文件夹ID:', targetFolderId);
             } else {
                 this._debug('警告: 无法获取文件夹ID，文件将上传到根目录');
             }
@@ -835,7 +963,7 @@ class GoogleDriveAPI {
                 webViewLink: fileData.webViewLink,
                 shareLink: this._buildShareLink(fileData.id)
             };
-            this._debug('返回结果:', result);
+            this._debug('返回结果11:', result);
             return result;
         } catch (error) {
             this._error('上传文件失败:', error);
@@ -1083,10 +1211,158 @@ class GoogleDriveAPI {
     }
     
     /**
+     * 创建文件夹并上传文件夹内的所有文件
+     * @param {string} folderName - 文件夹名称
+     * @param {FileList|Array<File>} files - 文件夹内的文件列表
+     * @param {string} parentFolderId - 父文件夹ID（PixelQR文件夹）
+     * @param {Function} onProgress - 进度回调函数 (progress: number) => void
+     * @returns {Promise<object>} 包含文件夹ID和分享链接的对象
+     */
+    async uploadFolder(folderName, files, parentFolderId, onProgress = null) {
+        try {
+            const accessToken = await this.getAccessToken();
+            if (!accessToken) {
+                throw new Error('无法获取访问令牌');
+            }
+            
+            this._debug('开始上传文件夹:', folderName);
+            
+            // 1. 创建文件夹
+            const folderMetadata = {
+                name: folderName,
+                mimeType: 'application/vnd.google-apps.folder',
+                parents: parentFolderId ? [parentFolderId] : []
+            };
+            
+            const createResponse = await fetch(DRIVE_API_CONFIG.DRIVE_API_ENDPOINT, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(folderMetadata)
+            });
+            
+            if (!createResponse.ok) {
+                const errorData = await createResponse.json().catch(() => ({}));
+                throw new Error(errorData.error?.message || '创建文件夹失败');
+            }
+            
+            const folderData = await createResponse.json();
+            const folderId = folderData.id;
+            this._debug('文件夹创建成功:', folderId);
+            
+            // 2. 上传文件夹内的所有文件
+            const fileArray = Array.from(files);
+            const totalFiles = fileArray.length;
+            let uploadedCount = 0;
+            
+            // 构建文件路径映射（保持文件夹结构）
+            const fileMap = new Map(); // path -> file
+            
+            for (const file of fileArray) {
+                if (file.webkitRelativePath) {
+                    fileMap.set(file.webkitRelativePath, file);
+                } else {
+                    fileMap.set(file.name, file);
+                }
+            }
+            
+            // 按路径排序，确保先创建子文件夹
+            const sortedPaths = Array.from(fileMap.keys()).sort();
+            
+            // 创建子文件夹映射（路径 -> 文件夹ID）
+            const subFolderMap = new Map();
+            
+            for (const relativePath of sortedPaths) {
+                const file = fileMap.get(relativePath);
+                const pathParts = relativePath.split('/');
+                
+                if (pathParts.length > 1) {
+                    // 有子文件夹，需要创建子文件夹结构
+                    let currentParentId = folderId;
+                    
+                    // 创建所有父文件夹
+                    for (let i = 0; i < pathParts.length - 1; i++) {
+                        const subFolderName = pathParts[i];
+                        const subFolderPath = pathParts.slice(0, i + 1).join('/');
+                        
+                        if (!subFolderMap.has(subFolderPath)) {
+                            // 创建子文件夹
+                            const subFolderMetadata = {
+                                name: subFolderName,
+                                mimeType: 'application/vnd.google-apps.folder',
+                                parents: [currentParentId]
+                            };
+                            
+                            const subFolderResponse = await fetch(DRIVE_API_CONFIG.DRIVE_API_ENDPOINT, {
+                                method: 'POST',
+                                headers: {
+                                    'Authorization': `Bearer ${accessToken}`,
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify(subFolderMetadata)
+                            });
+                            
+                            if (subFolderResponse.ok) {
+                                const subFolderData = await subFolderResponse.json();
+                                subFolderMap.set(subFolderPath, subFolderData.id);
+                                currentParentId = subFolderData.id;
+                                this._debug('子文件夹创建成功:', subFolderName, subFolderData.id);
+                            }
+                        } else {
+                            currentParentId = subFolderMap.get(subFolderPath);
+                        }
+                    }
+                    
+                    // 上传文件到对应的父文件夹
+                    const fileParentId = currentParentId;
+                    await this.uploadFile(file, null, (progress) => {
+                        if (onProgress) {
+                            const overallProgress = Math.round(
+                                (uploadedCount / totalFiles) * 100 + (progress / totalFiles)
+                            );
+                            onProgress(overallProgress);
+                        }
+                    }, fileParentId);
+                } else {
+                    // 根目录文件，直接上传到文件夹
+                    await this.uploadFile(file, null, (progress) => {
+                        if (onProgress) {
+                            const overallProgress = Math.round(
+                                (uploadedCount / totalFiles) * 100 + (progress / totalFiles)
+                            );
+                            onProgress(overallProgress);
+                        }
+                    }, folderId);
+                }
+                
+                uploadedCount++;
+                if (onProgress) {
+                    onProgress(Math.round((uploadedCount / totalFiles) * 100));
+                }
+            }
+            
+            // 3. 构建分享链接
+            const shareLink = `https://drive.google.com/drive/folders/${folderId}`;
+            
+            return {
+                id: folderId,
+                name: folderName,
+                webViewLink: shareLink,
+                shareLink: shareLink
+            };
+        } catch (error) {
+            this._error('上传文件夹失败:', error);
+            throw error;
+        }
+    }
+    
+    /**
      * 登出（清除令牌、文件夹ID和用户信息缓存）
      * @returns {Promise<void>}
      */
-    async logout() {
+    async logout(removePermission = false) {
         this.accessToken = null;
         this.tokenExpiry = null;
         this.folderId = null;
@@ -1105,6 +1381,62 @@ class GoogleDriveAPI {
                 storage.local.remove(keys, resolve);
             });
             this._debug('令牌、文件夹ID和用户信息已清除');
+        }
+        
+        // 如果请求移除权限，尝试移除 identity 权限
+        if (removePermission) {
+            await this._removeIdentityPermission();
+        }
+    }
+    
+    /**
+     * 移除 identity 权限（如果已授予）
+     * @private
+     * @returns {Promise<boolean>} 如果权限已移除或不存在返回true
+     */
+    async _removeIdentityPermission() {
+        const runtime = this._getRuntimeAPI();
+        if (!runtime || !runtime.permissions) {
+            // 如果没有 permissions API，无法移除（可能是必需权限）
+            this._debug('无法移除 identity 权限（可能是必需权限）');
+            return false;
+        }
+        
+        try {
+            // 检查是否有权限
+            const hasPermission = await new Promise((resolve) => {
+                if (runtime.permissions.contains) {
+                    runtime.permissions.contains({ permissions: ['identity'] }, resolve);
+                } else {
+                    resolve(false);
+                }
+            });
+            
+            if (!hasPermission) {
+                this._debug('identity 权限未授予，无需移除');
+                return true;
+            }
+            
+            // 移除权限
+            this._debug('移除 identity 权限...');
+            const removed = await new Promise((resolve) => {
+                if (runtime.permissions.remove) {
+                    runtime.permissions.remove({ permissions: ['identity'] }, resolve);
+                } else {
+                    resolve(false);
+                }
+            });
+            
+            if (removed) {
+                this._debug('identity 权限已移除');
+                return true;
+            } else {
+                this._debug('移除 identity 权限失败（可能是必需权限）');
+                return false;
+            }
+        } catch (error) {
+            this._error('移除 identity 权限失败:', error);
+            return false;
         }
     }
     

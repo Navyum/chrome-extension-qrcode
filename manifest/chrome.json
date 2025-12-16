@@ -10,7 +10,9 @@
     "storage",
     "downloads",
     "scripting",
-    "favicon",
+    "favicon"
+  ],
+  "optional_permissions": [
     "identity"
   ],
   "action": {

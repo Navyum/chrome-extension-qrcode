@@ -10,10 +10,10 @@
     "storage",
     "downloads",
     "scripting",
-    "favicon",
-    "identity"
+    "favicon"
   ],
   "optional_permissions": [
+    "identity",
     "videoCapture",
     "audioCapture"
   ],

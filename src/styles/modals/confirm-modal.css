@@ -1,0 +1,23 @@
+/* Confirm Modal Styles - 确认对话框样式 */
+
+#confirm-clear-modal .modal-content {
+    max-width: 320px;
+}
+
+#confirm-clear-modal .modal-body {
+    padding: 20px;
+}
+
+#confirm-clear-modal .modal-body p {
+    color: #000000;
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* 深色模式支持 */
+@media (prefers-color-scheme: dark) {
+    #confirm-clear-modal .modal-body p {
+        color: #e8eaed;
+    }
+}
+

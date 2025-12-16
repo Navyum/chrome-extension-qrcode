@@ -1,0 +1,304 @@
+/* History Modal Styles - 历史记录模态框样式 */
+
+/* 历史记录模态框：去除外部滚动条 */
+#history-modal .modal-content {
+    overflow: visible;
+    display: flex;
+    flex-direction: column;
+    max-height: 85vh;
+}
+
+#history-modal .modal-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    padding: 16px 20px;
+}
+
+.history-tabs {
+    display: flex;
+    border-bottom: 1px solid #e9ecef;
+    margin-bottom: 12px;
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 12px 16px;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    color: #6c757d;
+    transition: all 0.2s ease;
+}
+
+.tab-btn.active {
+    color: #47630f;
+    border-bottom-color: #47630f;
+}
+
+.tab-btn:hover {
+    background: #f8f9fa;
+}
+
+.history-content {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    position: relative;
+}
+
+.history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow-y: auto;
+    visibility: hidden;
+    opacity: 0;
+    /* 使用 transition 而不是 animation，避免与子元素动画冲突 */
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+    /* 确保子元素在父容器隐藏时也不显示 */
+    pointer-events: none;
+}
+
+#generate-history {
+    position: relative;
+    min-height: 100%;
+}
+
+.history-list.active {
+    visibility: visible;
+    opacity: 1;
+    z-index: 1;
+    position: relative;
+    /* 恢复指针事件 */
+    pointer-events: auto;
+}
+
+.empty-history {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    text-align: center;
+    color: #6c757d;
+}
+
+.empty-history-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+}
+
+.empty-history-text {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 4px;
+    color: #333;
+}
+
+.empty-history-hint {
+    font-size: 12px;
+    color: #6c757d;
+}
+
+.history-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+    border-radius: 6px;
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    /* 初始状态：隐藏，等待动画触发 */
+    opacity: 0;
+    transform: translateY(-5px);
+}
+
+/* 只有当父容器有 active 类时，子元素才应用动画 */
+.history-list.active .history-item {
+    animation: historyItemFadeIn 0.3s ease-out forwards;
+}
+
+/* 渐进动画效果：为每个历史记录项添加延迟 */
+.history-list.active .history-item:nth-child(1) { 
+    animation-delay: 0.05s; 
+}
+.history-list.active .history-item:nth-child(2) { 
+    animation-delay: 0.1s; 
+}
+.history-list.active .history-item:nth-child(3) { 
+    animation-delay: 0.15s; 
+}
+.history-list.active .history-item:nth-child(4) { 
+    animation-delay: 0.2s; 
+}
+.history-list.active .history-item:nth-child(5) { 
+    animation-delay: 0.25s; 
+}
+.history-list.active .history-item:nth-child(n+6) { 
+    animation-delay: 0.3s; 
+}
+
+@keyframes historyItemFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.history-item:hover {
+    background: #e9ecef;
+    border-color: #47630f;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.history-icon {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    border-radius: 4px;
+    background: white;
+    border: 1px solid #e9ecef;
+}
+
+.history-icon img {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+}
+
+.history-content-wrapper {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.history-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: #333;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.history-subtitle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: #6c757d;
+}
+
+.history-time {
+    margin-left: auto;
+}
+
+.history-actions {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.history-action-btn {
+    padding: 4px 8px;
+    font-size: 11px;
+    border: 1px solid #e9ecef;
+    border-radius: 4px;
+    background: white;
+    color: #47630f;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.history-action-btn:hover {
+    background: #47630f;
+    color: white;
+    border-color: #47630f;
+}
+
+/* 深色模式支持 */
+@media (prefers-color-scheme: dark) {
+    .history-tabs {
+        border-bottom-color: #3c4043;
+    }
+
+    .tab-btn {
+        color: #9aa0a6;
+    }
+
+    .tab-btn.active {
+        color: #8ab4f8;
+        border-bottom-color: #8ab4f8;
+    }
+
+    .tab-btn:hover {
+        background: #3c4043;
+    }
+
+    .empty-history-text {
+        color: #e8eaed;
+    }
+
+    .empty-history-hint {
+        color: #9aa0a6;
+    }
+
+    .history-item {
+        background: #292a2d;
+        border-color: #3c4043;
+    }
+
+    .history-item:hover {
+        background: #3c4043;
+        border-color: #8ab4f8;
+    }
+
+    .history-icon {
+        background: #3c4043;
+        border-color: #5f6368;
+    }
+
+    .history-title {
+        color: #e8eaed;
+    }
+
+    .history-subtitle {
+        color: #9aa0a6;
+    }
+
+    .history-action-btn {
+        background: #292a2d;
+        border-color: #3c4043;
+        color: #8ab4f8;
+    }
+
+    .history-action-btn:hover {
+        background: #8ab4f8;
+        color: #1e3a5f;
+        border-color: #8ab4f8;
+    }
+}
+

@@ -1,0 +1,130 @@
+/* User Info Modal Styles - 用户信息模态框样式 */
+
+.user-info-modal-content {
+    max-width: 400px;
+    width: 90%;
+}
+
+.user-info-content {
+    padding: 20px 0;
+}
+
+.user-info-avatar-section {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.user-info-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 3px solid #6B8E23;
+    object-fit: cover;
+    display: block;
+    margin: 0 auto 12px;
+    animation: avatarBreathingLarge 2s ease-in-out infinite;
+    position: relative;
+}
+
+@keyframes avatarBreathingLarge {
+    0%, 100% {
+        box-shadow: 
+            0 0 0 0 rgba(107, 142, 35, 0.4),
+            0 0 0 0 rgba(107, 142, 35, 0.2);
+        border-color: #6B8E23;
+    }
+    50% {
+        box-shadow: 
+            0 0 0 6px rgba(107, 142, 35, 0),
+            0 0 0 10px rgba(107, 142, 35, 0);
+        border-color: #7ba32a;
+    }
+}
+
+.user-info-name {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 4px;
+}
+
+.user-info-email {
+    font-size: 14px;
+    color: #666;
+}
+
+.user-info-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.user-info-actions .action-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 20px;
+    font-size: 14px;
+}
+
+.user-info-actions .action-btn svg {
+    flex-shrink: 0;
+}
+
+.user-info-revoke-link {
+    text-align: center;
+    margin-top: 4px;
+}
+
+.user-info-revoke-link a {
+    font-size: 12px;
+    color: #6B8E23;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.user-info-revoke-link a:hover {
+    color: #5A7A1E;
+    text-decoration: underline;
+}
+
+/* 深色模式支持 */
+@media (prefers-color-scheme: dark) {
+    .user-info-avatar {
+        border-color: #3c4043;
+    }
+
+    .user-info-name {
+        color: #e8eaed;
+    }
+
+    .user-info-email {
+        color: #9aa0a6;
+    }
+
+    .user-info-revoke-link a {
+        color: #9aa0a6;
+    }
+
+    .user-info-revoke-link a:hover {
+        color: #e8eaed;
+    }
+
+    /* 深色模式下退出登录按钮的图标适配 */
+    .user-info-actions .action-btn.secondary {
+        background: #292a2d;
+        color: #e8eaed;
+        border-color: #3c4043;
+    }
+
+    .user-info-actions .action-btn.secondary:hover {
+        background: #3c4043;
+        border-color: #5f6368;
+    }
+
+    .user-info-actions .action-btn.secondary img {
+        filter: brightness(0) invert(1); /* 反转图标颜色，使其在深色背景上可见 */
+    }
+}
+

@@ -9,17 +9,35 @@
         background: #202124;
     }
 
+    /* Header 深色模式适配 */
     .header {
-        background: #202124;
-        border-bottom-color: #3c4043;
+        background: #202124 !important;
+        border-bottom: 1px solid #3c4043 !important;
     }
 
-    .title {
+    .header-content {
         color: #e8eaed;
     }
 
+    .header-text {
+        color: #e8eaed;
+    }
+
+    .cloud-icon img {
+        filter: brightness(0) invert(1); /* 反转云图标颜色 */
+        opacity: 0.9;
+    }
+
+    .title-container {
+        color: #e8eaed;
+    }
+
+    .title {
+        color: #e8eaed !important;
+    }
+
     .subtitle {
-        color: #9aa0a6;
+        color: #9aa0a6 !important;
     }
 
     .url-input-container {
@@ -74,6 +92,12 @@
         height: 20px;
         object-fit: contain;
         transition: filter 0.2s ease;
+        filter: brightness(0) invert(1); /* 深色模式下默认显示为白色 */
+        opacity: 0.9;
+    }
+
+    .drive-upload-icon-btn:hover img {
+        opacity: 1; /* 悬停时完全不透明 */
     }
 
     .drive-upload-icon-btn.authenticated {
@@ -87,7 +111,8 @@
     }
 
     .drive-upload-icon-btn.authenticated img {
-        filter: brightness(0) saturate(100%) invert(37%) sepia(93%) saturate(1234%) hue-rotate(60deg) brightness(95%) contrast(85%);
+        filter: brightness(0) saturate(100%) invert(37%) sepia(93%) saturate(1234%) hue-rotate(60deg) brightness(95%) contrast(85%); /* 已登录时显示绿色 */
+        opacity: 1;
     }
 
     .upload-mode-option {
@@ -155,17 +180,18 @@
 
     .google-signin-btn {
         background: #292a2d;
-        border-color: #3c4043;
+        border: 1px solid #5f6368 !important; /* 使用更明显的边框颜色 */
         color: #e8eaed;
     }
 
     .google-signin-btn:hover {
         background: #3c4043;
-        border-color: #5f6368;
+        border-color: #8ab4f8 !important; /* 悬停时使用蓝色边框 */
     }
 
     .google-signin-btn:active {
         background: #5f6368;
+        border-color: #8ab4f8 !important;
     }
 
     .qr-container {
@@ -257,13 +283,34 @@
         }
     }
 
+    /* Primary 按钮深色模式适配 */
     .action-btn.primary {
-        background: #5a9df8;
-        color: white;
+        background: #5a9df8 !important;
+        color: white !important;
+        border: none !important;
     }
 
     .action-btn.primary:hover {
-        background: #4a8de8;
+        background: #4a8de8 !important;
+        color: white !important;
+    }
+
+    .action-btn.primary.download {
+        background: #5a9df8 !important;
+        color: white !important;
+    }
+
+    .action-btn.primary.download:hover {
+        background: #4a8de8 !important;
+    }
+
+    .action-btn.primary.copy {
+        background: #5a9df8 !important;
+        color: white !important;
+    }
+
+    .action-btn.primary.copy:hover {
+        background: #4a8de8 !important;
     }
 
     .file-mode-btn {
@@ -295,32 +342,113 @@
         color: #aecbfa;
     }
 
+    /* Secondary 按钮深色模式适配 */
     .action-btn.secondary {
-        background: #292a2d;
-        color: #e8eaed;
-        border-color: #3c4043;
+        background: #292a2d !important;
+        color: #e8eaed !important;
+        border: 1px solid #3c4043 !important;
     }
 
     .action-btn.secondary:hover {
-        background: #3c4043;
-        border-color: #5f6368;
+        background: #3c4043 !important;
+        border-color: #5f6368 !important;
+        color: #e8eaed !important;
     }
     
+    /* Secondary 按钮图标颜色参考 bottom-icons 进行调整 */
     .action-btn.secondary .icon {
-        filter: brightness(0) invert(1); /* Invert icons for dark mode */
+        filter: brightness(0) invert(1) !important; /* 反转图标颜色 */
+        opacity: 0.8 !important; /* 与 bottom-icons 保持一致 */
     }
 
+    .action-btn.secondary:hover .icon {
+        opacity: 1 !important; /* 悬停时完全不透明 */
+    }
+
+    /* 深色模式下 secondary 按钮中的 img 图标也需要反转 */
+    .action-btn.secondary img {
+        filter: brightness(0) invert(1) !important; /* 反转图标颜色 */
+        opacity: 0.8 !important; /* 与 bottom-icons 保持一致 */
+    }
+
+    .action-btn.secondary:hover img {
+        opacity: 1 !important; /* 悬停时完全不透明 */
+    }
+
+    /* 确保 secondary 按钮中的 img.icon 也被正确应用 */
+    .action-btn.secondary img.icon {
+        filter: brightness(0) invert(1) !important; /* 反转图标颜色 */
+        opacity: 0.8 !important; /* 与 bottom-icons 保持一致 */
+    }
+
+    .action-btn.secondary:hover img.icon {
+        opacity: 1 !important; /* 悬停时完全不透明 */
+    }
+
+    .action-buttons {
+        background: #202124;
+    }
+
+    /* Secondary buttons 和 bottom-icons 之间的线条深色模式适配 */
     .bottom-icons {
-        border-top-color: #3c4043;
+        border-top: 1px solid #3c4043 !important;
     }
 
     .bottom-icon-btn {
         color: #9aa0a6;
+        background: transparent;
     }
 
     .bottom-icon-btn:hover {
         background: #3c4043;
         color: #e8eaed;
+    }
+
+    .bottom-icon-btn img {
+        filter: brightness(0) invert(1); /* 反转底部图标颜色 */
+        opacity: 0.8;
+    }
+
+    .bottom-icon-btn:hover img {
+        opacity: 1;
+    }
+
+    .right-icons {
+        display: flex;
+        gap: 4px;
+    }
+
+    /* QR Display Section 适配（但 qr-container 本身不调整） */
+    .qr-display-section {
+        background: #202124;
+    }
+
+    /* QR Placeholder 文字颜色适配（但二维码容器本身不调整） */
+    .qr-placeholder {
+        color: #9aa0a6;
+    }
+
+    .qr-placeholder p {
+        color: #9aa0a6;
+    }
+
+    /* Primary 按钮图标颜色参考 bottom-icons 进行调整 */
+    .action-btn.primary .icon {
+        filter: brightness(0) invert(1); /* 反转图标颜色 */
+        opacity: 0.8; /* 与 bottom-icons 保持一致 */
+    }
+
+    .action-btn.primary:hover .icon {
+        opacity: 1; /* 悬停时完全不透明 */
+    }
+
+    .action-btn.primary img {
+        filter: brightness(0) invert(1); /* 反转图标颜色 */
+        opacity: 0.8; /* 与 bottom-icons 保持一致 */
+    }
+
+    .action-btn.primary:hover img {
+        opacity: 1; /* 悬停时完全不透明 */
     }
 
     /* Modal Dark Mode */
@@ -422,7 +550,7 @@
     }
 
     .tab-btn:hover {
-        background: #3c4043;
+        background: hsl(206, 6%, 25%);
     }
 
     /* Scan Tabs Dark Mode */
@@ -494,6 +622,111 @@
 
     ::-webkit-scrollbar-thumb:hover {
         background: #70757a;
+    }
+
+    /* File Input Wrapper Dark Mode */
+    .file-mode-btn {
+        border-color: #5f6368;
+        background: #292a2d;
+        color: #9aa0a6;
+    }
+
+    .file-mode-btn:hover {
+        border-color: #8ab4f8;
+        background: #3c4043;
+        color: #e8eaed;
+    }
+
+    .file-mode-btn.active {
+        border-color: #8ab4f8;
+        background: #8ab4f8;
+        color: #202124;
+    }
+
+    .file-action-btn {
+        border-color: #8ab4f8;
+        background: #292a2d;
+        color: #8ab4f8;
+    }
+
+    .file-action-btn:hover {
+        background: #8ab4f8;
+        color: #202124;
+    }
+
+    .file-input-label {
+        border-color: #5f6368;
+        background: #292a2d;
+    }
+
+    @keyframes fileInputBreathingDark {
+        0%, 100% {
+            border-color: #5f6368;
+            box-shadow: 0 0 0 0 rgba(138, 180, 248, 0);
+        }
+        50% {
+            border-color: #8ab4f8;
+            box-shadow: 0 0 0 4px rgba(138, 180, 248, 0.15);
+        }
+    }
+
+    .file-input-label {
+        animation: fileInputBreathingDark 2s ease-in-out infinite;
+    }
+
+    .file-input-label:hover {
+        border-color: #8ab4f8;
+        background: #3c4043;
+    }
+
+    .file-input-text {
+        color: #8ab4f8;
+    }
+
+    .file-input-hint {
+        color: #9aa0a6;
+    }
+
+    .file-input-wrapper input[type="file"]:focus + .file-input-label {
+        border-color: #8ab4f8;
+        box-shadow: 0 0 0 2px rgba(138, 180, 248, 0.3);
+    }
+
+    .file-selected-display {
+        border-color: #8ab4f8;
+        background: #2d3a1f;
+    }
+
+    .file-selected-display:hover {
+        border-color: #a0c4ff;
+        background: #3c4a2a;
+    }
+
+    .file-selected-preview {
+        background: #3c4043;
+        border-color: #5f6368;
+    }
+
+    .file-selected-checkmark {
+        background: #8ab4f8;
+        border-color: #292a2d;
+    }
+
+    .file-selected-name {
+        color: #8ab4f8;
+    }
+
+    .file-selected-remove {
+        color: #8ab4f8;
+    }
+
+    .file-selected-remove:hover {
+        background: rgba(138, 180, 248, 0.15);
+        color: #a0c4ff;
+    }
+
+    .file-selected-remove:active {
+        background: rgba(138, 180, 248, 0.25);
     }
 }
 

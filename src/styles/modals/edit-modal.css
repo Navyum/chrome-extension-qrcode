@@ -1,0 +1,462 @@
+/* Edit Modal Styles - 编辑二维码模态框样式 */
+
+.edit-section {
+    margin-bottom: 20px;
+}
+
+.edit-section h4 {
+    margin-bottom: 12px;
+    color: #333;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.color-inputs, .size-inputs {
+    display: flex;
+    gap: 12px;
+}
+
+.color-input, .size-input {
+    flex: 1;
+}
+
+.color-input label, .size-input label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 12px;
+    color: #6c757d;
+}
+
+.color-input input[type="color"] {
+    width: 100%;
+    height: 40px;
+    border: 1px solid #e9ecef;
+    padding: 2px;
+    background: #fff;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+/* Customize Webkit Color Input Swatch (Chrome/Edge/Safari) */
+input[type="color"]::-webkit-color-swatch-wrapper {
+    padding: 0;
+}
+
+input[type="color"]::-webkit-color-swatch {
+    border: none;
+    border-radius: 4px;
+}
+
+.size-input input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.size-input input:focus {
+    outline: none;
+    border-color: #6B8E23;
+    box-shadow: 0 0 0 2px rgba(107, 142, 35, 0.2);
+}
+
+.builtin-logo-section {
+    margin-bottom: 16px;
+}
+
+.builtin-logo-section label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #333;
+}
+
+.builtin-logo-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 4px;
+    padding: 4px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.builtin-logo-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    border: 1px solid #e9ecef;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: white;
+    aspect-ratio: 1;
+    box-sizing: border-box;
+    position: relative;
+}
+
+.builtin-logo-item:hover {
+    border-color: #47630f;
+    transform: translateY(-1px);
+    box-shadow: 0 1px 4px rgba(71, 99, 15, 0.2);
+}
+
+.builtin-logo-item.selected {
+    border-color: #2d4a0a;
+    background: #f0f4e8;
+    box-shadow: 0 0 0 1px rgba(45, 74, 10, 0.2);
+}
+
+.builtin-logo-icon {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.builtin-logo-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.builtin-logo-checkmark {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 16px;
+    height: 16px;
+    background: #2d4a0a;
+    color: white;
+    border-radius: 50%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: bold;
+    border: 2px solid white;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+}
+
+.builtin-logo-item.selected .builtin-logo-checkmark {
+    display: flex;
+}
+
+.logo-divider {
+    text-align: center;
+    margin: 16px 0;
+    color: #999;
+    font-size: 12px;
+    font-weight: 500;
+    position: relative;
+}
+
+.logo-divider::before,
+.logo-divider::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 40%;
+    height: 1px;
+    background: #e9ecef;
+}
+
+.logo-divider::before {
+    left: 0;
+}
+
+.logo-divider::after {
+    right: 0;
+}
+
+.logo-inputs .file-input-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.logo-inputs .file-input-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 16px;
+    border: 2px dashed #e9ecef;
+    border-radius: 6px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    min-height: 56px;
+    box-sizing: border-box;
+    animation: fileInputBreathing 2s ease-in-out infinite;
+}
+
+@keyframes fileInputBreathing {
+    0%, 100% {
+        border-color: #e9ecef;
+        box-shadow: 0 0 0 0 rgba(107, 142, 35, 0);
+    }
+    50% {
+        border-color: #6B8E23;
+        box-shadow: 0 0 0 4px rgba(107, 142, 35, 0.1);
+    }
+}
+
+.logo-inputs .file-input-label:hover {
+    border-color: #47630f;
+    background: #f8f9fa;
+    animation: none;
+}
+
+.logo-inputs .file-input-text {
+    font-size: 14px;
+    font-weight: 500;
+    color: #47630f;
+    margin-bottom: 4px;
+}
+
+.logo-inputs .file-input-hint {
+    font-size: 12px;
+    color: #6c757d;
+}
+
+.logo-inputs .file-selected-display {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border: 2px solid #2d4a0a;
+    border-radius: 6px;
+    background: #f0f4e8;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-height: 56px;
+    box-sizing: border-box;
+}
+
+.logo-inputs .file-selected-display:hover {
+    border-color: #1e3207;
+    background: #e8f0d8;
+}
+
+.logo-inputs .file-selected-preview {
+    position: relative;
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    overflow: hidden;
+    background: white;
+    border: 1px solid #e9ecef;
+}
+
+.logo-inputs .file-selected-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.logo-inputs .file-selected-name {
+    flex: 1;
+    font-size: 14px;
+    color: #2d4a0a;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.logo-inputs .file-selected-remove {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: transparent;
+    color: #2d4a0a;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: all 0.2s ease;
+    z-index: 10;
+}
+
+.logo-inputs .file-selected-remove:hover {
+    background: rgba(45, 74, 10, 0.1);
+    color: #1e3207;
+}
+
+.logo-inputs .file-selected-remove:active {
+    background: rgba(45, 74, 10, 0.2);
+}
+
+.logo-options {
+    margin-top: 12px;
+}
+
+.logo-options label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 12px;
+    color: #6c757d;
+}
+
+.logo-options input[type="range"] {
+    width: 100%;
+    margin-bottom: 4px;
+}
+
+#opacity-value {
+    font-size: 12px;
+    color: #6c757d;
+}
+
+/* 深色模式支持 */
+@media (prefers-color-scheme: dark) {
+    .edit-section h4 {
+        color: #e8eaed;
+    }
+
+    .color-input label, .size-input label {
+        color: #9aa0a6;
+    }
+
+    .color-input input[type="color"] {
+        border-color: #3c4043;
+        background: #292a2d;
+    }
+
+    .size-input input {
+        background: #292a2d;
+        border-color: #3c4043;
+        color: #e8eaed;
+    }
+
+    .size-input input:focus {
+        border-color: #8ab4f8;
+        box-shadow: 0 0 0 2px rgba(138, 180, 248, 0.2);
+    }
+
+    .builtin-logo-section label {
+        color: #e8eaed;
+    }
+
+    .builtin-logo-grid {
+        background: #292a2d;
+        border-color: #3c4043;
+    }
+
+    .builtin-logo-item {
+        background: #3c4043;
+        border-color: #5f6368;
+    }
+
+    .builtin-logo-item:hover {
+        border-color: #8ab4f8;
+    }
+
+    .builtin-logo-item.selected {
+        border-color: #8ab4f8;
+        background: #1e3a5f;
+    }
+
+    .logo-divider {
+        color: #9aa0a6;
+    }
+
+    .logo-divider::before,
+    .logo-divider::after {
+        background: #3c4043;
+    }
+
+    .logo-inputs .file-input-label {
+        background: #292a2d;
+        border-color: #5f6368;
+    }
+
+    @keyframes fileInputBreathingDark {
+        0%, 100% {
+            border-color: #5f6368;
+            box-shadow: 0 0 0 0 rgba(138, 180, 248, 0);
+        }
+        50% {
+            border-color: #8ab4f8;
+            box-shadow: 0 0 0 4px rgba(138, 180, 248, 0.15);
+        }
+    }
+
+    .logo-inputs .file-input-label {
+        animation: fileInputBreathingDark 2s ease-in-out infinite;
+    }
+
+    .logo-inputs .file-input-label:hover {
+        background: #3c4043;
+        border-color: #8ab4f8;
+        animation: none;
+    }
+
+    .logo-inputs .file-input-text {
+        color: #8ab4f8;
+    }
+
+    .logo-inputs .file-input-hint {
+        color: #9aa0a6;
+    }
+
+    .logo-inputs .file-selected-display {
+        background: #1e3a5f;
+        border-color: #8ab4f8;
+    }
+
+    .logo-inputs .file-selected-display:hover {
+        background: #2a4a7a;
+        border-color: #a8c5ff;
+    }
+
+    .logo-inputs .file-selected-preview {
+        background: #292a2d;
+        border-color: #3c4043;
+    }
+
+    .logo-inputs .file-selected-name {
+        color: #8ab4f8;
+    }
+
+    .logo-inputs .file-selected-remove {
+        color: #8ab4f8;
+    }
+
+    .logo-inputs .file-selected-remove:hover {
+        background: rgba(138, 180, 248, 0.1);
+        color: #a8c5ff;
+    }
+
+    .logo-options label {
+        color: #9aa0a6;
+    }
+
+    #opacity-value {
+        color: #9aa0a6;
+    }
+}
+
+/* 响应式设计 */
+@media (max-width: 480px) {
+    .color-inputs, .size-inputs {
+        flex-direction: column;
+    }
+}
+

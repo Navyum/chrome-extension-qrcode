@@ -1,9 +1,6 @@
 // Google Drive API 工具类
 // 用于处理文件上传到Google Drive并获取共享链接
 
-// 调试模式：开发时设为true，生产时设为false
-const DEBUG_DRIVE = true;
-
 /**
  * Google Drive API配置常量
  */
@@ -79,17 +76,6 @@ class GoogleDriveAPI {
     }
     
     /**
-     * 调试日志输出
-     * @private
-     * @param {...any} args - 要输出的参数
-     */
-    _debug(...args) {
-        if (DEBUG_DRIVE) {
-            console.log('[Drive API]', ...args);
-        }
-    }
-    
-    /**
      * 错误日志输出
      * @private
      * @param {...any} args - 要输出的参数
@@ -162,15 +148,12 @@ class GoogleDriveAPI {
      */
     async init() {
         try {
-            this._debug('开始初始化...');
-            
             const runtime = this._getRuntimeAPI();
             if (!runtime) {
                 throw new Error('Browser runtime API not available');
             }
             
             const manifest = runtime.getManifest();
-            this._debug('Manifest配置:', manifest.oauth2);
             
             if (!manifest.oauth2 || !manifest.oauth2.client_id) {
                 throw new Error(
@@ -180,7 +163,6 @@ class GoogleDriveAPI {
             }
             
             this.clientId = manifest.oauth2.client_id;
-            this._debug('Client ID已设置:', this.clientId.substring(0, 20) + '...');
         } catch (error) {
             this._error('初始化失败:', error);
             throw error;
@@ -250,7 +232,6 @@ class GoogleDriveAPI {
         const runtime = this._getRuntimeAPI();
         if (!runtime || !runtime.permissions) {
             // 如果没有 permissions API，假设权限已授予（必需权限的情况）
-            this._debug('没有 permissions API，假设 identity 权限已授予');
             return true;
         }
         
@@ -266,12 +247,10 @@ class GoogleDriveAPI {
             });
             
             if (hasPermission) {
-                this._debug('identity 权限已授予');
                 return true;
             }
             
             // 请求权限
-            this._debug('请求 identity 权限...');
             const granted = await new Promise((resolve) => {
                 if (runtime.permissions.request) {
                     runtime.permissions.request({ permissions: ['identity'] }, resolve);
@@ -282,7 +261,6 @@ class GoogleDriveAPI {
             });
             
             if (granted) {
-                this._debug('identity 权限已授予');
                 return true;
             } else {
                 this._error('用户拒绝了 identity 权限请求');
@@ -303,16 +281,8 @@ class GoogleDriveAPI {
     async getAccessToken() {
         // 检查是否已有有效的访问令牌
         if (this.accessToken && this.tokenExpiry && Date.now() < this.tokenExpiry) {
-            this._debug('使用缓存的访问令牌');
             return Promise.resolve(this.accessToken);
         }
-        
-        this._debug('需要获取新的访问令牌');
-        this._debug('当前令牌状态:', {
-            hasToken: !!this.accessToken,
-            expiry: this.tokenExpiry ? new Date(this.tokenExpiry).toLocaleString() : '未设置',
-            isValid: this.tokenExpiry && Date.now() < this.tokenExpiry
-        });
         
         // 请求 identity 权限（如果尚未授予）
         await this._requestIdentityPermission();
@@ -327,19 +297,11 @@ class GoogleDriveAPI {
         }
         
         return new Promise((resolve, reject) => {
-            this._debug('使用launchWebAuthFlow获取令牌...');
-            this._debug('Client ID:', this.clientId);
-            
             // 获取重定向URL
             const redirectUrl = identity.getRedirectURL();
-            this._debug('重定向URL:', redirectUrl);
-            this._debug('⚠️ 重要提示：请确保以下重定向URI已添加到Google Cloud Console:');
-            this._debug('   重定向URI:', redirectUrl);
-            this._debug('   访问: https://console.cloud.google.com/apis/credentials');
             
             // 构建授权URL
             const authUrl = this._buildAuthUrl(redirectUrl);
-            this._debug('完整授权URL:', authUrl);
             
             // 启动OAuth流程
             identity.launchWebAuthFlow({
@@ -359,13 +321,10 @@ class GoogleDriveAPI {
                     return;
                 }
                 
-                this._debug('收到重定向URL:', redirectUrl);
-                
                 try {
                     // 提取访问令牌
                     const { accessToken, expiresIn } = this._extractTokenFromRedirect(redirectUrl);
                     
-                    this._debug('成功提取访问令牌');
                     this.accessToken = accessToken;
                     // 设置过期时间（提前缓冲时间）
                     this.tokenExpiry = Date.now() + (expiresIn * 1000 - DRIVE_API_CONFIG.TOKEN_EXPIRY_BUFFER);
@@ -395,7 +354,6 @@ class GoogleDriveAPI {
                 [DRIVE_API_CONFIG.STORAGE_KEYS.ACCESS_TOKEN]: token,
                 [DRIVE_API_CONFIG.STORAGE_KEYS.TOKEN_EXPIRY]: expiry
             });
-            this._debug('令牌已保存到storage');
         }
     }
     
@@ -523,8 +481,6 @@ class GoogleDriveAPI {
      */
     async _findFolder(folderName, accessToken) {
         try {
-            this._debug('查询文件夹:', folderName);
-            
             const query = `name='${folderName}' and mimeType='application/vnd.google-apps.folder' and trashed=false`;
             const params = new URLSearchParams({
                 q: query,
@@ -547,12 +503,9 @@ class GoogleDriveAPI {
             
             const data = await response.json();
             if (data.files && data.files.length > 0) {
-                const folderId = data.files[0].id;
-                this._debug('找到文件夹:', folderId);
-                return folderId;
+                return data.files[0].id;
             }
             
-            this._debug('文件夹不存在');
             return null;
         } catch (error) {
             this._error('查询文件夹时出错:', error);
@@ -571,8 +524,6 @@ class GoogleDriveAPI {
      */
     async _createFolder(folderName, accessToken, parentFolderId = null, returnFullInfo = false) {
         try {
-            this._debug('创建文件夹:', folderName, parentFolderId ? `(父文件夹: ${parentFolderId})` : '');
-            
             const metadata = {
                 name: folderName,
                 mimeType: 'application/vnd.google-apps.folder'
@@ -605,16 +556,13 @@ class GoogleDriveAPI {
             const folderData = await response.json();
             
             if (returnFullInfo) {
-                this._debug('文件夹创建成功:', folderData);
                 return {
                     id: folderData.id,
                     name: folderData.name,
                     webViewLink: folderData.webViewLink || null
                 };
             } else {
-            const folderId = folderData.id;
-            this._debug('文件夹创建成功:', folderId);
-            return folderId;
+                return folderData.id;
             }
         } catch (error) {
             this._error('创建文件夹时出错:', error);
@@ -648,7 +596,6 @@ class GoogleDriveAPI {
         try {
             // 如果已缓存文件夹ID，直接返回
             if (this.folderId) {
-                this._debug('使用缓存的文件夹ID:', this.folderId);
                 return this.folderId;
             }
             
@@ -662,7 +609,6 @@ class GoogleDriveAPI {
                 
                 if (result[DRIVE_API_CONFIG.STORAGE_KEYS.FOLDER_ID]) {
                     this.folderId = result[DRIVE_API_CONFIG.STORAGE_KEYS.FOLDER_ID];
-                    this._debug('从storage加载文件夹ID:', this.folderId);
                     return this.folderId;
                 }
             }
@@ -689,7 +635,6 @@ class GoogleDriveAPI {
                     storage.local.set({
                         [DRIVE_API_CONFIG.STORAGE_KEYS.FOLDER_ID]: folderId
                     });
-                    this._debug('文件夹ID已保存到storage');
                 }
             }
             
@@ -710,8 +655,6 @@ class GoogleDriveAPI {
      * @returns {Promise<object>} 文件信息对象
      */
     async _uploadSmallFile(file, metadata, accessToken, onProgress = null) {
-        this._debug('使用multipart方式上传小文件');
-        
         // 创建FormData
         const formData = new FormData();
         formData.append('metadata', new Blob([JSON.stringify(metadata)], { 
@@ -729,8 +672,6 @@ class GoogleDriveAPI {
             body: formData
         });
         
-        this._debug('上传响应状态:', response.status, response.statusText);
-        
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
             this._error('上传失败:', {
@@ -745,11 +686,6 @@ class GoogleDriveAPI {
         }
         
         const fileData = await response.json();
-        this._debug('文件上传成功:', {
-            id: fileData.id,
-            name: fileData.name,
-            webViewLink: fileData.webViewLink
-        });
         
         // 调用进度回调（100%）
         if (onProgress) {
@@ -769,8 +705,6 @@ class GoogleDriveAPI {
      * @returns {Promise<object>} 文件信息对象
      */
     async _uploadLargeFile(file, metadata, accessToken, onProgress = null) {
-        this._debug('使用resumable方式上传大文件');
-        
         // 步骤1：初始化resumable上传会话
         const initUrl = this._buildResumableInitUrl();
         const initResponse = await fetch(initUrl, {
@@ -803,8 +737,6 @@ class GoogleDriveAPI {
             throw new Error('No upload URL returned from resumable upload initialization');
         }
         
-        this._debug('Resumable上传URL已获取:', uploadUrl);
-        
         // 步骤2：分块上传文件
         const chunkSize = DRIVE_API_CONFIG.RESUMABLE_CHUNK_SIZE;
         let uploadedBytes = 0;
@@ -813,8 +745,6 @@ class GoogleDriveAPI {
         while (uploadedBytes < totalBytes) {
             const chunkEnd = Math.min(uploadedBytes + chunkSize, totalBytes);
             const chunk = file.slice(uploadedBytes, chunkEnd);
-            
-            this._debug(`上传块: ${uploadedBytes}-${chunkEnd} (${chunkEnd - uploadedBytes} bytes)`);
             
             // 上传当前块
             const chunkResponse = await fetch(uploadUrl, {
@@ -846,15 +776,9 @@ class GoogleDriveAPI {
                 if (onProgress) {
                     onProgress(progress);
                 }
-                this._debug(`上传进度: ${progress}% (${uploadedBytes}/${totalBytes} bytes)`);
             } else if (chunkResponse.status === 200 || chunkResponse.status === 201) {
                 // 上传完成
                 const fileData = await chunkResponse.json();
-                this._debug('文件上传成功:', {
-                    id: fileData.id,
-                    name: fileData.name,
-                    webViewLink: fileData.webViewLink
-                });
                 
                 // 更新进度到100%
                 if (onProgress) {
@@ -898,14 +822,6 @@ class GoogleDriveAPI {
             const fileSize = file.size || 0;
             const isLargeFile = fileSize >= DRIVE_API_CONFIG.SMALL_FILE_THRESHOLD;
             
-            this._debug('开始上传文件:', {
-                name: file.name,
-                size: fileSize,
-                sizeMB: (fileSize / 1024 / 1024).toFixed(2) + ' MB',
-                type: file.type,
-                uploadMethod: isLargeFile ? 'resumable' : 'multipart'
-            });
-            
             // 确保已初始化
             if (!this.clientId) {
                 await this.init();
@@ -915,13 +831,10 @@ class GoogleDriveAPI {
             await this.loadToken();
             
             // 获取访问令牌（如果未授权会自动触发授权流程）
-            this._debug('获取访问令牌...');
             const accessToken = await this.getAccessToken();
-            this._debug('访问令牌已获取');
             
             // 使用文件名或默认名称
             const name = fileName || file.name || 'uploaded_file';
-            this._debug('文件名:', name);
             
             // 确定父文件夹ID
             let targetFolderId = parentFolderId;
@@ -939,12 +852,7 @@ class GoogleDriveAPI {
             // 如果找到文件夹，设置父文件夹
             if (targetFolderId) {
                 metadata.parents = [targetFolderId];
-                this._debug('文件将上传到文件夹ID:', targetFolderId);
-            } else {
-                this._debug('警告: 无法获取文件夹ID，文件将上传到根目录');
             }
-            
-            this._debug('文件元数据:', metadata);
             
             // 根据文件大小选择上传方式
             let fileData;
@@ -957,14 +865,12 @@ class GoogleDriveAPI {
             // 文件权限在上传后由调用者设置（根据用户选择的可见性）
             
             // 返回文件信息（包含共享链接）
-            const result = {
+            return {
                 id: fileData.id,
                 name: fileData.name,
                 webViewLink: fileData.webViewLink,
                 shareLink: this._buildShareLink(fileData.id)
             };
-            this._debug('返回结果11:', result);
-            return result;
         } catch (error) {
             this._error('上传文件失败:', error);
             throw error;
@@ -1042,11 +948,8 @@ class GoogleDriveAPI {
      */
     async setFileVisibility(fileId, visibility = 'anyone', accessToken = null) {
         try {
-            this._debug('设置文件可见性:', fileId, visibility);
-            
             // 如果是owner，不需要设置权限（默认就是owner）
             if (visibility === 'owner') {
-                this._debug('文件仅所有者可见，无需设置权限');
                 return;
             }
             
@@ -1056,8 +959,6 @@ class GoogleDriveAPI {
             
             // 处理 restricted：移除所有公开权限
             if (visibility === 'restricted') {
-                this._debug('设置文件为受限访问，移除公开权限');
-                
                 // 获取文件的所有权限
                 const permissions = await this._getFilePermissions(fileId, accessToken);
                 
@@ -1065,19 +966,14 @@ class GoogleDriveAPI {
                 const anyonePermissions = permissions.filter(p => p.type === 'anyone');
                 
                 if (anyonePermissions.length === 0) {
-                    this._debug('文件没有公开权限，已经是受限状态');
                     return;
                 }
                 
                 // 删除所有 'anyone' 权限
                 for (const permission of anyonePermissions) {
-                    const deleted = await this._deleteFilePermission(fileId, permission.id, accessToken);
-                    if (deleted) {
-                        this._debug('已删除公开权限:', permission.id);
-                    }
+                    await this._deleteFilePermission(fileId, permission.id, accessToken);
                 }
                 
-                this._debug('文件已设置为受限访问');
                 return;
             }
             
@@ -1098,16 +994,12 @@ class GoogleDriveAPI {
                 body: JSON.stringify(permission)
             });
             
-            this._debug('权限设置响应:', response.status, response.statusText);
-            
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
                 this._error('设置文件权限失败:', 
                     errorData.error?.message || response.statusText
                 );
                 // 不抛出错误，因为文件已经上传成功
-            } else {
-                this._debug('文件权限设置成功:', visibility);
             }
         } catch (error) {
             this._error('设置文件权限时出错:', error);
@@ -1134,7 +1026,6 @@ class GoogleDriveAPI {
         try {
             // 如果已缓存用户信息，直接返回
             if (this.userInfo) {
-                this._debug('使用缓存的用户信息');
                 return this.userInfo;
             }
             
@@ -1148,7 +1039,6 @@ class GoogleDriveAPI {
                 
                 if (result[DRIVE_API_CONFIG.STORAGE_KEYS.USER_INFO]) {
                     this.userInfo = result[DRIVE_API_CONFIG.STORAGE_KEYS.USER_INFO];
-                    this._debug('从storage加载用户信息');
                     return this.userInfo;
                 }
             }
@@ -1159,7 +1049,6 @@ class GoogleDriveAPI {
             }
             
             // 获取用户信息
-            this._debug('获取用户信息...');
             const response = await fetch(DRIVE_API_CONFIG.USER_INFO_ENDPOINT, {
                 method: 'GET',
                 headers: {
@@ -1173,7 +1062,6 @@ class GoogleDriveAPI {
             }
             
             const userInfo = await response.json();
-            this._debug('用户信息获取成功:', userInfo);
             
             // 缓存用户信息
             this.userInfo = userInfo;
@@ -1183,7 +1071,6 @@ class GoogleDriveAPI {
                 storage.local.set({
                     [DRIVE_API_CONFIG.STORAGE_KEYS.USER_INFO]: userInfo
                 });
-                this._debug('用户信息已保存到storage');
             }
             
             return userInfo;
@@ -1225,8 +1112,6 @@ class GoogleDriveAPI {
                 throw new Error('无法获取访问令牌');
             }
             
-            this._debug('开始上传文件夹:', folderName);
-            
             // 1. 创建文件夹
             const folderMetadata = {
                 name: folderName,
@@ -1250,7 +1135,6 @@ class GoogleDriveAPI {
             
             const folderData = await createResponse.json();
             const folderId = folderData.id;
-            this._debug('文件夹创建成功:', folderId);
             
             // 2. 上传文件夹内的所有文件
             const fileArray = Array.from(files);
@@ -1308,7 +1192,6 @@ class GoogleDriveAPI {
                                 const subFolderData = await subFolderResponse.json();
                                 subFolderMap.set(subFolderPath, subFolderData.id);
                                 currentParentId = subFolderData.id;
-                                this._debug('子文件夹创建成功:', subFolderName, subFolderData.id);
                             }
                         } else {
                             currentParentId = subFolderMap.get(subFolderPath);
@@ -1380,7 +1263,6 @@ class GoogleDriveAPI {
             await new Promise((resolve) => {
                 storage.local.remove(keys, resolve);
             });
-            this._debug('令牌、文件夹ID和用户信息已清除');
         }
         
         // 如果请求移除权限，尝试移除 identity 权限
@@ -1398,7 +1280,6 @@ class GoogleDriveAPI {
         const runtime = this._getRuntimeAPI();
         if (!runtime || !runtime.permissions) {
             // 如果没有 permissions API，无法移除（可能是必需权限）
-            this._debug('无法移除 identity 权限（可能是必需权限）');
             return false;
         }
         
@@ -1413,12 +1294,10 @@ class GoogleDriveAPI {
             });
             
             if (!hasPermission) {
-                this._debug('identity 权限未授予，无需移除');
                 return true;
             }
             
             // 移除权限
-            this._debug('移除 identity 权限...');
             const removed = await new Promise((resolve) => {
                 if (runtime.permissions.remove) {
                     runtime.permissions.remove({ permissions: ['identity'] }, resolve);
@@ -1427,13 +1306,7 @@ class GoogleDriveAPI {
                 }
             });
             
-            if (removed) {
-                this._debug('identity 权限已移除');
-                return true;
-            } else {
-                this._debug('移除 identity 权限失败（可能是必需权限）');
-                return false;
-            }
+            return removed;
         } catch (error) {
             this._error('移除 identity 权限失败:', error);
             return false;

@@ -1,0 +1,593 @@
+/* Upload Drive Modal Styles - 上传到Google Drive模态框样式 */
+
+/* 上传方式选择 */
+.upload-mode-section {
+    margin-bottom: 15px;
+}
+
+.upload-mode-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.upload-mode-options {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+}
+
+.upload-mode-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 6px 4px;
+    border: 1.5px solid #e0e0e0;
+    border-radius: 6px;
+    background: #fff;
+    transition: all 0.2s ease;
+    position: relative;
+    flex: 1;
+    text-align: center;
+    min-width: 0;
+}
+
+.upload-mode-option:hover {
+    border-color: #6B8E23;
+    background: #f9faf9;
+}
+
+.upload-mode-option input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    margin: 0;
+    width: 0;
+    height: 0;
+}
+
+.upload-mode-option input[type="radio"]:checked + .upload-mode-icon {
+    color: #6B8E23;
+}
+
+.upload-mode-option input[type="radio"]:checked + .upload-mode-icon img {
+    filter: brightness(0) saturate(100%) invert(37%) sepia(93%) saturate(1234%) hue-rotate(60deg) brightness(95%) contrast(85%);
+}
+
+.upload-mode-option input[type="radio"]:checked ~ .upload-mode-content .upload-mode-title {
+    color: #6B8E23;
+    font-weight: 600;
+}
+
+.upload-mode-option.checked {
+    border-color: #6B8E23;
+    background: #f0f7f0;
+}
+
+.upload-mode-option.checked .upload-mode-icon {
+    color: #6B8E23;
+}
+
+.upload-mode-option.checked .upload-mode-icon img {
+    filter: brightness(0) saturate(100%) invert(37%) sepia(93%) saturate(1234%) hue-rotate(60deg) brightness(95%) contrast(85%);
+}
+
+.upload-mode-option.checked .upload-mode-content .upload-mode-title {
+    color: #6B8E23;
+    font-weight: 600;
+}
+
+.upload-mode-icon {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    margin-bottom: 3px;
+    color: #666;
+    transition: color 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.upload-mode-icon img {
+    transition: filter 0.2s ease;
+    filter: brightness(0) saturate(100%) invert(40%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(90%) contrast(100%);
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.upload-mode-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.upload-mode-title {
+    font-size: 12px;
+    font-weight: 500;
+    color: #333;
+    user-select: none;
+    transition: color 0.2s ease;
+    text-align: center;
+    line-height: 1.3;
+}
+
+/* 可见性选择样式 */
+.visibility-section {
+    margin-bottom: 10px;
+}
+
+.visibility-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.visibility-options {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+}
+
+.visibility-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 6px 4px;
+    border: 1.5px solid #e0e0e0;
+    border-radius: 6px;
+    background: #fff;
+    transition: all 0.2s ease;
+    position: relative;
+    flex: 1;
+    text-align: center;
+    min-width: 0;
+}
+
+.visibility-option:hover {
+    border-color: #6B8E23;
+    background: #f9faf9;
+}
+
+.visibility-option input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    margin: 0;
+    width: 0;
+    height: 0;
+}
+
+.visibility-option input[type="radio"]:checked + .visibility-icon {
+    color: #6B8E23;
+}
+
+.visibility-option input[type="radio"]:checked + .visibility-icon img {
+    filter: brightness(0) saturate(100%) invert(37%) sepia(93%) saturate(1234%) hue-rotate(60deg) brightness(95%) contrast(85%);
+}
+
+.visibility-option input[type="radio"]:checked ~ .visibility-content .visibility-title {
+    color: #6B8E23;
+    font-weight: 600;
+}
+
+.visibility-option.checked {
+    border-color: #6B8E23;
+    background: #f0f7f0;
+}
+
+.visibility-option.checked .visibility-icon {
+    color: #6B8E23;
+}
+
+.visibility-option.checked .visibility-icon img {
+    filter: brightness(0) saturate(100%) invert(37%) sepia(93%) saturate(1234%) hue-rotate(60deg) brightness(95%) contrast(85%);
+}
+
+.visibility-option.checked .visibility-content .visibility-title {
+    color: #6B8E23;
+    font-weight: 600;
+}
+
+.visibility-icon {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    margin-bottom: 3px;
+    color: #666;
+    transition: color 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.visibility-icon img {
+    transition: filter 0.2s ease;
+    filter: brightness(0) saturate(100%) invert(40%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(90%) contrast(100%);
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.visibility-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.visibility-title {
+    font-size: 12px;
+    font-weight: 500;
+    color: #333;
+    user-select: none;
+    transition: color 0.2s ease;
+    text-align: center;
+    line-height: 1.3;
+}
+
+.visibility-desc {
+    display: none;
+}
+
+/* 授权登录界面样式 */
+.auth-section {
+    padding: 20px 0;
+    text-align: center;
+}
+
+.auth-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.auth-icon {
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.auth-icon svg {
+    width: 100%;
+    height: 100%;
+}
+
+.auth-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+}
+
+.auth-desc {
+    font-size: 14px;
+    color: #666;
+    margin: 0;
+    line-height: 1.5;
+    max-width: 400px;
+}
+
+.google-signin-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 12px 24px;
+    background: #fff;
+    border: 1px solid #dadce0;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #3c4043;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 2px rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+    min-width: 200px;
+}
+
+.google-signin-btn:hover {
+    box-shadow: 0 1px 3px rgba(60, 64, 67, 0.3), 0 4px 8px 3px rgba(60, 64, 67, 0.15);
+    background: #f8f9fa;
+}
+
+.google-signin-btn:active {
+    box-shadow: 0 1px 2px rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+    background: #f1f3f4;
+}
+
+.google-signin-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.google-signin-btn .google-icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}
+
+/* 上传进度条 */
+#upload-progress {
+    margin-top: 10px;
+}
+
+.upload-progress-bar {
+    width: 100%;
+    height: 8px;
+    background: #e9ecef;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.upload-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #6B8E23 0%, #5a7a1a 50%, #6B8E23 100%);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+    width: 0%;
+    position: relative;
+    overflow: hidden;
+}
+
+.upload-progress-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.3) 50%, transparent 100%);
+    animation: progressShine 1.5s infinite;
+}
+
+@keyframes progressShine {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+.upload-progress-text {
+    font-size: 12px;
+    color: #6c757d;
+    text-align: center;
+}
+
+/* 上传结果 */
+#upload-result {
+    margin-top: 10px;
+}
+
+.upload-success {
+    font-size: 14px;
+    font-weight: 500;
+    color: #47630f;
+    margin-bottom: 8px;
+}
+
+.upload-link {
+    font-size: 12px;
+    color: #666;
+    word-break: break-all;
+}
+
+.upload-link a {
+    color: #007bff;
+    text-decoration: underline;
+}
+
+.upload-link a:hover {
+    color: #0056b3;
+}
+
+/* 深色模式支持 */
+@media (prefers-color-scheme: dark) {
+    .upload-mode-label {
+        color: #e8eaed;
+    }
+
+    .upload-mode-option {
+        background: #292a2d;
+        border-color: #3c4043;
+    }
+
+    .upload-mode-option:hover {
+        border-color: #8ab4f8;
+        background: #3c4043;
+    }
+
+    .upload-mode-option.checked {
+        border-color: #8ab4f8;
+        background: #1e3a5f;
+    }
+
+    .upload-mode-title {
+        color: #e8eaed;
+    }
+
+    .upload-mode-option.checked .upload-mode-content .upload-mode-title {
+        color: #8ab4f8;
+    }
+
+    .visibility-label {
+        color: #e8eaed;
+    }
+
+    .visibility-option {
+        background: #292a2d;
+        border-color: #3c4043;
+    }
+
+    .visibility-option:hover {
+        border-color: #8ab4f8;
+        background: #3c4043;
+    }
+
+    .visibility-option.checked {
+        border-color: #8ab4f8;
+        background: #1e3a5f;
+    }
+
+    .visibility-title {
+        color: #e8eaed;
+    }
+
+    .visibility-option.checked .visibility-content .visibility-title {
+        color: #8ab4f8;
+    }
+
+    .auth-title {
+        color: #e8eaed;
+    }
+
+    .auth-desc {
+        color: #9aa0a6;
+    }
+
+    .google-signin-btn {
+        background: #292a2d;
+        border: 1px solid #5f6368 !important; /* 使用更明显的边框颜色 */
+        color: #e8eaed;
+    }
+
+    .google-signin-btn:hover {
+        background: #3c4043;
+        border-color: #8ab4f8 !important; /* 悬停时使用蓝色边框 */
+    }
+
+    .google-signin-btn:active {
+        background: #5f6368;
+        border-color: #8ab4f8 !important;
+    }
+
+    .upload-progress-bar {
+        background: #3c4043;
+    }
+
+    .upload-progress-fill {
+        background: linear-gradient(90deg, #8ab4f8 0%, #5a9df8 50%, #8ab4f8 100%);
+    }
+
+    .upload-progress-text {
+        color: #9aa0a6;
+    }
+
+    .upload-success {
+        color: #8ab4f8;
+    }
+
+    .upload-link {
+        color: #9aa0a6;
+    }
+
+    .upload-link a {
+        color: #8ab4f8;
+    }
+
+    .upload-link a:hover {
+        color: #a8c5ff;
+    }
+
+    /* File Input Wrapper Dark Mode for Drive Upload */
+    .file-input-wrapper {
+        position: relative;
+        width: 100%;
+    }
+
+    .file-input-label {
+        border-color: #5f6368;
+        background: #292a2d;
+    }
+
+    @keyframes fileInputBreathingDark {
+        0%, 100% {
+            border-color: #5f6368;
+            box-shadow: 0 0 0 0 rgba(138, 180, 248, 0);
+        }
+        50% {
+            border-color: #8ab4f8;
+            box-shadow: 0 0 0 4px rgba(138, 180, 248, 0.15);
+        }
+    }
+
+    .file-input-label {
+        animation: fileInputBreathingDark 2s ease-in-out infinite;
+    }
+
+    .file-input-label:hover {
+        border-color: #8ab4f8;
+        background: #3c4043;
+        animation: none;
+    }
+
+    .file-input-text {
+        color: #8ab4f8;
+    }
+
+    .file-input-hint {
+        color: #9aa0a6;
+    }
+
+    .file-input-wrapper input[type="file"]:focus + .file-input-label {
+        border-color: #8ab4f8;
+        box-shadow: 0 0 0 2px rgba(138, 180, 248, 0.3);
+    }
+
+    .file-selected-display {
+        border-color: #8ab4f8;
+        background: #2d3a1f;
+    }
+
+    .file-selected-display:hover {
+        border-color: #a0c4ff;
+        background: #3c4a2a;
+    }
+
+    .file-selected-preview {
+        background: #3c4043;
+        border-color: #5f6368;
+    }
+
+    .file-selected-checkmark {
+        background: #8ab4f8;
+        border-color: #292a2d;
+    }
+
+    .file-selected-name {
+        color: #8ab4f8;
+    }
+
+    .file-selected-remove {
+        color: #8ab4f8;
+    }
+
+    .file-selected-remove:hover {
+        background: rgba(138, 180, 248, 0.15);
+        color: #a0c4ff;
+    }
+
+    .file-selected-remove:active {
+        background: rgba(138, 180, 248, 0.25);
+    }
+}
+

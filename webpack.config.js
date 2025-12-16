@@ -105,6 +105,14 @@ module.exports = {
           globOptions: {
             ignore: ['**/.*', '**/.*/**']
           }
+        },
+        // Note: modals are bundled into popup.js by webpack, no need to copy separately
+        {
+          from: 'src/styles',
+          to: 'styles',
+          globOptions: {
+            ignore: ['**/.*', '**/.*/**']
+          }
         }
       ]
     })

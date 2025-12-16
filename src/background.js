@@ -2,6 +2,8 @@
 
 const browserApi = require('./utils/browser-api');
 
+// 检查 runtime 是否可用
+if (browserApi.runtime && browserApi.runtime.onInstalled) {
 browserApi.runtime.onInstalled.addListener((details) => {
     // 创建右键菜单
     createContextMenus();
@@ -11,19 +13,46 @@ browserApi.runtime.onInstalled.addListener((details) => {
 
     // 卸载时触发调研问卷
     if (details.reason === browserApi.runtime.OnInstalledReason.INSTALL) {
-        browserApi.runtime.setUninstallURL('https://forms.gle/TbehvAbCm72vyxUG9');
+            try {
+                if (browserApi.runtime.setUninstallURL) {
+                    browserApi.runtime.setUninstallURL('https://forms.gle/TbehvAbCm72vyxUG9', () => {
+                        if (browserApi.runtime && browserApi.runtime.lastError) {
+                            console.warn('[Background] Error setting uninstall URL:', browserApi.runtime.lastError.message);
     }
 });
+                }
+            } catch (error) {
+                console.warn('[Background] Error setting uninstall URL:', error);
+            }
+        }
+    });
+}
 
 // 创建右键菜单
 function createContextMenus() {
+    // 检查 contextMenus API 是否可用
+    if (!browserApi.contextMenus) {
+        console.warn('[Background] contextMenus API not available');
+        return;
+    }
+    
     // 清除现有菜单
     browserApi.contextMenus.removeAll(() => {
+        // 检查是否有错误
+        if (browserApi.runtime && browserApi.runtime.lastError) {
+            console.warn('[Background] Error removing context menus:', browserApi.runtime.lastError.message);
+            return;
+        }
+        
         // 为选中文本创建菜单
         browserApi.contextMenus.create({
             id: 'generate-qr-selected-text',
             title: browserApi.i18n.getMessage('contextMenuGenerateText'),
             contexts: ['selection']
+        }, () => {
+            if (browserApi.runtime && browserApi.runtime.lastError) {
+                console.warn('[Background] Error creating context menu:', browserApi.runtime.lastError.message);
+            }
         });
         
         // 为链接创建菜单
@@ -31,6 +60,10 @@ function createContextMenus() {
             id: 'generate-qr-link',
             title: browserApi.i18n.getMessage('contextMenuGenerateLink'),
             contexts: ['link']
+        }, () => {
+            if (browserApi.runtime && browserApi.runtime.lastError) {
+                console.warn('[Background] Error creating context menu:', browserApi.runtime.lastError.message);
+            }
         });
         
         // 为图片创建菜单
@@ -38,6 +71,10 @@ function createContextMenus() {
             id: 'generate-qr-image',
             title: browserApi.i18n.getMessage('contextMenuGenerateImage'),
             contexts: ['image']
+        }, () => {
+            if (browserApi.runtime && browserApi.runtime.lastError) {
+                console.warn('[Background] Error creating context menu:', browserApi.runtime.lastError.message);
+            }
         });
         
         // 为页面创建菜单
@@ -45,6 +82,10 @@ function createContextMenus() {
             id: 'generate-qr-page',
             title: browserApi.i18n.getMessage('contextMenuGeneratePage'),
             contexts: ['page']
+        }, () => {
+            if (browserApi.runtime && browserApi.runtime.lastError) {
+                console.warn('[Background] Error creating context menu:', browserApi.runtime.lastError.message);
+            }
         });
 
         // 为扫描创建菜单
@@ -52,6 +93,10 @@ function createContextMenus() {
             id: 'scan-qr-image',
             title: browserApi.i18n.getMessage('contextMenuScanImage'),
             contexts: ['image']
+        }, () => {
+            if (browserApi.runtime && browserApi.runtime.lastError) {
+                console.warn('[Background] Error creating context menu:', browserApi.runtime.lastError.message);
+            }
         });
     });
 }
@@ -89,6 +134,7 @@ function getSelectionScript() {
 }
 
 // 处理右键菜单点击
+if (browserApi.contextMenus && browserApi.contextMenus.onClicked) {
 browserApi.contextMenus.onClicked.addListener(async (info, tab) => {
     let content = '';
     let type = 'url';
@@ -128,6 +174,7 @@ browserApi.contextMenus.onClicked.addListener(async (info, tab) => {
         await openPopupWithData(content, type);
     }
 });
+}
 
 // 打开弹出窗口并传递数据
 async function openPopupWithData(content, type) {
@@ -172,6 +219,7 @@ async function openScanModalWithUrl(imageUrl) {
 }
 
 // 处理快捷键
+if (browserApi.commands && browserApi.commands.onCommand) {
 browserApi.commands.onCommand.addListener(async (command) => {
     const [tab] = await browserApi.tabs.query({ active: true, currentWindow: true });
     
@@ -235,15 +283,26 @@ browserApi.commands.onCommand.addListener(async (command) => {
             break;
     }
 });
+}
 
 // 处理来自popup的消息
+if (browserApi.runtime && browserApi.runtime.onMessage) {
 browserApi.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === 'getPendingQRData') {
         // 获取待处理的二维码数据
         browserApi.storage.local.get('pendingQRData', (result) => {
+            if (browserApi.runtime && browserApi.runtime.lastError) {
+                console.error('[Background] Error getting pending QR data:', browserApi.runtime.lastError.message);
+                sendResponse(null);
+                return;
+            }
             sendResponse(result.pendingQRData);
             // 清除待处理数据
-            browserApi.storage.local.remove('pendingQRData');
+            browserApi.storage.local.remove('pendingQRData', () => {
+                if (browserApi.runtime && browserApi.runtime.lastError) {
+                    console.warn('[Background] Error removing pending QR data:', browserApi.runtime.lastError.message);
+                }
+            });
         });
         return true;
     }
@@ -251,9 +310,18 @@ browserApi.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === 'getPendingScanUrl') {
         // 获取待扫描的图片URL
         browserApi.storage.local.get('pendingScanUrl', (result) => {
+            if (browserApi.runtime && browserApi.runtime.lastError) {
+                console.error('[Background] Error getting pending scan URL:', browserApi.runtime.lastError.message);
+                sendResponse(null);
+                return;
+            }
             sendResponse(result.pendingScanUrl);
             // 清除待处理数据
-            browserApi.storage.local.remove('pendingScanUrl');
+            browserApi.storage.local.remove('pendingScanUrl', () => {
+                if (browserApi.runtime && browserApi.runtime.lastError) {
+                    console.warn('[Background] Error removing pending scan URL:', browserApi.runtime.lastError.message);
+                }
+            });
         });
         return true;
     }
@@ -265,6 +333,11 @@ browserApi.runtime.onMessage.addListener((request, sender, sendResponse) => {
             filename: request.filename,
             saveAs: false
         }, (downloadId) => {
+            if (browserApi.runtime && browserApi.runtime.lastError) {
+                console.error('[Background] Error downloading file:', browserApi.runtime.lastError.message);
+                sendResponse({ error: browserApi.runtime.lastError.message });
+                return;
+            }
             sendResponse({ downloadId: downloadId });
         });
         return true;
@@ -274,18 +347,30 @@ browserApi.runtime.onMessage.addListener((request, sender, sendResponse) => {
     // 但为了兼容性保留
     if (request.action === 'getTabInfo') {
         browserApi.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+            if (browserApi.runtime && browserApi.runtime.lastError) {
+                console.error('[Background] Error querying tabs:', browserApi.runtime.lastError.message);
+                sendResponse({ tab: null });
+                return;
+            }
             sendResponse({ tab: tabs[0] });
         });
         return true;
     }
 });
+}
 
 // 权限检查
+if (browserApi.permissions && browserApi.permissions.contains) {
 browserApi.permissions.contains({
     permissions: ['activeTab', 'contextMenus', 'storage', 'downloads', 'scripting']
 }, (result) => {
+        if (browserApi.runtime && browserApi.runtime.lastError) {
+            console.warn('[Background] Error checking permissions:', browserApi.runtime.lastError.message);
+            return;
+        }
     // 权限检查完成
 });
+}
 
 // 定期清理过期数据
 setInterval(async () => {

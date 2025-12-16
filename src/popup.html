@@ -6,6 +6,14 @@
     <meta name="description" content="A simple and efficient QR Code Generator extension for Chrome. Generate QR codes for current page URL, selected text, or custom content. Scan QR codes from images.">
     <title>QR Code Generator</title>
     <link rel="stylesheet" href="popup.css">
+    <!-- Modal Styles -->
+    <link rel="stylesheet" href="styles/modals/base-modal.css">
+    <link rel="stylesheet" href="styles/modals/edit-modal.css">
+    <link rel="stylesheet" href="styles/modals/scan-modal.css">
+    <link rel="stylesheet" href="styles/modals/history-modal.css">
+    <link rel="stylesheet" href="styles/modals/upload-drive-modal.css">
+    <link rel="stylesheet" href="styles/modals/user-info-modal.css">
+    <link rel="stylesheet" href="styles/modals/confirm-modal.css">
 </head>
 <body>
     <div class="container">
@@ -401,11 +409,6 @@
         </div>
     </div>
 
-    <script src="libs/qrcode.js"></script>
-    <script src="libs/qrcode-with-logo.js"></script>
-    <script src="libs/jsqr.js"></script>
-    <script src="libs/jsqr-improve.js"></script>
-    <script src="utils/google-drive-api.js"></script>
     <!-- 用户信息模态框 -->
     <div class="modal" id="user-info-modal" style="display: none;">
         <div class="modal-content user-info-modal-content">
@@ -438,6 +441,16 @@
         </div>
     </div>
 
+    <!-- External Libraries (loaded separately as they're not bundled by webpack) -->
+    <script src="libs/qrcode.js"></script>
+    <script src="libs/qrcode-with-logo.js"></script>
+    <script src="libs/jsqr.js"></script>
+    <script src="libs/jsqr-improve.js"></script>
+    <!-- 
+        Modal scripts and utils are bundled into popup.js by webpack via require(),
+        no need to load them separately in HTML
+    -->
+    <!-- Main popup script (includes all modal modules and utils via webpack) -->
     <script src="popup.js"></script>
 </body>
 </html> 

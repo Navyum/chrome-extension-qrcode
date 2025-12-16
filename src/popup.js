@@ -45,6 +45,7 @@ class QRCodePopup {
         // Google Drive API实例
         this.googleDriveAPI = new GoogleDriveAPI();
         this.selectedFiles = [];
+        this.defaultVisibility = 'anyone'; // 默认可见性
         
         this.init();
     }
@@ -151,6 +152,11 @@ class QRCodePopup {
         // 上传到Google Drive按钮
         document.getElementById('upload-drive-btn').addEventListener('click', () => {
             this.showUploadDriveModal();
+        });
+
+        // Google登录按钮
+        document.getElementById('google-signin-btn').addEventListener('click', async () => {
+            await this.handleGoogleSignIn();
         });
 
         // URL输入框事件
@@ -424,12 +430,20 @@ class QRCodePopup {
             }
             
             // 添加到生成历史记录
-            this.addToHistory('generated', {
-                content: content,
-                type: type,
-                faviconUrl: faviconUrl,
-                timestamp: new Date().toISOString()
-            });
+            // 跳过以下情况：
+            // 1. Google Drive链接（已在uploadFilesToDrive中添加）
+            // 2. chrome:// 开头的URL（浏览器内部页面）
+            const isGoogleDriveLink = type === 'url' && content.includes('drive.google.com');
+            const isChromeInternalUrl = type === 'url' && content.startsWith('chrome://');
+            
+            if (!isGoogleDriveLink && !isChromeInternalUrl) {
+                this.addToHistory('generated', {
+                    content: content,
+                    type: type,
+                    faviconUrl: faviconUrl,
+                    timestamp: new Date().toISOString()
+                });
+            }
         } catch (error) {
             // 检查是否是长度溢出错误
             // 增加对 TypeError 的检查，处理库未抛出明确 overflow 错误的情况
@@ -943,6 +957,15 @@ class QRCodePopup {
         // 文件选择事件
         document.getElementById('drive-upload-file').addEventListener('change', (e) => {
             this.handleFileSelect(e.target.files);
+        });
+
+        // 可见性选择事件
+        document.querySelectorAll('input[name="file-visibility"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                this.defaultVisibility = e.target.value;
+                this.updateVisibilityOptions(e.target.value);
+                this.saveSettings(); // 保存可见性选择
+            });
         });
 
         // 点击模态框外部关闭
@@ -1555,14 +1578,20 @@ class QRCodePopup {
     }
 
     async loadSettings() {
-        const result = await browserApi.storage.local.get('qrOptions');
+        const result = await browserApi.storage.local.get(['qrOptions', 'defaultVisibility']);
         if (result.qrOptions) {
             this.qrOptions = { ...this.qrOptions, ...result.qrOptions };
+        }
+        if (result.defaultVisibility) {
+            this.defaultVisibility = result.defaultVisibility;
         }
     }
 
     async saveSettings() {
-        await browserApi.storage.local.set({ qrOptions: this.qrOptions });
+        await browserApi.storage.local.set({ 
+            qrOptions: this.qrOptions,
+            defaultVisibility: this.defaultVisibility
+        });
     }
 
     // 历史记录相关方法
@@ -1618,12 +1647,23 @@ class QRCodePopup {
             });
             
             if (existingIndex !== -1) {
-                // 如果存在相同记录，移除旧记录
+                // 如果存在相同记录，更新时间和相关信息，然后移到开头
+                const existingRecord = this.history.generated[existingIndex];
+                existingRecord.timestamp = record.timestamp;
+                // 更新其他可能变化的字段
+                if (record.fileName) existingRecord.fileName = record.fileName;
+                if (record.fileType) existingRecord.fileType = record.fileType;
+                if (record.isGoogleDrive !== undefined) existingRecord.isGoogleDrive = record.isGoogleDrive;
+                if (record.faviconUrl) existingRecord.faviconUrl = record.faviconUrl;
+                
+                // 移除旧记录
                 this.history.generated.splice(existingIndex, 1);
+                // 添加到开头
+                this.history.generated.unshift(existingRecord);
+            } else {
+                // 添加新记录到开头
+                this.history.generated.unshift(record);
             }
-            
-            // 添加新记录到开头
-            this.history.generated.unshift(record);
             
             // 限制记录数量
             if (this.history.generated.length > maxRecords) {
@@ -1665,15 +1705,36 @@ class QRCodePopup {
 
         container.innerHTML = this.history.generated.map((record, index) => {
             const time = this.formatTime(record.timestamp);
-            const title = this.escapeHtml(this.truncateText(record.content, 60));
             const isUrl = this.isUrl(record.content);
             const dirAttr = isUrl ? 'dir="ltr"' : '';
             const copyText = this.escapeHtml(browserApi.i18n.getMessage('popup_history_action_copy'));
             
+            // 判断是否是Google Drive链接
+            const isGoogleDrive = record.isGoogleDrive || (isUrl && record.content.includes('drive.google.com'));
+            
+            // 确定标题显示内容
+            let title;
+            if (isGoogleDrive && record.fileName) {
+                title = this.escapeHtml(this.truncateText(record.fileName, 60));
+            } else {
+                title = this.escapeHtml(this.truncateText(record.content, 60));
+            }
+            
+            // 确定类型显示内容
+            let typeDisplay;
+            if (isGoogleDrive && record.fileType) {
+                typeDisplay = record.fileType.toUpperCase();
+            } else {
+                typeDisplay = record.type.toUpperCase();
+            }
 
-            // 使用保存的favicon URL或占位图标
+            // 使用Google Drive icon或保存的favicon URL或占位图标
             let iconHtml = '📱';
-            if (isUrl && record.faviconUrl) {
+            if (isGoogleDrive) {
+                // 使用Google Drive的PNG icon
+                iconHtml = `<img src="images/qr-icon/googledrive.png" alt="Google Drive" class="google-drive-icon" />
+                           <span class="fallback-icon" style="display: none;">📱</span>`;
+            } else if (isUrl && record.faviconUrl) {
                 iconHtml = `<img src="${this.escapeHtmlForAttribute(record.faviconUrl)}" alt="favicon" class="favicon" />
                            <span class="fallback-icon" style="display: none;">📱</span>`;
             } else if (isUrl) {
@@ -1682,14 +1743,14 @@ class QRCodePopup {
             }
             
             return `
-                <div class="history-item" data-index="${index}">
+                <div class="history-item" data-index="${index}" data-content="${this.escapeHtmlForAttribute(record.content)}" data-type="${this.escapeHtmlForAttribute(record.type)}" title="双击恢复此记录">
                     <div class="history-icon generate">
                         ${iconHtml}
                     </div>
                     <div class="history-content-wrapper">
                         <div class="history-title" ${dirAttr}>${title}</div>
                         <div class="history-subtitle">
-                            <span>${this.escapeHtml(record.type.toUpperCase())}</span>
+                            <span>${this.escapeHtml(typeDisplay)}</span>
                             <span class="history-time">${time}</span>
                         </div>
                     </div>
@@ -1703,8 +1764,147 @@ class QRCodePopup {
         // 绑定图片错误处理事件
         this.bindImageErrorHandlers(container);
         
+        // 绑定双击事件：跳转到popup页面并重新展示记录
+        container.querySelectorAll('.history-item').forEach(item => {
+            item.addEventListener('dblclick', (e) => {
+                e.stopPropagation();
+                const content = item.dataset.content;
+                const type = item.dataset.type;
+                if (content && type) {
+                    this.restoreHistoryRecord(content, type);
+                }
+            });
+        });
+        
+        // 绑定复制按钮事件
+        container.querySelectorAll('.copy-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const content = btn.dataset.content;
+                if (content) {
+                    navigator.clipboard.writeText(content).then(() => {
+                        this.showMessage(browserApi.i18n.getMessage('success_copied'), 'success');
+                    }).catch(() => {
+                        this.showMessage(browserApi.i18n.getMessage('error_copy_failed'), 'error');
+                    });
+                }
+            });
+        });
+        
         // 只为没有favicon URL的记录异步加载favicon
         this.loadFaviconsForHistory('generated');
+    }
+    
+    /**
+     * 恢复历史记录到popup页面
+     * @param {string} content - 记录内容
+     * @param {string} type - 记录类型
+     */
+    async restoreHistoryRecord(content, type) {
+        // 关闭历史记录模态框
+        document.getElementById('history-modal').style.display = 'none';
+        
+        // 更新当前内容和类型
+        this.currentContent = content;
+        this.currentType = type;
+        
+        // 更新URL输入框
+        const urlElement = document.getElementById('current-url');
+        if (urlElement && type === 'url') {
+            urlElement.value = content;
+        }
+        
+        // 查找历史记录以获取保存的favicon信息
+        let record = null;
+        if (type === 'url') {
+            // 在generated历史记录中查找
+            record = this.history.generated.find(item => {
+                if (item.type === 'url' && item.content === content) {
+                    return true;
+                }
+                // 对于URL类型，进行规范化比较
+                if (item.type === 'url') {
+                    return this.normalizeUrl(item.content) === this.normalizeUrl(content);
+                }
+                return false;
+            });
+        }
+        
+        // 更新页面标题和favicon
+        if (type === 'url') {
+            try {
+                const urlObj = new URL(content);
+                const titleElement = document.querySelector('.title');
+                if (titleElement) {
+                    // 如果是Google Drive文件且有文件名，显示文件名
+                    if (record && record.isGoogleDrive && record.fileName) {
+                        titleElement.textContent = record.fileName;
+                    } else {
+                        titleElement.textContent = urlObj.hostname;
+                    }
+                }
+                
+                // 更新favicon
+                const cloudIconElement = document.querySelector('.cloud-icon');
+                if (cloudIconElement) {
+                    const isGoogleDrive = record && (record.isGoogleDrive || content.includes('drive.google.com'));
+                    
+                    if (isGoogleDrive) {
+                        // 使用Google Drive图标
+                        cloudIconElement.innerHTML = `<img src="images/qr-icon/googledrive.png" alt="Google Drive" width="24" height="24" style="border-radius: 4px;" class="cloud-favicon">
+                            <div style="display:none" class="cloud-default-icon">${this.getDefaultIconSvg()}</div>`;
+                        
+                        // 绑定错误处理事件
+                        const img = cloudIconElement.querySelector('.cloud-favicon');
+                        const fallback = cloudIconElement.querySelector('.cloud-default-icon');
+                        if (img && fallback) {
+                            img.addEventListener('error', () => {
+                                img.style.display = 'none';
+                                fallback.style.display = 'inline-block';
+                            });
+                        }
+                    } else {
+                        // 使用保存的favicon或获取新的favicon
+                        let faviconUrl = null;
+                        if (record && record.faviconUrl) {
+                            faviconUrl = record.faviconUrl;
+                        } else {
+                            // 尝试获取favicon
+                            const faviconUrls = this.getFaviconUrl(content);
+                            if (faviconUrls && faviconUrls.length > 0) {
+                                faviconUrl = faviconUrls[0];
+                            }
+                        }
+                        
+                        if (faviconUrl) {
+                            cloudIconElement.innerHTML = `<img src="${this.escapeHtmlForAttribute(faviconUrl)}" alt="Favicon" width="24" height="24" style="border-radius: 4px;" class="cloud-favicon">
+                                <div style="display:none" class="cloud-default-icon">${this.getDefaultIconSvg()}</div>`;
+                            
+                            // 绑定错误处理事件
+                            const img = cloudIconElement.querySelector('.cloud-favicon');
+                            const fallback = cloudIconElement.querySelector('.cloud-default-icon');
+                            if (img && fallback) {
+                                img.addEventListener('error', () => {
+                                    img.style.display = 'none';
+                                    fallback.style.display = 'inline-block';
+                                });
+                            }
+                        } else {
+                            // 使用默认图标
+                            this.renderDefaultIcon(cloudIconElement);
+                        }
+                    }
+                }
+            } catch (error) {
+                // 静默处理
+            }
+        }
+        
+        // 生成二维码
+        this.createQRCode(content, type);
+        
+        // 聚焦到URL输入框
+        this.focusUrlInput();
     }
 
     renderScannedHistory() {
@@ -1740,7 +1940,7 @@ class QRCodePopup {
             }
             
             return `
-                <div class="history-item" data-index="${index}">
+                <div class="history-item" data-index="${index}" data-content="${this.escapeHtmlForAttribute(record.content)}" data-type="${this.escapeHtmlForAttribute(record.type)}" title="双击恢复此记录">
                     <div class="history-icon scan">
                         ${iconHtml}
                     </div>
@@ -1761,14 +1961,42 @@ class QRCodePopup {
         // 绑定图片错误处理事件
         this.bindImageErrorHandlers(container);
         
+        // 绑定双击事件：跳转到popup页面并重新展示记录
+        container.querySelectorAll('.history-item').forEach(item => {
+            item.addEventListener('dblclick', (e) => {
+                e.stopPropagation();
+                const content = item.dataset.content;
+                const type = item.dataset.type;
+                if (content && type) {
+                    this.restoreHistoryRecord(content, type);
+                }
+            });
+        });
+        
+        // 绑定复制按钮事件
+        container.querySelectorAll('.copy-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const content = btn.dataset.content;
+                if (content) {
+                    navigator.clipboard.writeText(content).then(() => {
+                        this.showMessage(browserApi.i18n.getMessage('success_copied'), 'success');
+                    }).catch(() => {
+                        this.showMessage(browserApi.i18n.getMessage('error_copy_failed'), 'error');
+                    });
+                }
+            });
+        });
+        
         // 只为没有favicon URL的记录异步加载favicon
         this.loadFaviconsForHistory('scanned');
     }
 
     bindImageErrorHandlers(container) {
         if (!container) return;
-        const favicons = container.querySelectorAll('.favicon');
-        favicons.forEach(img => {
+        // 处理 favicon 和 Google Drive icon 的错误
+        const images = container.querySelectorAll('.favicon, .google-drive-icon');
+        images.forEach(img => {
             img.addEventListener('error', () => {
                 img.style.display = 'none';
                 const fallback = img.nextElementSibling;
@@ -2083,22 +2311,101 @@ class QRCodePopup {
     }
 
     // Google Drive上传相关方法
+    /**
+     * 显示上传到Google Drive模态框
+     * 根据授权状态显示不同的界面
+     */
     async showUploadDriveModal() {
         document.getElementById('upload-drive-modal').style.display = 'flex';
         this.resetUploadModal();
         
-        // 检查是否已授权，如果已授权则加载用户信息
         try {
+            // 初始化Google Drive API
+            await this.googleDriveAPI.init();
+            
+            // 检查是否已授权
             const isAuthenticated = await this.googleDriveAPI.isAuthenticated();
+            
             if (isAuthenticated) {
-                await this.loadUserAvatar();
+                // 已授权，显示文件上传界面
+                this.showUploadSection();
             } else {
-                // 隐藏头像
-                document.getElementById('user-avatar-container').style.display = 'none';
+                // 未授权，显示授权登录界面
+                this.showAuthSection();
             }
         } catch (error) {
-            console.error('[Upload] 加载用户信息失败:', error);
-            document.getElementById('user-avatar-container').style.display = 'none';
+            console.error('[Upload] 初始化失败:', error);
+            this.showAuthSection();
+        }
+    }
+
+    /**
+     * 显示授权登录界面
+     */
+    showAuthSection() {
+        document.getElementById('auth-section').style.display = 'block';
+        document.getElementById('upload-section').style.display = 'none';
+        document.getElementById('start-upload').style.display = 'none';
+        document.getElementById('user-avatar-container').style.display = 'none';
+    }
+
+    /**
+     * 显示文件上传界面
+     */
+    showUploadSection() {
+        document.getElementById('auth-section').style.display = 'none';
+        document.getElementById('upload-section').style.display = 'block';
+        document.getElementById('start-upload').style.display = 'inline-block';
+        
+        // 恢复保存的可见性选择
+        const savedVisibility = this.defaultVisibility || 'anyone';
+        const visibilityRadio = document.querySelector(`input[name="file-visibility"][value="${savedVisibility}"]`);
+        if (visibilityRadio) {
+            visibilityRadio.checked = true;
+            this.updateVisibilityOptions(savedVisibility);
+        } else {
+            // 如果保存的值不存在，使用默认值
+            const defaultRadio = document.querySelector('input[name="file-visibility"][value="anyone"]');
+            if (defaultRadio) {
+                defaultRadio.checked = true;
+                this.updateVisibilityOptions('anyone');
+            }
+        }
+        
+        // 加载用户信息
+        this.loadUserAvatar();
+    }
+
+    /**
+     * 处理Google登录按钮点击
+     */
+    async handleGoogleSignIn() {
+        const signInBtn = document.getElementById('google-signin-btn');
+        const signInText = signInBtn.querySelector('span');
+        signInBtn.disabled = true;
+        if (signInText) {
+            signInText.textContent = browserApi.i18n.getMessage('popup_upload_auth_processing') || '正在登录...';
+        }
+        
+        try {
+            // 获取访问令牌（会触发授权流程）
+            await this.googleDriveAPI.getAccessToken();
+            console.log('[Upload] 授权成功');
+            
+            // 授权成功后，切换到文件上传界面
+            this.showUploadSection();
+            this.showMessage(browserApi.i18n.getMessage('success_auth_granted'), 'success');
+        } catch (authError) {
+            console.error('[Upload] 授权失败:', authError);
+            this.showMessage(
+                browserApi.i18n.getMessage('error_auth_failed', [authError.message || authError.toString()]), 
+                'error'
+            );
+        } finally {
+            signInBtn.disabled = false;
+            if (signInText) {
+                signInText.textContent = browserApi.i18n.getMessage('popup_upload_auth_button');
+            }
         }
     }
 
@@ -2112,11 +2419,35 @@ class QRCodePopup {
         document.getElementById('upload-result').style.display = 'none';
         document.getElementById('start-upload').disabled = false;
         
-        // 重置可见性选择为默认值
-        const ownerRadio = document.querySelector('input[name="file-visibility"][value="owner"]');
-        if (ownerRadio) {
-            ownerRadio.checked = true;
+        // 恢复保存的可见性选择
+        const savedVisibility = this.defaultVisibility || 'anyone';
+        const visibilityRadio = document.querySelector(`input[name="file-visibility"][value="${savedVisibility}"]`);
+        if (visibilityRadio) {
+            visibilityRadio.checked = true;
+            this.updateVisibilityOptions(savedVisibility);
+        } else {
+            // 如果保存的值不存在，使用默认值
+            const defaultRadio = document.querySelector('input[name="file-visibility"][value="anyone"]');
+            if (defaultRadio) {
+                defaultRadio.checked = true;
+                this.updateVisibilityOptions('anyone');
+            }
         }
+    }
+
+    /**
+     * 更新可见性选项的选中状态
+     * @param {string} selectedValue - 选中的可见性值
+     */
+    updateVisibilityOptions(selectedValue) {
+        document.querySelectorAll('.visibility-option').forEach(option => {
+            const radio = option.querySelector('input[type="radio"]');
+            if (radio && radio.value === selectedValue) {
+                option.classList.add('checked');
+            } else {
+                option.classList.remove('checked');
+            }
+        });
     }
     
     async loadUserAvatar() {
@@ -2225,6 +2556,11 @@ class QRCodePopup {
             document.getElementById('upload-progress').style.display = 'block';
             document.getElementById('upload-result').style.display = 'none';
             document.getElementById('start-upload').disabled = true;
+            
+            // 初始化进度条为0%
+            document.getElementById('upload-progress-fill').style.width = '0%';
+            document.getElementById('upload-progress-text').textContent = 
+                browserApi.i18n.getMessage('popup_upload_progress', [0, this.selectedFiles.length, '']);
 
             const totalFiles = this.selectedFiles.length;
             const uploadedFiles = [];
@@ -2331,11 +2667,38 @@ class QRCodePopup {
                         setTimeout(() => {
                             this.currentContent = file.shareLink;
                             this.currentType = 'url';
+                            
+                            // 更新URL输入框
                             const urlElement = document.getElementById('current-url');
                             if (urlElement) {
                                 urlElement.value = file.shareLink;
                             }
+                            
+                            // 更新页面标题为Google Drive链接的域名
+                            const titleElement = document.querySelector('.title');
+                            if (titleElement) {
+                                try {
+                                    const urlObj = new URL(file.shareLink);
+                                    titleElement.textContent = urlObj.hostname;
+                                } catch (error) {
+                                    titleElement.textContent = 'Google Drive';
+                                }
+                            }
+                            
                             console.log('[Upload] 调用createQRCode生成二维码');
+                            
+                            // 添加到历史记录，包含文件信息
+                            const fileExtension = file.name.split('.').pop().toLowerCase();
+                            this.addToHistory('generated', {
+                                content: file.shareLink,
+                                type: 'url',
+                                fileName: file.name,
+                                fileType: fileExtension,
+                                isGoogleDrive: true,
+                                faviconUrl: null, // Google Drive链接使用本地icon
+                                timestamp: new Date().toISOString()
+                            });
+                            
                             this.createQRCode(file.shareLink, 'url');
                             // 关闭上传模态框
                             document.getElementById('upload-drive-modal').style.display = 'none';
@@ -2383,11 +2746,38 @@ class QRCodePopup {
                         setTimeout(() => {
                             this.currentContent = firstFile.shareLink;
                             this.currentType = 'url';
+                            
+                            // 更新URL输入框
                             const urlElement = document.getElementById('current-url');
                             if (urlElement) {
                                 urlElement.value = firstFile.shareLink;
                             }
+                            
+                            // 更新页面标题为Google Drive链接的域名
+                            const titleElement = document.querySelector('.title');
+                            if (titleElement) {
+                                try {
+                                    const urlObj = new URL(firstFile.shareLink);
+                                    titleElement.textContent = urlObj.hostname;
+                                } catch (error) {
+                                    titleElement.textContent = 'Google Drive';
+                                }
+                            }
+                            
                             console.log('[Upload] 调用createQRCode生成二维码');
+                            
+                            // 添加到历史记录，包含文件信息
+                            const fileExtension = firstFile.name.split('.').pop().toLowerCase();
+                            this.addToHistory('generated', {
+                                content: firstFile.shareLink,
+                                type: 'url',
+                                fileName: firstFile.name,
+                                fileType: fileExtension,
+                                isGoogleDrive: true,
+                                faviconUrl: null, // Google Drive链接使用本地icon
+                                timestamp: new Date().toISOString()
+                            });
+                            
                             this.createQRCode(firstFile.shareLink, 'url');
                             // 关闭上传模态框
                             document.getElementById('upload-drive-modal').style.display = 'none';

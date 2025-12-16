@@ -22,10 +22,18 @@
         color: #9aa0a6;
     }
 
+    .url-input-container {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        width: 100%;
+    }
+
     .url-input {
         background: #292a2d;
         border-color: #3c4043;
         color: #e8eaed;
+        flex: 1;
     }
 
     .url-input:hover {
@@ -36,9 +44,136 @@
         border-color: #8ab4f8;
     }
 
-    .qr-container {
-        background: #ffffff; /* QR Code needs white background */
+    .drive-upload-icon-btn {
+        background: #292a2d;
+        border: 1px solid #3c4043;
+        border-radius: 4px;
+        padding: 6px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+        height: 32px;
+        width: 32px;
+        flex-shrink: 0;
+    }
+
+    .drive-upload-icon-btn:hover {
+        background: #3c4043;
+        border-color: #5f6368;
+    }
+
+    .drive-upload-icon-btn:active {
+        background: #5f6368;
+    }
+
+    .drive-upload-icon-btn svg {
+        display: block;
+    }
+
+    .visibility-label {
+        color: #e8eaed;
+    }
+
+    .visibility-option {
+        background: #292a2d;
         border-color: #3c4043;
+    }
+
+    .visibility-option:hover {
+        border-color: #5f6368;
+        background: #3c4043;
+    }
+
+    .visibility-option.checked {
+        border-color: #8ab4f8;
+        background: #1e3a5f;
+    }
+
+    .visibility-option.checked .visibility-icon {
+        color: #8ab4f8;
+    }
+
+    .visibility-option.checked .visibility-content .visibility-title {
+        color: #8ab4f8;
+    }
+
+    .visibility-option.checked .visibility-content .visibility-desc {
+        color: #9aa0a6;
+    }
+
+    .visibility-icon {
+        color: #9aa0a6;
+    }
+
+    .visibility-title {
+        color: #e8eaed;
+    }
+
+    .visibility-desc {
+        color: #9aa0a6;
+    }
+
+    .auth-title {
+        color: #e8eaed;
+    }
+
+    .auth-desc {
+        color: #9aa0a6;
+    }
+
+    .google-signin-btn {
+        background: #292a2d;
+        border-color: #3c4043;
+        color: #e8eaed;
+    }
+
+    .google-signin-btn:hover {
+        background: #3c4043;
+        border-color: #5f6368;
+    }
+
+    .google-signin-btn:active {
+        background: #5f6368;
+    }
+
+    .qr-container {
+        background: linear-gradient(145deg, #2a2a2a 0%, #1e1e1e 100%);
+        border-color: #3c4043;
+        box-shadow: 
+            0 8px 24px rgba(0, 0, 0, 0.4),
+            0 4px 8px rgba(0, 0, 0, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1),
+            inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+    }
+    
+    .qr-container::before {
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
+    }
+
+    .upload-progress-bar {
+        background: #3c4043;
+    }
+
+    .upload-progress-fill {
+        background: linear-gradient(90deg, #8ab4f8 0%, #5a9df8 50%, #8ab4f8 100%);
+    }
+
+    .upload-progress-text {
+        color: #9aa0a6;
+    }
+
+    .upload-success {
+        color: #8ab4f8;
+    }
+
+    .upload-link {
+        color: #e8eaed;
+    }
+
+    .upload-link a {
+        color: #8ab4f8;
     }
 
     .action-btn.secondary {
@@ -240,16 +375,19 @@
 body {
     width: 380px;
     height: 520px;
+    margin: 0;
+    padding: 0;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     font-size: 14px;
     line-height: 1.5;
     color: #333;
     background-color: #ffffff;
+    overflow: hidden;
 }
 
 /* Container */
 .container {
-    width: 340px; /* 黄金分割比：340 = 400 * 0.85 (黄金比例约0.618) */
+    width: 100%;
     min-height: 500px;
     background: white;
     border-radius: 0;
@@ -260,7 +398,7 @@ body {
 /* Header Section */
 .header {
     background: white;
-    padding: 15px;
+    padding: 20px;
     border-bottom: 1px solid #f0f0f0;
 }
 
@@ -313,6 +451,13 @@ body {
     line-height: 1.4;
 }
 
+.url-input-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+}
+
 .url-input {
     background: transparent;
     border: 1px solid #e8e8e8;
@@ -320,7 +465,7 @@ body {
     padding: 6px 10px;
     font-size: 13px;
     color: #666;
-    width: 100%;
+    flex: 1;
     outline: none;
     transition: border-color 0.2s ease;
     height: 32px;
@@ -334,6 +479,34 @@ body {
     border-color: #d0d0d0;
 }
 
+.drive-upload-icon-btn {
+    background: transparent;
+    border: 1px solid #e8e8e8;
+    border-radius: 4px;
+    padding: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    height: 32px;
+    width: 32px;
+    flex-shrink: 0;
+}
+
+.drive-upload-icon-btn:hover {
+    background: #f5f5f5;
+    border-color: #d0d0d0;
+}
+
+.drive-upload-icon-btn:active {
+    background: #e8e8e8;
+}
+
+.drive-upload-icon-btn svg {
+    display: block;
+}
+
 /* QR Code Display Section */
 .qr-display-section {
     padding: 15px 20px;
@@ -344,13 +517,39 @@ body {
     width: 220px; /* 调整QR码大小以适应新的容器宽度 */
     height: 220px;
     margin: 0 auto;
-    border: 2px solid #f0f0f0;
-    border-radius: 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 16px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: white;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+    box-shadow: 
+        0 8px 24px rgba(0, 0, 0, 0.12),
+        0 4px 8px rgba(0, 0, 0, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+    position: relative;
+    overflow: hidden;
+}
+
+.qr-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 50%;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.6) 0%, transparent 100%);
+    border-radius: 16px 16px 0 0;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.qr-container canvas,
+.qr-container img,
+.qr-container svg {
+    position: relative;
+    z-index: 2;
 }
 
 .qr-placeholder {
@@ -502,7 +701,7 @@ body {
     width: 90%;
     max-width: 400px;
     max-height: 80vh;
-    overflow-y: hidden;
+    overflow-y: auto;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
@@ -558,41 +757,122 @@ body {
 
 /* 可见性选择样式 */
 .visibility-section {
-    padding: 12px;
-    background: #f8f9fa;
-    border-radius: 8px;
-    border: 1px solid #e9ecef;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
+}
+
+.visibility-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
 }
 
 .visibility-options {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     gap: 8px;
 }
 
 .visibility-option {
     display: flex;
+    flex-direction: column;
     align-items: center;
+    justify-content: center;
     cursor: pointer;
-    padding: 8px;
-    border-radius: 4px;
-    transition: background-color 0.2s ease;
+    padding: 8px 6px;
+    border: 1.5px solid #e0e0e0;
+    border-radius: 6px;
+    background: #fff;
+    transition: all 0.2s ease;
+    position: relative;
+    flex: 1;
+    text-align: center;
+    min-width: 0;
 }
 
 .visibility-option:hover {
-    background-color: #e9ecef;
+    border-color: #6B8E23;
+    background: #f9faf9;
 }
 
 .visibility-option input[type="radio"] {
-    margin-right: 8px;
+    position: absolute;
+    opacity: 0;
     cursor: pointer;
+    margin: 0;
+    width: 0;
+    height: 0;
 }
 
-.visibility-option span {
-    font-size: 14px;
+.visibility-option input[type="radio"]:checked + .visibility-icon {
+    color: #6B8E23;
+}
+
+.visibility-option input[type="radio"]:checked ~ .visibility-content .visibility-title {
+    color: #6B8E23;
+    font-weight: 600;
+}
+
+.visibility-option input[type="radio"]:checked ~ .visibility-content .visibility-desc {
+    color: #5a7a1a;
+}
+
+.visibility-option.checked {
+    border-color: #6B8E23;
+    background: #f0f7f0;
+}
+
+.visibility-option.checked .visibility-icon {
+    color: #6B8E23;
+}
+
+.visibility-option.checked .visibility-content .visibility-title {
+    color: #6B8E23;
+    font-weight: 600;
+}
+
+.visibility-option.checked .visibility-content .visibility-desc {
+    color: #5a7a1a;
+}
+
+.visibility-icon {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    margin-bottom: 4px;
+    color: #666;
+    transition: color 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.visibility-icon svg {
+    width: 100%;
+    height: 100%;
+}
+
+.visibility-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.visibility-title {
+    font-size: 12px;
+    font-weight: 500;
     color: #333;
     user-select: none;
+    transition: color 0.2s ease;
+    text-align: center;
+    line-height: 1.3;
+}
+
+.visibility-desc {
+    display: none;
 }
 
 .close-btn {
@@ -614,6 +894,87 @@ body {
 }
 .modal-body {
     padding: 20px;
+}
+
+/* 授权登录界面样式 */
+.auth-section {
+    padding: 20px 0;
+    text-align: center;
+}
+
+.auth-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.auth-icon {
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.auth-icon svg {
+    width: 100%;
+    height: 100%;
+}
+
+.auth-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+}
+
+.auth-desc {
+    font-size: 14px;
+    color: #666;
+    margin: 0;
+    line-height: 1.5;
+    max-width: 400px;
+}
+
+.google-signin-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 12px 24px;
+    background: #fff;
+    border: 1px solid #dadce0;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #3c4043;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 2px rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+    min-width: 200px;
+}
+
+.google-signin-btn:hover {
+    box-shadow: 0 1px 3px rgba(60, 64, 67, 0.3), 0 4px 8px 3px rgba(60, 64, 67, 0.15);
+    background: #f8f9fa;
+}
+
+.google-signin-btn:active {
+    box-shadow: 0 1px 2px rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+    background: #f1f3f4;
+}
+
+.google-signin-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.google-signin-btn .google-icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
 }
 
 /* 扫描模态框更紧凑的内边距 */
@@ -1550,6 +1911,17 @@ input[type="color"]::-webkit-color-swatch {
     transition: opacity 0.3s ease;
 }
 
+.history-icon .google-drive-icon {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    display: block;
+}
+
+.history-item {
+    cursor: pointer;
+}
+
 .history-content-wrapper {
     flex: 1;
     min-width: 0;
@@ -1622,6 +1994,92 @@ input[type="color"]::-webkit-color-swatch {
 .empty-history-hint {
     font-size: 12px;
     opacity: 0.7;
+}
+
+/* 上传进度条样式 */
+#upload-progress {
+    margin-top: 16px;
+    margin-bottom: 0;
+}
+
+.upload-progress-bar {
+    width: 100%;
+    height: 8px;
+    background: #e9ecef;
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+    margin-bottom: 8px;
+}
+
+.upload-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #6B8E23 0%, #8BC34A 50%, #6B8E23 100%);
+    background-size: 200% 100%;
+    border-radius: 4px;
+    transition: width 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    animation: progressShine 2s linear infinite;
+}
+
+.upload-progress-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.3) 50%, transparent 100%);
+    animation: progressShimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes progressShine {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+@keyframes progressShimmer {
+    0%, 100% {
+        transform: translateX(-100%);
+    }
+    50% {
+        transform: translateX(100%);
+    }
+}
+
+.upload-progress-text {
+    font-size: 12px;
+    color: #666;
+    text-align: center;
+    margin-top: 4px;
+    line-height: 1.4;
+}
+
+.upload-success {
+    font-size: 14px;
+    color: #6B8E23;
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+
+.upload-link {
+    font-size: 13px;
+    color: #333;
+    word-break: break-all;
+}
+
+.upload-link a {
+    color: #6B8E23;
+    text-decoration: none;
+}
+
+.upload-link a:hover {
+    text-decoration: underline;
 }
 
 /* RTL Support adjustments */

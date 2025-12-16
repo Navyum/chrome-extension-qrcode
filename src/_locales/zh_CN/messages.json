@@ -107,9 +107,9 @@
   "error_load_image_failed_cors": { "message": "加载图片失败。图片可能被CORS策略阻止。请尝试上传图片文件代替。" },
   "popup_upload_icon_alt": { "message": "上传" },
   "popup_upload_button": { "message": "上传到Google Drive" },
-  "popup_upload_modal_title": { "message": "上传文件到Google Drive" },
+  "popup_upload_modal_title": { "message": "使用Google Drive存储并生成" },
   "popup_upload_choose_file": { "message": "选择文件" },
-  "popup_upload_start": { "message": "开始上传" },
+  "popup_upload_start": { "message": "开始生成" },
   "popup_upload_progress": { "message": "正在上传 ($1/$2): $3" },
   "popup_upload_progress_detail": { "message": "正在上传 ($1/$2): $3 - $4% ($5 MB)" },
   "popup_upload_completed": { "message": "上传完成 ($1/$2)" },
@@ -126,11 +126,17 @@
   "success_auth_granted": { "message": "授权成功，开始上传文件..." },
   "error_auth_failed": { "message": "授权失败：$1" },
   "error_network_failed": { "message": "网络错误，请检查网络连接后重试" },
-  "popup_upload_visibility_label": { "message": "文件可见性：" },
+  "popup_upload_visibility_label": { "message": "文件可见性" },
   "popup_upload_visibility_owner": { "message": "仅所有者" },
+  "popup_upload_visibility_owner_desc": { "message": "只有您可以访问" },
   "popup_upload_visibility_anyone": { "message": "任何有链接的人" },
-  "popup_upload_visibility_restricted": { "message": "受限" },
+  "popup_upload_visibility_anyone_desc": { "message": "可通过链接访问并生成二维码" },
+  "popup_upload_auth_title": { "message": "授权使用Google Drive" },
+  "popup_upload_auth_desc": { "message": "请先授权您的Google账户以使用文件上传功能" },
+  "popup_upload_auth_button": { "message": "使用Google账户" },
+  "popup_upload_auth_processing": { "message": "正在登录..." },
   "success_file_uploaded": { "message": "文件上传成功" },
-  "error_folder_not_found": { "message": "无法找到PixelQR文件夹" }
+  "error_folder_not_found": { "message": "无法找到PixelQR文件夹" },
+  "error_drive_init_failed": { "message": "初始化Google Drive失败：$1" }
 }
 

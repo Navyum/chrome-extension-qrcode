@@ -113,7 +113,7 @@
   "popup_upload_mode_label": { "message": "アップロードモード" },
   "popup_upload_mode_file": { "message": "ファイル" },
   "popup_upload_mode_folder": { "message": "フォルダ" },
-  "popup_upload_start": { "message": "生成を開始" },
+  "popup_upload_start": { "message": "開始" },
   "popup_upload_progress": { "message": "アップロード中 ($1/$2): $3" },
   "popup_upload_progress_detail": { "message": "アップロード中 ($1/$2): $3 - $4% ($5 MB)" },
   "popup_upload_completed": { "message": "アップロード完了 ($1/$2)" },

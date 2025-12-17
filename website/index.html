@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="PixelQR - Free QR Code Generator & Scanner. Create, customize, and scan QR codes offline. Support Chrome, Firefox, Edge browsers.">
+    <title>PixelQR - Free QR Code Generator & Scanner</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 60px 20px 40px;
+            color: white;
+        }
+
+        .logo {
+            width: 128px;
+            height: 128px;
+            margin: 0 auto 20px;
+            background: white;
+            border-radius: 24px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .tagline {
+            font-size: 1.3rem;
+            opacity: 0.95;
+            margin-bottom: 30px;
+        }
+
+        .badges {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 50px;
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .badge:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .main-content {
+            background: white;
+            border-radius: 20px;
+            padding: 50px 40px;
+            margin-top: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .section {
+            margin-bottom: 50px;
+        }
+
+        .section:last-child {
+            margin-bottom: 0;
+        }
+
+        h2 {
+            font-size: 2rem;
+            color: #667eea;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            color: #764ba2;
+            margin: 30px 0 15px;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .feature-card {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 12px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.2);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+
+        .feature-card h4 {
+            font-size: 1.2rem;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .feature-card p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .highlight {
+            background: linear-gradient(120deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin: 30px 0;
+        }
+
+        .highlight h3 {
+            color: white;
+            margin-top: 0;
+        }
+
+        ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        ul li {
+            padding: 10px 0;
+            padding-left: 30px;
+            position: relative;
+        }
+
+        ul li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #667eea;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .cta-section {
+            text-align: center;
+            padding: 50px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            color: white;
+            margin-top: 50px;
+        }
+
+        .cta-section h2 {
+            color: white;
+            border-bottom: 3px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .cta-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 15px 35px;
+            background: white;
+            color: #667eea;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: white;
+            margin-top: 40px;
+        }
+
+        footer a {
+            color: white;
+            text-decoration: underline;
+            margin: 0 10px;
+        }
+
+        footer a:hover {
+            opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .tagline {
+                font-size: 1.1rem;
+            }
+
+            .main-content {
+                padding: 30px 20px;
+            }
+
+            .features {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .main-content {
+                background: #1a1a1a;
+                color: #e0e0e0;
+            }
+
+            .feature-card {
+                background: #2a2a2a;
+            }
+
+            .feature-card h4 {
+                color: #e0e0e0;
+            }
+
+            .feature-card p {
+                color: #b0b0b0;
+            }
+
+            h2 {
+                color: #8ab4f8;
+            }
+
+            h3 {
+                color: #a78bfa;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <img src="assets/icon.png" alt="PixelQR Logo">
+            </div>
+            <h1>PixelQR</h1>
+            <p class="tagline">Free QR Code Generator & Scanner - Create, Customize, and Scan QR Codes Offline</p>
+            <div class="badges">
+                <a href="https://chrome.google.com/webstore" class="badge" target="_blank">
+                    <span>🌐</span>
+                    <span>Chrome Web Store</span>
+                </a>
+                <a href="https://addons.mozilla.org" class="badge" target="_blank">
+                    <span>🦊</span>
+                    <span>Firefox Add-ons</span>
+                </a>
+                <a href="https://microsoftedge.microsoft.com/addons" class="badge" target="_blank">
+                    <span>🔷</span>
+                    <span>Edge Add-ons</span>
+                </a>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <section class="section">
+                <h2>🌟 Features</h2>
+                <div class="features">
+                    <div class="feature-card">
+                        <div class="feature-icon">📱</div>
+                        <h4>QR Code Generation</h4>
+                        <p>Generate QR codes for current page URLs, selected text, or custom content. Support keyboard shortcuts and right-click context menu.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🎨</div>
+                        <h4>Customization</h4>
+                        <p>Customize QR code colors, size, and add logos. Built-in 12 popular platform logos or upload your own custom logo.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🔍</div>
+                        <h4>QR Code Scanner</h4>
+                        <p>Scan QR codes from local images or remote URLs. Automatically identify content type and display results.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">☁️</div>
+                        <h4>Google Drive Integration</h4>
+                        <p>Upload files or folders to Google Drive and generate QR codes for sharing links. Control file visibility settings.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📚</div>
+                        <h4>History Management</h4>
+                        <p>Automatically save generation and scan history. Quickly access and reuse previous QR codes.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🌙</div>
+                        <h4>Dark Mode Support</h4>
+                        <p>Automatically adapt to system theme. Beautiful dark mode interface for comfortable viewing.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section">
+                <h2>✨ Key Highlights</h2>
+                <div class="highlight">
+                    <h3>🔒 Privacy First</h3>
+                    <p>Core QR code generation and scanning features work completely offline. No data is collected or uploaded. Google Drive integration is optional and only used when you actively choose to use it.</p>
+                </div>
+                <div class="highlight">
+                    <h3>⚡ Fast & Efficient</h3>
+                    <p>Lightweight extension with fast performance. Generate QR codes instantly without any delay. All processing happens locally in your browser.</p>
+                </div>
+                <div class="highlight">
+                    <h3>🌍 Multi-Language Support</h3>
+                    <p>Support for 12 languages including English, Chinese, Japanese, Korean, Spanish, French, German, Italian, Portuguese, Russian, Arabic, and Persian. Automatically detects browser language.</p>
+                </div>
+            </section>
+
+            <section class="section">
+                <h2>🚀 Quick Start</h2>
+                <h3>Installation</h3>
+                <ul>
+                    <li>Install from Chrome Web Store, Firefox Add-ons, or Edge Add-ons</li>
+                    <li>Click the extension icon in your browser toolbar</li>
+                    <li>QR code for the current page will be generated automatically</li>
+                </ul>
+
+                <h3>Keyboard Shortcuts</h3>
+                <ul>
+                    <li><strong>Ctrl+Shift+Q</strong> (Windows/Linux) or <strong>Cmd+Shift+Q</strong> (Mac): Generate QR code for current page</li>
+                    <li><strong>Ctrl+Shift+T</strong> (Windows/Linux) or <strong>Cmd+Shift+T</strong> (Mac): Generate QR code for selected text</li>
+                </ul>
+
+                <h3>Usage Tips</h3>
+                <ul>
+                    <li>Right-click on any text, link, or image to generate QR code</li>
+                    <li>Customize QR code appearance in the Edit modal</li>
+                    <li>Upload files to Google Drive and generate sharing QR codes</li>
+                    <li>View history to quickly access previous QR codes</li>
+                </ul>
+            </section>
+
+            <section class="section">
+                <h2>📋 Supported Browsers</h2>
+                <ul>
+                    <li>✅ Google Chrome (Manifest V3)</li>
+                    <li>✅ Mozilla Firefox (Manifest V2)</li>
+                    <li>✅ Microsoft Edge (Manifest V3)</li>
+                </ul>
+            </section>
+        </div>
+
+        <div class="cta-section">
+            <h2>Ready to Get Started?</h2>
+            <p style="font-size: 1.2rem; margin-bottom: 20px;">Install PixelQR now and start creating QR codes in seconds!</p>
+            <div class="cta-buttons">
+                <a href="https://chrome.google.com/webstore" class="btn" target="_blank">Install for Chrome</a>
+                <a href="https://addons.mozilla.org" class="btn" target="_blank">Install for Firefox</a>
+                <a href="https://microsoftedge.microsoft.com/addons" class="btn" target="_blank">Install for Edge</a>
+            </div>
+        </div>
+
+        <footer>
+            <p>&copy; 2024 PixelQR. All rights reserved.</p>
+            <p style="margin-top: 10px;">
+                <a href="privacy-policy.html">Privacy Policy</a>
+                <a href="https://github.com" target="_blank">GitHub</a>
+                <a href="mailto:support@example.com">Support</a>
+            </p>
+        </footer>
+    </div>
+</body>
+</html>
+

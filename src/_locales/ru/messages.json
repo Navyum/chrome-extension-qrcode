@@ -113,7 +113,7 @@
   "popup_upload_mode_label": { "message": "Режим загрузки" },
   "popup_upload_mode_file": { "message": "Файл" },
   "popup_upload_mode_folder": { "message": "Папка" },
-  "popup_upload_start": { "message": "Начать генерацию" },
+  "popup_upload_start": { "message": "Начать" },
   "popup_upload_progress": { "message": "Загрузка ($1/$2): $3" },
   "popup_upload_progress_detail": { "message": "Загрузка ($1/$2): $3 - $4% ($5 МБ)" },
   "popup_upload_completed": { "message": "Загрузка завершена ($1/$2)" },

@@ -113,7 +113,7 @@
   "popup_upload_mode_label": { "message": "Modalità di caricamento" },
   "popup_upload_mode_file": { "message": "File" },
   "popup_upload_mode_folder": { "message": "Cartella" },
-  "popup_upload_start": { "message": "Inizia la generazione" },
+  "popup_upload_start": { "message": "Inizia" },
   "popup_upload_progress": { "message": "Caricamento ($1/$2): $3" },
   "popup_upload_progress_detail": { "message": "Caricamento ($1/$2): $3 - $4% ($5 MB)" },
   "popup_upload_completed": { "message": "Caricamento completato ($1/$2)" },

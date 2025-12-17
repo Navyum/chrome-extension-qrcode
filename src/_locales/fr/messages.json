@@ -113,7 +113,7 @@
   "popup_upload_mode_label": { "message": "Mode de téléchargement" },
   "popup_upload_mode_file": { "message": "Fichier" },
   "popup_upload_mode_folder": { "message": "Dossier" },
-  "popup_upload_start": { "message": "Commencer la génération" },
+  "popup_upload_start": { "message": "Commencer" },
   "popup_upload_progress": { "message": "Téléchargement ($1/$2): $3" },
   "popup_upload_progress_detail": { "message": "Téléchargement ($1/$2): $3 - $4% ($5 MB)" },
   "popup_upload_completed": { "message": "Téléchargement terminé ($1/$2)" },

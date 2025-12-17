@@ -290,12 +290,52 @@ class GoogleDriveAPI {
         const identity = this._getIdentityAPI();
         if (!identity) {
             const error = new Error(
-                'Identity API not available. This feature requires Chrome or Edge browser.'
+                'Identity API not available. This feature requires Chrome, Edge, or Firefox browser with identity permission.'
             );
             this._error(error.message);
             throw error;
         }
         
+        // 检测是否为 Firefox（使用 Promise-based API）
+        const isFirefox = typeof browser !== 'undefined' && browser.identity;
+        
+        if (isFirefox) {
+            // Firefox 使用 Promise-based API
+            try {
+                // 获取重定向URL
+                const redirectUrl = identity.getRedirectURL();
+                
+                // 构建授权URL
+                const authUrl = this._buildAuthUrl(redirectUrl);
+                
+                // Firefox 的 launchWebAuthFlow 返回 Promise
+                const finalRedirectUrl = await identity.launchWebAuthFlow({
+                    url: authUrl,
+                    interactive: true
+                });
+                
+                if (!finalRedirectUrl) {
+                    this._error('未返回重定向URL');
+                    throw new Error('No redirect URL returned');
+                }
+                
+                // 提取访问令牌
+                const { accessToken, expiresIn } = this._extractTokenFromRedirect(finalRedirectUrl);
+                
+                this.accessToken = accessToken;
+                // 设置过期时间（提前缓冲时间）
+                this.tokenExpiry = Date.now() + (expiresIn * 1000 - DRIVE_API_CONFIG.TOKEN_EXPIRY_BUFFER);
+                
+                // 保存令牌到storage
+                this._saveTokenToStorage(accessToken, this.tokenExpiry);
+                
+                return accessToken;
+            } catch (error) {
+                this._error('解析重定向URL失败:', error);
+                throw error;
+            }
+        } else {
+            // Chrome/Edge 使用回调式 API
         return new Promise((resolve, reject) => {
             // 获取重定向URL
             const redirectUrl = identity.getRedirectURL();
@@ -339,6 +379,7 @@ class GoogleDriveAPI {
                 }
             });
         });
+        }
     }
     
     /**

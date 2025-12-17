@@ -113,7 +113,7 @@
   "popup_upload_mode_label": { "message": "Upload-Modus" },
   "popup_upload_mode_file": { "message": "Datei" },
   "popup_upload_mode_folder": { "message": "Ordner" },
-  "popup_upload_start": { "message": "Generierung starten" },
+  "popup_upload_start": { "message": "starten" },
   "popup_upload_progress": { "message": "Lädt hoch ($1/$2): $3" },
   "popup_upload_progress_detail": { "message": "Lädt hoch ($1/$2): $3 - $4% ($5 MB)" },
   "popup_upload_completed": { "message": "Upload abgeschlossen ($1/$2)" },

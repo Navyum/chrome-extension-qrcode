@@ -8,7 +8,8 @@
     "activeTab",
     "contextMenus",
     "storage",
-    "downloads"
+    "downloads",
+    "identity"
   ],
 
   "browser_specific_settings": {
@@ -41,6 +42,13 @@
   "background": {
     "scripts": ["background.js"],
     "persistent": false
+  },
+  "oauth2": {
+    "client_id": "218937796520-mparpteknls03pef340tkouv6bn6u11m.apps.googleusercontent.com",
+    "scopes": [
+      "https://www.googleapis.com/auth/drive.file",
+      "https://www.googleapis.com/auth/userinfo.profile"
+    ]
   },
   
   "commands": {

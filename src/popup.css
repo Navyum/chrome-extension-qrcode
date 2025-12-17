@@ -594,35 +594,6 @@ body {
     border-color: #ccc;
 }
 
-/* Modal footer buttons */
-.modal-footer {
-    display: flex;
-    gap: 8px;
-    padding: 16px 20px;
-    border-top: 1px solid #e9ecef;
-    flex-shrink: 0;
-}
-
-.modal-footer .action-btn {
-    flex: 1;
-    padding: 10px 20px;
-    justify-content: center;
-    min-width: 80px;
-    height: 36px;
-    font-size: 14px;
-    border-radius: 6px;
-}
-
-.modal-footer .action-btn:not(.secondary) {
-    background: #47630f;
-    color: white;
-    border: none;
-}
-
-.modal-footer .action-btn:not(.secondary):hover {
-    background: #5A7A1E;
-}
-
 .action-btn .icon {
     width: 18px;
     height: 18px;

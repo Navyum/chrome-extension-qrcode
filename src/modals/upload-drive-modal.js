@@ -733,19 +733,40 @@ class UploadDriveModal extends BaseModal {
         if (dateFolderInfo && (this.selectedFiles.length > 1 || this.selectedFolders.length > 0)) {
             // 多文件上传或文件夹上传：使用文件夹链接
             qrLink = dateFolderInfo.webViewLink || dateFolderInfo.shareLink;
-            displayText = browserApi.i18n.getMessage('popup_upload_folder_link') || '文件夹链接';
+            displayText = browserApi.i18n.getMessage('popup_upload_folder_link') || 'Folder Link';
         } else if (uploadedFiles.length > 0) {
             // 单文件上传：使用文件链接
             qrLink = uploadedFiles[0].webViewLink || uploadedFiles[0].shareLink;
-            displayText = browserApi.i18n.getMessage('popup_upload_file_link') || '文件链接';
+            displayText = browserApi.i18n.getMessage('popup_upload_file_link') || 'File Link';
         }
         
         if (successMessage) {
-            if (this.selectedFiles.length > 1 || this.selectedFolders.length > 0) {
-                successMessage.textContent = browserApi.i18n.getMessage('popup_upload_files_in_folder') || '文件已上传到文件夹';
+            let messageText = '';
+            
+            // 判断上传类型和文件个数
+            if (this.selectedFolders.length > 0) {
+                // 文件夹上传：显示文件夹内的文件个数
+                const folder = this.selectedFolders[0];
+                const fileCount = folder.files ? folder.files.length : 0;
+                if (fileCount > 0) {
+                    messageText = browserApi.i18n.getMessage('popup_upload_success_multiple', [fileCount]) || `Successfully uploaded ${fileCount} files!`;
+                } else {
+                    messageText = browserApi.i18n.getMessage('success_file_uploaded') || 'File uploaded successfully';
+                }
+            } else if (this.selectedFiles.length > 1) {
+                // 多文件上传：显示实际上传成功的文件个数
+                const successCount = uploadedFiles.length;
+                messageText = browserApi.i18n.getMessage('popup_upload_success_multiple', [successCount]) || `Successfully uploaded ${successCount} files!`;
+            } else if (uploadedFiles.length === 1) {
+                // 单文件上传：显示文件名
+                const fileName = uploadedFiles[0].name || 'file';
+                messageText = browserApi.i18n.getMessage('popup_upload_success', [fileName]) || `File "${fileName}" uploaded successfully!`;
             } else {
-                successMessage.textContent = browserApi.i18n.getMessage('popup_upload_files') || '文件上传成功';
+                // 默认消息
+                messageText = browserApi.i18n.getMessage('success_file_uploaded') || 'File uploaded successfully';
             }
+            
+            successMessage.textContent = messageText;
         }
         
         if (linkDisplay && qrLink) {
@@ -759,6 +780,36 @@ class UploadDriveModal extends BaseModal {
             link.textContent = qrLink;
             
             linkDisplay.appendChild(link);
+            
+            // 显示成功消息提示，包含文件个数信息
+            if (this.showMessage) {
+                let uploadSuccessMsg = '';
+                
+                // 判断上传类型和文件个数
+                if (this.selectedFolders.length > 0) {
+                    // 文件夹上传：显示文件夹内的文件个数
+                    const folder = this.selectedFolders[0];
+                    const fileCount = folder.files ? folder.files.length : 0;
+                    if (fileCount > 0) {
+                        uploadSuccessMsg = browserApi.i18n.getMessage('popup_upload_success_multiple', [fileCount]) || `Successfully uploaded ${fileCount} files!`;
+                    } else {
+                        uploadSuccessMsg = browserApi.i18n.getMessage('success_file_uploaded') || 'File uploaded successfully';
+                    }
+                } else if (this.selectedFiles.length > 1) {
+                    // 多文件上传：显示实际上传成功的文件个数
+                    const successCount = uploadedFiles.length;
+                    uploadSuccessMsg = browserApi.i18n.getMessage('popup_upload_success_multiple', [successCount]) || `Successfully uploaded ${successCount} files!`;
+                } else if (uploadedFiles.length === 1) {
+                    // 单文件上传：显示文件名
+                    const fileName = uploadedFiles[0].name || 'file';
+                    uploadSuccessMsg = browserApi.i18n.getMessage('popup_upload_success', [fileName]) || `File "${fileName}" uploaded successfully!`;
+                } else {
+                    // 默认消息
+                    uploadSuccessMsg = browserApi.i18n.getMessage('success_file_uploaded') || 'File uploaded successfully';
+                }
+                
+                this.showMessage(uploadSuccessMsg, 'success');
+            }
         }
         
         // 生成二维码
@@ -777,6 +828,11 @@ class UploadDriveModal extends BaseModal {
                 timestamp: new Date().toISOString()
             });
         }
+        
+        // 延迟关闭模态框，确保二维码已生成并显示在popup页面
+        setTimeout(() => {
+            this.hide();
+        }, 500);
     }
     
     /**

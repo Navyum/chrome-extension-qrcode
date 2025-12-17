@@ -551,11 +551,12 @@ class ScanModal extends BaseModal {
         
         // 添加有效性指示
         if (result.isValid === false) {
-            contentElement.style.color = '#dc3545';
-            contentElement.style.fontStyle = 'italic';
+            contentElement.classList.add('invalid');
         } else {
-            contentElement.style.color = '#333';
-            contentElement.style.fontStyle = 'normal';
+            contentElement.classList.remove('invalid');
+            // 移除内联样式，让 CSS 处理颜色（支持深色模式）
+            contentElement.style.color = '';
+            contentElement.style.fontStyle = '';
         }
         
         // 显示结果区域

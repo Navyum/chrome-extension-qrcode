@@ -239,6 +239,11 @@
     overflow-y: auto;
 }
 
+.text-value.invalid {
+    color: #dc3545;
+    font-style: italic;
+}
+
 /* 扫描结果区域保持合适的大小 */
 #scan-modal .scan-result {
     max-width: 100%;
@@ -311,6 +316,11 @@
         background: #3c4043;
         border-color: #5f6368;
         color: #e8eaed;
+    }
+
+    .text-value.invalid {
+        color: #f28b82;
+        font-style: italic;
     }
 
     /* File Input Wrapper Dark Mode */

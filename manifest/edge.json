@@ -13,9 +13,7 @@
     "favicon"
   ],
   "optional_permissions": [
-    "identity",
-    "videoCapture",
-    "audioCapture"
+    "identity"
   ],
   
   "action": {

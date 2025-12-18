@@ -309,6 +309,10 @@ class QRCodePopup {
             }
         });
 
+        document.getElementById('help-btn').addEventListener('click', () => {
+            this.openHelp();
+        });
+
         document.getElementById('star-btn').addEventListener('click', () => {
             this.rateExtension();
         });
@@ -1330,6 +1334,11 @@ class QRCodePopup {
         browserApi.tabs.create({ url: reviewUrl });
         this.showMessage(browserApi.i18n.getMessage('success_thanks_rating'), 'success');
     }
+    openHelp() {
+        let helpUrl = 'https://qr.camscanner.top/';
+        browserApi.tabs.create({ url: helpUrl });
+    }
+
     openFeedback() {
         let supportUrl = 'https://docs.google.com/forms/d/e/1FAIpQLSdHfHweueYDQePclu-HRMOq0zpTYyDFi9hgcMoRJuh1sDTOdg/viewform?usp=dialog';
         browserApi.tabs.create({ url: supportUrl });

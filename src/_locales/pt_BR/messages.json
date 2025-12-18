@@ -21,6 +21,7 @@
   "popup_edit_button": { "message": "Editar QR Code" },
   "popup_scan_button": { "message": "Ler QR Code" },
   "popup_history_button_title": { "message": "Histórico" },
+  "popup_help_button_title": { "message": "Ajuda" },
   "popup_rate_button_title": { "message": "Avaliar com 5 estrelas" },
   "popup_feedback_button_title": { "message": "Feedback" },
   "popup_edit_modal_title": { "message": "Editar QR Code" },

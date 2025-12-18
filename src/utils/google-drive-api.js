@@ -1,6 +1,16 @@
 // Google Drive API 工具类
 // 用于处理文件上传到Google Drive并获取共享链接
 
+// 引入 browserApi 适配器
+let browserApi;
+if (typeof require !== 'undefined') {
+    try {
+        browserApi = require('./browser-api');
+    } catch (e1) {
+
+    }
+}
+
 /**
  * Google Drive API配置常量
  */
@@ -76,20 +86,30 @@ class GoogleDriveAPI {
     }
     
     /**
-     * 错误日志输出
+     * 安全地记录错误日志（不泄露敏感信息）
      * @private
-     * @param {...any} args - 要输出的参数
+     * @param {string} message - 错误消息
+     * @param {Error|any} [error] - 错误对象（可选）
      */
-    _error(...args) {
-        // Error logging disabled
+    _error(message, error = null) {
+        // 仅记录关键错误，避免泄露敏感信息
+        if (typeof console !== 'undefined' && console.error) {
+            // 只记录错误消息，不记录可能包含敏感信息的错误对象
+            console.error('[GoogleDriveAPI]', message);
+        }
     }
     
     /**
      * 安全地获取Chrome或Firefox的runtime API
      * @private
      * @returns {object|null} runtime API对象或null
-     */
+     **/
     _getRuntimeAPI() {
+        // 优先使用 browserApi
+        if (browserApi && browserApi.runtime) {
+            return browserApi.runtime;
+        }
+        // 回退到直接访问
         if (typeof chrome !== 'undefined' && chrome.runtime) {
             return chrome.runtime;
         }
@@ -105,12 +125,19 @@ class GoogleDriveAPI {
      * @returns {object|null} identity API对象或null
      */
     _getIdentityAPI() {
+        // 优先使用 browserApi
+        if (browserApi && browserApi.identity) {
+            return browserApi.identity;
+        }
+        
+        // 回退到直接访问
         if (typeof chrome !== 'undefined' && chrome.identity) {
             return chrome.identity;
         }
         if (typeof browser !== 'undefined' && browser.identity) {
             return browser.identity;
         }
+        
         return null;
     }
     
@@ -120,6 +147,11 @@ class GoogleDriveAPI {
      * @returns {object|null} storage API对象或null
      */
     _getStorageAPI() {
+        // 优先使用 browserApi
+        if (browserApi && browserApi.storage) {
+            return browserApi.storage;
+        }
+        // 回退到直接访问
         if (typeof chrome !== 'undefined' && chrome.storage) {
             return chrome.storage;
         }
@@ -135,6 +167,11 @@ class GoogleDriveAPI {
      * @returns {object|undefined} lastError对象或undefined
      */
     _getLastError() {
+        // 优先使用 browserApi
+        if (browserApi && browserApi.runtime && browserApi.runtime.lastError) {
+            return browserApi.runtime.lastError;
+        }
+        // 回退到直接访问
         const chromeRuntime = typeof chrome !== 'undefined' ? chrome.runtime : null;
         const browserRuntime = typeof browser !== 'undefined' ? browser.runtime : null;
         return chromeRuntime?.lastError || browserRuntime?.lastError;
@@ -164,7 +201,7 @@ class GoogleDriveAPI {
             
             this.clientId = manifest.oauth2.client_id;
         } catch (error) {
-            this._error('初始化失败:', error);
+            this._error('init failed');
             throw error;
         }
     }
@@ -224,13 +261,34 @@ class GoogleDriveAPI {
     }
     
     /**
+     * 安全地获取Chrome或Firefox的permissions API
+     * @private
+     * @returns {object|null} permissions API对象或null
+     */
+    _getPermissionsAPI() {
+        // 优先使用 browserApi
+        if (browserApi && browserApi.permissions) {
+            return browserApi.permissions;
+        }
+        // 回退到直接访问
+        if (typeof chrome !== 'undefined' && chrome.permissions) {
+            return chrome.permissions;
+        }
+        if (typeof browser !== 'undefined' && browser.permissions) {
+            return browser.permissions;
+        }
+        return null;
+    }
+    
+    /**
      * 请求 identity 权限（如果尚未授予）
      * @private
      * @returns {Promise<boolean>} 如果权限已授予或成功请求返回true
      */
     async _requestIdentityPermission() {
-        const runtime = this._getRuntimeAPI();
-        if (!runtime || !runtime.permissions) {
+        const permissionsAPI = this._getPermissionsAPI();
+        
+        if (!permissionsAPI) {
             // 如果没有 permissions API，假设权限已授予（必需权限的情况）
             return true;
         }
@@ -238,10 +296,9 @@ class GoogleDriveAPI {
         try {
             // 检查是否已有权限
             const hasPermission = await new Promise((resolve) => {
-                if (runtime.permissions.contains) {
-                    runtime.permissions.contains({ permissions: ['identity'] }, resolve);
+                if (permissionsAPI.contains) {
+                    permissionsAPI.contains({ permissions: ['identity'] }, resolve);
                 } else {
-                    // 如果没有 contains 方法，假设没有权限
                     resolve(false);
                 }
             });
@@ -252,10 +309,9 @@ class GoogleDriveAPI {
             
             // 请求权限
             const granted = await new Promise((resolve) => {
-                if (runtime.permissions.request) {
-                    runtime.permissions.request({ permissions: ['identity'] }, resolve);
+                if (permissionsAPI.request) {
+                    permissionsAPI.request({ permissions: ['identity'] }, resolve);
                 } else {
-                    // 如果没有 request 方法，拒绝请求
                     resolve(false);
                 }
             });
@@ -263,11 +319,10 @@ class GoogleDriveAPI {
             if (granted) {
                 return true;
             } else {
-                this._error('用户拒绝了 identity 权限请求');
                 throw new Error('需要 identity 权限才能使用 Google Drive 功能');
             }
         } catch (error) {
-            this._error('请求 identity 权限失败:', error);
+            // 不记录详细错误信息，避免泄露敏感数据
             throw error;
         }
     }
@@ -289,96 +344,80 @@ class GoogleDriveAPI {
         
         const identity = this._getIdentityAPI();
         if (!identity) {
-            const error = new Error(
+            throw new Error(
                 'Identity API not available. This feature requires Chrome, Edge, or Firefox browser with identity permission.'
             );
-            this._error(error.message);
-            throw error;
         }
         
         // 检测是否为 Firefox（使用 Promise-based API）
-        const isFirefox = typeof browser !== 'undefined' && browser.identity;
+        // Chrome/Edge 的 launchWebAuthFlow 接受两个参数 (options, callback)
+        // Firefox 的 launchWebAuthFlow 只接受一个参数 (options) 并返回 Promise
+        const isFirefox = typeof browser !== 'undefined' && 
+                         browser.identity && 
+                         identity.launchWebAuthFlow &&
+                         identity.launchWebAuthFlow.length === 1;
         
         if (isFirefox) {
             // Firefox 使用 Promise-based API
             try {
-                // 获取重定向URL
                 const redirectUrl = identity.getRedirectURL();
-                
-                // 构建授权URL
                 const authUrl = this._buildAuthUrl(redirectUrl);
                 
-                // Firefox 的 launchWebAuthFlow 返回 Promise
                 const finalRedirectUrl = await identity.launchWebAuthFlow({
                     url: authUrl,
                     interactive: true
                 });
                 
                 if (!finalRedirectUrl) {
-                    this._error('未返回重定向URL');
                     throw new Error('No redirect URL returned');
                 }
                 
-                // 提取访问令牌
                 const { accessToken, expiresIn } = this._extractTokenFromRedirect(finalRedirectUrl);
                 
                 this.accessToken = accessToken;
-                // 设置过期时间（提前缓冲时间）
                 this.tokenExpiry = Date.now() + (expiresIn * 1000 - DRIVE_API_CONFIG.TOKEN_EXPIRY_BUFFER);
-                
-                // 保存令牌到storage
                 this._saveTokenToStorage(accessToken, this.tokenExpiry);
                 
                 return accessToken;
             } catch (error) {
-                this._error('解析重定向URL失败:', error);
+                // 不记录详细错误信息，避免泄露敏感数据
                 throw error;
             }
         } else {
             // Chrome/Edge 使用回调式 API
-        return new Promise((resolve, reject) => {
-            // 获取重定向URL
-            const redirectUrl = identity.getRedirectURL();
-            
-            // 构建授权URL
-            const authUrl = this._buildAuthUrl(redirectUrl);
-            
-            // 启动OAuth流程
-            identity.launchWebAuthFlow({
-                url: authUrl,
-                interactive: true
-            }, (redirectUrl) => {
-                const lastError = this._getLastError();
-                if (lastError) {
-                    this._error('OAuth流程失败:', lastError.message);
-                    reject(new Error(lastError.message));
-                    return;
-                }
+            return new Promise((resolve, reject) => {
+                const redirectUrl = identity.getRedirectURL();
+                const authUrl = this._buildAuthUrl(redirectUrl);
                 
-                if (!redirectUrl) {
-                    this._error('未返回重定向URL');
-                    reject(new Error('No redirect URL returned'));
-                    return;
-                }
-                
-                try {
-                    // 提取访问令牌
-                    const { accessToken, expiresIn } = this._extractTokenFromRedirect(redirectUrl);
+                identity.launchWebAuthFlow({
+                    url: authUrl,
+                    interactive: true
+                }, (redirectUrl) => {
+                    const lastError = this._getLastError();
+                    if (lastError) {
+                        reject(new Error(lastError.message || 'OAuth authentication failed'));
+                        return;
+                    }
                     
-                    this.accessToken = accessToken;
-                    // 设置过期时间（提前缓冲时间）
-                    this.tokenExpiry = Date.now() + (expiresIn * 1000 - DRIVE_API_CONFIG.TOKEN_EXPIRY_BUFFER);
+                    if (!redirectUrl) {
+                        reject(new Error('No redirect URL returned'));
+                        return;
+                    }
                     
-                    // 保存令牌到storage
-                    this._saveTokenToStorage(accessToken, this.tokenExpiry);
-                    
-                    resolve(accessToken);
-                } catch (error) {
-                    this._error('解析重定向URL失败:', error);
-                    reject(error);
-                }
+                    try {
+                        const { accessToken, expiresIn } = this._extractTokenFromRedirect(redirectUrl);
+                        
+                        this.accessToken = accessToken;
+                        this.tokenExpiry = Date.now() + (expiresIn * 1000 - DRIVE_API_CONFIG.TOKEN_EXPIRY_BUFFER);
+                        this._saveTokenToStorage(accessToken, this.tokenExpiry);
+                        
+                        resolve(accessToken);
+                    } catch (error) {
+                        // 不记录详细错误信息，避免泄露敏感数据
+                        reject(error);
+                    }
+                });
             });
-        });
         }
     }
     
@@ -508,7 +547,6 @@ class GoogleDriveAPI {
                 webViewLink: shareLink
             };
         } catch (error) {
-            this._error('获取文件夹分享链接失败:', error);
             throw error;
         }
     }
@@ -538,7 +576,6 @@ class GoogleDriveAPI {
             });
             
             if (!response.ok) {
-                this._error('查询文件夹失败:', response.status, response.statusText);
                 return null;
             }
             
@@ -549,7 +586,6 @@ class GoogleDriveAPI {
             
             return null;
         } catch (error) {
-            this._error('查询文件夹时出错:', error);
             return null;
         }
     }
@@ -589,8 +625,6 @@ class GoogleDriveAPI {
             });
             
             if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                this._error('创建文件夹失败:', errorData.error?.message || response.statusText);
                 return null;
             }
             
@@ -606,7 +640,6 @@ class GoogleDriveAPI {
                 return folderData.id;
             }
         } catch (error) {
-            this._error('创建文件夹时出错:', error);
             return null;
         }
     }
@@ -623,7 +656,6 @@ class GoogleDriveAPI {
             const accessToken = await this.getAccessToken();
             return await this._createFolder(folderName, accessToken, parentFolderId, returnFullInfo);
         } catch (error) {
-            this._error('创建文件夹失败:', error);
             return null;
         }
     }
@@ -681,7 +713,6 @@ class GoogleDriveAPI {
             
             return folderId;
         } catch (error) {
-            this._error('获取或创建文件夹失败:', error);
             return null;
         }
     }
@@ -715,11 +746,6 @@ class GoogleDriveAPI {
         
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
-            this._error('上传失败:', {
-                status: response.status,
-                statusText: response.statusText,
-                error: errorData
-            });
             throw new Error(
                 errorData.error?.message || 
                 `Upload failed: ${response.statusText} (${response.status})`
@@ -761,11 +787,6 @@ class GoogleDriveAPI {
         
         if (!initResponse.ok) {
             const errorData = await initResponse.json().catch(() => ({}));
-            this._error('初始化resumable上传失败:', {
-                status: initResponse.status,
-                statusText: initResponse.statusText,
-                error: errorData
-            });
             throw new Error(
                 errorData.error?.message || 
                 `Failed to initialize resumable upload: ${initResponse.statusText}`
@@ -830,13 +851,6 @@ class GoogleDriveAPI {
             } else {
                 // 上传失败
                 const errorData = await chunkResponse.json().catch(() => ({}));
-                this._error('分块上传失败:', {
-                    status: chunkResponse.status,
-                    statusText: chunkResponse.statusText,
-                    error: errorData,
-                    uploadedBytes: uploadedBytes,
-                    totalBytes: totalBytes
-                });
                 throw new Error(
                     errorData.error?.message || 
                     `Chunk upload failed: ${chunkResponse.statusText} (${chunkResponse.status})`
@@ -913,7 +927,6 @@ class GoogleDriveAPI {
                 shareLink: this._buildShareLink(fileData.id)
             };
         } catch (error) {
-            this._error('上传文件失败:', error);
             throw error;
         }
     }
@@ -936,15 +949,12 @@ class GoogleDriveAPI {
             });
             
             if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                this._error('获取文件权限失败:', errorData.error?.message || response.statusText);
                 return [];
             }
             
             const data = await response.json();
             return data.permissions || [];
         } catch (error) {
-            this._error('获取文件权限时出错:', error);
             return [];
         }
     }
@@ -968,14 +978,11 @@ class GoogleDriveAPI {
             });
             
             if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                this._error('删除文件权限失败:', errorData.error?.message || response.statusText);
                 return false;
             }
             
             return true;
         } catch (error) {
-            this._error('删除文件权限时出错:', error);
             return false;
         }
     }
@@ -1021,7 +1028,6 @@ class GoogleDriveAPI {
             // 处理 anyone：添加公开权限
             const permission = DRIVE_API_CONFIG.PERMISSIONS[visibility];
             if (!permission) {
-                this._error('未知的可见性类型:', visibility);
                 return;
             }
             
@@ -1035,15 +1041,8 @@ class GoogleDriveAPI {
                 body: JSON.stringify(permission)
             });
             
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                this._error('设置文件权限失败:', 
-                    errorData.error?.message || response.statusText
-                );
-                // 不抛出错误，因为文件已经上传成功
-            }
+            // 不检查响应状态，因为文件已经上传成功，权限设置失败不影响主要功能
         } catch (error) {
-            this._error('设置文件权限时出错:', error);
             // 不抛出错误，因为文件已经上传成功
         }
     }
@@ -1098,7 +1097,6 @@ class GoogleDriveAPI {
             });
             
             if (!response.ok) {
-                this._error('获取用户信息失败:', response.status, response.statusText);
                 return null;
             }
             
@@ -1116,7 +1114,6 @@ class GoogleDriveAPI {
             
             return userInfo;
         } catch (error) {
-            this._error('获取用户信息失败:', error);
             return null;
         }
     }
@@ -1133,7 +1130,6 @@ class GoogleDriveAPI {
             }
             return null;
         } catch (error) {
-            this._error('获取文件夹链接失败:', error);
             return null;
         }
     }
@@ -1277,7 +1273,6 @@ class GoogleDriveAPI {
                 shareLink: shareLink
             };
         } catch (error) {
-            this._error('上传文件夹失败:', error);
             throw error;
         }
     }
@@ -1318,17 +1313,16 @@ class GoogleDriveAPI {
      * @returns {Promise<boolean>} 如果权限已移除或不存在返回true
      */
     async _removeIdentityPermission() {
-        const runtime = this._getRuntimeAPI();
-        if (!runtime || !runtime.permissions) {
-            // 如果没有 permissions API，无法移除（可能是必需权限）
+        const permissionsAPI = this._getPermissionsAPI();
+        if (!permissionsAPI) {
             return false;
         }
         
         try {
             // 检查是否有权限
             const hasPermission = await new Promise((resolve) => {
-                if (runtime.permissions.contains) {
-                    runtime.permissions.contains({ permissions: ['identity'] }, resolve);
+                if (permissionsAPI.contains) {
+                    permissionsAPI.contains({ permissions: ['identity'] }, resolve);
                 } else {
                     resolve(false);
                 }
@@ -1340,8 +1334,8 @@ class GoogleDriveAPI {
             
             // 移除权限
             const removed = await new Promise((resolve) => {
-                if (runtime.permissions.remove) {
-                    runtime.permissions.remove({ permissions: ['identity'] }, resolve);
+                if (permissionsAPI.remove) {
+                    permissionsAPI.remove({ permissions: ['identity'] }, resolve);
                 } else {
                     resolve(false);
                 }
@@ -1349,7 +1343,6 @@ class GoogleDriveAPI {
             
             return removed;
         } catch (error) {
-            this._error('移除 identity 权限失败:', error);
             return false;
         }
     }

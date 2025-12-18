@@ -21,6 +21,7 @@
   "popup_edit_button": { "message": "Редактировать" },
   "popup_scan_button": { "message": "Сканировать QR" },
   "popup_history_button_title": { "message": "История" },
+  "popup_help_button_title": { "message": "Помощь" },
   "popup_rate_button_title": { "message": "Оценить на 5 звезд" },
   "popup_feedback_button_title": { "message": "Отзыв" },
   "popup_edit_modal_title": { "message": "Редактировать QR-код" },

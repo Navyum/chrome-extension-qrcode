@@ -21,6 +21,7 @@
   "popup_edit_button": { "message": "QRコードを編集" },
   "popup_scan_button": { "message": "QRコードをスキャン" },
   "popup_history_button_title": { "message": "履歴" },
+  "popup_help_button_title": { "message": "ヘルプ" },
   "popup_rate_button_title": { "message": "5つ星で評価" },
   "popup_feedback_button_title": { "message": "フィードバック" },
   "popup_edit_modal_title": { "message": "QRコードを編集" },

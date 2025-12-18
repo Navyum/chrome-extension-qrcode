@@ -21,6 +21,7 @@
   "popup_edit_button": { "message": "编辑二维码" },
   "popup_scan_button": { "message": "扫描二维码" },
   "popup_history_button_title": { "message": "历史记录" },
+  "popup_help_button_title": { "message": "帮助" },
   "popup_rate_button_title": { "message": "五星好评" },
   "popup_feedback_button_title": { "message": "反馈" },
   "popup_edit_modal_title": { "message": "编辑二维码" },

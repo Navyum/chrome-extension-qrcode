@@ -21,6 +21,7 @@
   "popup_edit_button": { "message": "QR-Code bearbeiten" },
   "popup_scan_button": { "message": "QR-Code scannen" },
   "popup_history_button_title": { "message": "Verlauf" },
+  "popup_help_button_title": { "message": "Hilfe" },
   "popup_rate_button_title": { "message": "Mit 5 Sternen bewerten" },
   "popup_feedback_button_title": { "message": "Feedback" },
   "popup_edit_modal_title": { "message": "QR-Code bearbeiten" },

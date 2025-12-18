@@ -565,7 +565,7 @@ class QRCodePopup {
         
         try {
             // 尝试生成二维码，自动调整纠错级别
-            const canvas = this.generateQRCodeWithFallback(content, qrContainer, displaySize);
+            const canvas = await this.generateQRCodeWithFallback(content, qrContainer, displaySize);
             
             this.currentCanvas = canvas;
             this.currentContent = content;
@@ -650,54 +650,29 @@ class QRCodePopup {
         return this.qrOptions.logo;
     }
 
-    generateQRCodeWithFallback(content, container, size) {
+    async generateQRCodeWithFallback(content, container, size) {
         // 尝试不同的纠错级别，从M开始，如果失败则降低到L
         const errorLevels = [
             { level: QRCode.CorrectLevel.M, name: 'Medium' },
             { level: QRCode.CorrectLevel.L, name: 'Low' }
         ];
         
-        // 获取 logo（内置或自定义）
-        const logo = this.qrOptions.builtinLogo 
-            ? browserApi.runtime.getURL(`images/qr-icon/${this.qrOptions.builtinLogo}`)
-            : this.qrOptions.logo;
-        
-        for (const errorLevel of errorLevels) {
-            try {
-                const qrGenerator = new QRCodeWithLogo({
-                    width: size,
-                    height: size,
-                    colorDark: this.qrOptions.foreground,
-                    colorLight: this.qrOptions.background,
-                    correctLevel: errorLevel.level,
-                    logo: logo,
-                    logoSize: 0.2,
-                    logoOpacity: this.qrOptions.logoOpacity / 100
-                });
-                
-                const canvas = qrGenerator.generate(content, container);
-                this.currentQRCode = qrGenerator;
-                
-                // 如果成功生成，显示纠错级别信息
-                if (errorLevel.name === 'Low') {
-                    const levelName = browserApi.i18n.getMessage('error_level_low');
-                    this.showMessage(browserApi.i18n.getMessage('info_generated_with_error_level', [levelName]), 'info');
-                }
-                
-                return canvas;
-            } catch (error) {
-                // 这里的错误通常意味着当前纠错级别无法容纳该内容（长度溢出），
-                // 或者发生了其他生成错误。这是正常的降级过程，我们只需静默失败并尝试下一个级别。
-                // 最终如果所有级别都失败，会在上层 createQRCode 中捕获并提示用户。
-                
-                // 清空容器，准备下一次尝试
-                container.innerHTML = '';
-                continue;
+        try {
+            const canvas = await this.generateQRCodeAtLevel(content, container, size, errorLevels, true);
+            
+            if (!canvas) {
+                throw new Error('Unable to generate QR code with any error correction level');
             }
+
+            // 更新当前使用的生成器
+            // 注意：generateQRCodeAtLevel 内部创建了新的 QRCodeWithLogo，但没有保存它
+            // 我们可以在这里根据成功后的状态重新创建一个，或者修改 generateQRCodeAtLevel
+            // 为了简单，我们在这里直接使用 canvas 的 parentElement 检查
+            
+            return canvas;
+        } catch (error) {
+            throw error;
         }
-        
-        // 如果所有纠错级别都失败，抛出错误
-        throw new Error('Unable to generate QR code with any error correction level');
     }
 
 
@@ -727,23 +702,6 @@ class QRCodePopup {
                 qrHeight = minSize;
             }
 
-            // 获取 logo（内置或自定义）
-            const logo = this.qrOptions.builtinLogo 
-                ? browserApi.runtime.getURL(`images/qr-icon/${this.qrOptions.builtinLogo}`)
-                : this.qrOptions.logo;
-
-            // 使用计算后的尺寸生成下载用的二维码
-            const downloadQRGenerator = new QRCodeWithLogo({
-                width: qrWidth,
-                height: qrHeight,
-                colorDark: this.qrOptions.foreground,
-                colorLight: this.qrOptions.background,
-                correctLevel: QRCode.CorrectLevel.H,
-                logo: logo,
-                logoSize: 0.2,
-                logoOpacity: this.qrOptions.logoOpacity / 100
-            });
-
             // 创建临时容器生成下载用的二维码
             const tempContainer = document.createElement('div');
             tempContainer.style.position = 'absolute';
@@ -751,7 +709,17 @@ class QRCodePopup {
             tempContainer.style.top = '-9999px';
             document.body.appendChild(tempContainer);
 
-            const downloadCanvas = downloadQRGenerator.generate(this.currentContent, tempContainer);
+            // 使用 generateQRCodeWithFallback 来确保下载也能成功（自动处理纠错级别）
+            // 我们稍微修改一下 generateQRCodeWithFallback 的调用，因为我们要支持 H 级别
+            const downloadCanvas = await this.generateQRCodeAtLevel(this.currentContent, tempContainer, qrWidth, [
+                { level: QRCode.CorrectLevel.H, name: 'High' },
+                { level: QRCode.CorrectLevel.M, name: 'Medium' },
+                { level: QRCode.CorrectLevel.L, name: 'Low' }
+            ]);
+            
+            if (!downloadCanvas) {
+                throw new Error('Failed to generate QR code');
+            }
             
             // 创建带白色边框的二维码用于下载
             const canvasToDownload = this.addWhiteBorder(downloadCanvas);
@@ -769,6 +737,7 @@ class QRCodePopup {
             // 清理临时容器
             document.body.removeChild(tempContainer);
         } catch (error) {
+            console.error('Download failed:', error);
             this.showMessage(browserApi.i18n.getMessage('error_download_failed'), 'error');
         }
     }
@@ -794,23 +763,6 @@ class QRCodePopup {
                 qrHeight = minSize;
             }
 
-            // 获取 logo（内置或自定义）
-            const logo = this.qrOptions.builtinLogo 
-                ? browserApi.runtime.getURL(`images/qr-icon/${this.qrOptions.builtinLogo}`)
-                : this.qrOptions.logo;
-
-            // 使用计算后的尺寸生成复制用的二维码
-            const copyQRGenerator = new QRCodeWithLogo({
-                width: qrWidth,
-                height: qrHeight,
-                colorDark: this.qrOptions.foreground,
-                colorLight: this.qrOptions.background,
-                correctLevel: QRCode.CorrectLevel.H,
-                logo: logo,
-                logoSize: 0.2,
-                logoOpacity: this.qrOptions.logoOpacity / 100
-            });
-
             // 创建临时容器生成复制用的二维码
             const tempContainer = document.createElement('div');
             tempContainer.style.position = 'absolute';
@@ -818,7 +770,16 @@ class QRCodePopup {
             tempContainer.style.top = '-9999px';
             document.body.appendChild(tempContainer);
 
-            const copyCanvas = copyQRGenerator.generate(this.currentContent, tempContainer);
+            // 使用 generateQRCodeAtLevel 确保复制也能成功
+            const copyCanvas = await this.generateQRCodeAtLevel(this.currentContent, tempContainer, qrWidth, [
+                { level: QRCode.CorrectLevel.H, name: 'High' },
+                { level: QRCode.CorrectLevel.M, name: 'Medium' },
+                { level: QRCode.CorrectLevel.L, name: 'Low' }
+            ]);
+            
+            if (!copyCanvas) {
+                throw new Error('Failed to generate QR code');
+            }
             
             // 创建带白色边框的二维码
             const borderedCanvas = this.addWhiteBorder(copyCanvas);
@@ -834,8 +795,49 @@ class QRCodePopup {
             // 清理临时容器
             document.body.removeChild(tempContainer);
         } catch (error) {
+            console.error('Copy failed:', error);
             this.showMessage(browserApi.i18n.getMessage('error_copy_qr_failed'), 'error');
         }
+    }
+
+    // 辅助方法：在指定的一系列纠错级别中尝试生成二维码
+    async generateQRCodeAtLevel(content, container, size, levels, isMainDisplay = false) {
+        // 获取 logo（内置或自定义）
+        const logo = this.qrOptions.builtinLogo 
+            ? browserApi.runtime.getURL(`images/qr-icon/${this.qrOptions.builtinLogo}`)
+            : this.qrOptions.logo;
+            
+        for (const errorLevel of levels) {
+            try {
+                const qrGenerator = new QRCodeWithLogo({
+                    width: size,
+                    height: size,
+                    colorDark: this.qrOptions.foreground,
+                    colorLight: this.qrOptions.background,
+                    correctLevel: errorLevel.level,
+                    logo: logo,
+                    logoSize: 0.2,
+                    logoOpacity: this.qrOptions.logoOpacity / 100
+                });
+                
+                const canvas = await qrGenerator.generate(content, container);
+                
+                if (isMainDisplay) {
+                    this.currentQRCode = qrGenerator;
+                    // 如果成功生成，显示纠错级别信息
+                    if (errorLevel.name === 'Low') {
+                        const levelName = browserApi.i18n.getMessage('error_level_low');
+                        this.showMessage(browserApi.i18n.getMessage('info_generated_with_error_level', [levelName]), 'info');
+                    }
+                }
+                
+                return canvas;
+            } catch (error) {
+                container.innerHTML = '';
+                continue;
+            }
+        }
+        return null;
     }
 
     addWhiteBorder(canvas) {

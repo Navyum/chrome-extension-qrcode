@@ -63,6 +63,3 @@ Erleben Sie die schnellste und sicherste Art, QR-Codes direkt in Chrome zu gener
 • Benutzerfreundlich: Modernes, sauberes Interface-Design mit perfekter Dunkelmodus-Unterstützung
 • Produktivitätssteigerung: Unterstützt Tastaturkürzel für schnellen Zugriff, Kontextmenü für schnelle Generierung
 • Weltweiter Support: Vollständig lokalisiert in 12 Sprachen
-• Multi-Browser-Unterstützung: Unterstützt Chrome, Firefox, Edge Browser
-
-Ob Sie Links schnell auf das Handy teilen, Textinfos speichern, professionelle QR-Codes für den Druck erstellen oder Dateien über Google Drive teilen möchten, PixelQR erfüllt alle Ihre Bedürfnisse. Jetzt installieren für das zuverlässigste QR-Code-Erlebnis auf Chrome!

@@ -668,9 +668,9 @@ class QRCodePopup {
             // 注意：generateQRCodeAtLevel 内部创建了新的 QRCodeWithLogo，但没有保存它
             // 我们可以在这里根据成功后的状态重新创建一个，或者修改 generateQRCodeAtLevel
             // 为了简单，我们在这里直接使用 canvas 的 parentElement 检查
-            
-            return canvas;
-        } catch (error) {
+                
+                return canvas;
+            } catch (error) {
             throw error;
         }
     }

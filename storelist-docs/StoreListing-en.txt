@@ -63,6 +63,3 @@ Experience the fastest, most secure way to generate and scan QR codes directly i
 • User-Friendly: Modern, clean interface design with perfect Dark Mode support
 • Productivity Boost: Support keyboard shortcuts for quick access, right-click menu for quick generation
 • Global Support: Fully localized in 12 languages
-• Multi-Browser Support: Support Chrome, Firefox, Edge browsers
-
-Whether you need to quickly share links to mobile, save text information, create professional QR codes for printing, or share files via Google Drive, PixelQR meets all your needs. Install now for the most reliable QR code experience on Chrome!

@@ -63,6 +63,3 @@ Experimenta la forma más rápida y segura de generar y escanear códigos QR dir
 • Fácil de usar: Diseño de interfaz moderna y limpia con soporte perfecto para Modo Oscuro
 • Aumento de productividad: Soporta atajos de teclado para acceso rápido, menú contextual para generación rápida
 • Soporte global: Totalmente localizado en 12 idiomas
-• Soporte multi-navegador: Soporta navegadores Chrome, Firefox, Edge
-
-Ya sea para compartir enlaces rápidamente al móvil, guardar información de texto, crear códigos QR profesionales para impresión o compartir archivos vía Google Drive, PixelQR satisface todas tus necesidades. ¡Instala ahora para la experiencia de códigos QR más confiable en Chrome!

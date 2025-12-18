@@ -101,29 +101,29 @@ class QRCodeWithLogo {
             
             img.onload = () => {
                 try {
-                    const qrSize = canvas.width;
-                    const logoSize = qrSize * this.options.logoSize;
-                    const logoX = (qrSize - logoSize) / 2;
-                    const logoY = (qrSize - logoSize) / 2;
-                    
-                    // 保存当前状态
-                    ctx.save();
-                    
-                    // 设置透明度
+                const qrSize = canvas.width;
+                const logoSize = qrSize * this.options.logoSize;
+                const logoX = (qrSize - logoSize) / 2;
+                const logoY = (qrSize - logoSize) / 2;
+                
+                // 保存当前状态
+                ctx.save();
+                
+                // 设置透明度
                     ctx.globalAlpha = parseFloat(this.options.logoOpacity) || 1;
-                    
+                
                     // 绘制Logo背景（白色圆角矩形或正方形）
                     ctx.fillStyle = this.options.colorLight || '#FFFFFF';
                     const padding = 2;
                     ctx.fillRect(logoX - padding, logoY - padding, logoSize + padding * 2, logoSize + padding * 2);
-                    
-                    // 绘制Logo
-                    ctx.drawImage(img, logoX, logoY, logoSize, logoSize);
-                    
-                    // 恢复状态
-                    ctx.restore();
-                    
-                    resolve();
+                
+                // 绘制Logo
+                ctx.drawImage(img, logoX, logoY, logoSize, logoSize);
+                
+                // 恢复状态
+                ctx.restore();
+                
+                resolve();
                 } catch (e) {
                     reject(e);
                 }

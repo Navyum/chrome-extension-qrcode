@@ -1,8 +1,8 @@
 {
   "htmlLang": { "message": "en" },
   "htmlDir": { "message": "ltr" },
-  "extName": { "message": "PixelQR - QR Code Generator & Scanner" },
-  "extDescription": { "message": "Free QR Code Generator to create & customize QR codes for URLs, text, and more with logo support." },
+  "extName": { "message": "QR Code Generator & Scanner - File/Folder to Drive" },
+  "extDescription": { "message": "The fastest QR code creator & scanner with 100% privacy. Auto-upload folders/files to Google Drive for instant sharing. Custom logos & offline support included." },
   "actionTitle": { "message": "PixelQR: QR Code Generator" },
   "commandGeneratePageDesc": { "message": "Generate QR code for current page" },
   "commandGenerateTextDesc": { "message": "Generate QR code for selected text" },

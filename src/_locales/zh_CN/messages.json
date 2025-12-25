@@ -1,8 +1,8 @@
 {
   "htmlLang": { "message": "zh-CN" },
   "htmlDir": { "message": "ltr" },
-  "extName": { "message": "PixelQR - 二维码生成器与扫描器" },
-  "extDescription": { "message": "免费二维码生成器，可为网址、文本等创建并自定义二维码，支持添加 Logo。" },
+  "extName": { "message": "PixelQR二维码生成器与扫描器 - 支持文件夹上传网盘" },
+  "extDescription": { "message": "最快、最安全的二维码工具。支持本地文件及文件夹一键上传 Google Drive 并自动生成分享二维码。核心功能离线可用，支持内置 Logo 美化。" },
   "actionTitle": { "message": "PixelQR: 二维码生成器" },
   "commandGeneratePageDesc": { "message": "为当前页面生成二维码" },
   "commandGenerateTextDesc": { "message": "为所选文本生成二维码" },

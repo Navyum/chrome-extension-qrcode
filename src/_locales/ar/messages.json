@@ -1,8 +1,8 @@
 {
   "htmlLang": { "message": "ar" },
   "htmlDir": { "message": "rtl" },
-  "extName": { "message": "PixelQR - مولد وماسح رمز الاستجابة السريعة" },
-  "extDescription": { "message": "مولد رموز QR مجاني لإنشاء رموز لعناوين URL والنصوص وغيرها مع دعم تخصيص الشعار." },
+  "extName": { "message": "PixelQR: منشئ وماسح رمز QR - رفع الملفات إلى Drive" },
+  "extDescription": { "message":"أسرع أداة لإنشاء ونسخ رموز QR. ارفع الملفات والمجلدات إلى Google Drive وشاركها فوراً. يعمل بدون إنترنت مع خصوصية تامة."},
   "actionTitle": { "message": "PixelQR: منشئ وقارئ رموز QR" },
   "commandGeneratePageDesc": { "message": "إنشاء رمز QR للصفحة الحالية" },
   "commandGenerateTextDesc": { "message": "إنشاء رمز QR للنص المحدد" },

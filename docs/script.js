@@ -120,6 +120,7 @@ const cardStack = document.getElementById('cardStack');
 let currentIdx = 0;
 let isTransitioning = false;
 let cardElements = [];
+const UPDATE_BENTO_KEY = 'pixelqr_update_bento_v2025_01';
 
 function initCards() {
     if (!cardStack) return;
@@ -200,6 +201,58 @@ function cycleCards() {
     }
 }
 
+function initUpdateNotificationBento() {
+    const container = document.getElementById('updateNotificationBento');
+    if (!container) return;
+
+    try {
+        if (localStorage.getItem(UPDATE_BENTO_KEY) === '1') {
+            return;
+        }
+    } catch (e) {}
+
+    const closeBtn = document.getElementById('updateNotificationClose');
+    const hideCheckbox = document.getElementById('updateNotificationHide');
+    const gotItBtn = document.getElementById('updateNotificationGotIt');
+
+    const dismiss = (e) => {
+        e.stopPropagation();
+        if (hideCheckbox && hideCheckbox.checked) {
+            try { localStorage.setItem(UPDATE_BENTO_KEY, '1'); } catch (e) {}
+        }
+        container.classList.remove('show');
+        setTimeout(() => container.hidden = true, 600);
+    };
+
+    const minimize = () => {
+        if (!container.classList.contains('show')) return;
+        container.classList.add('minimized');
+    };
+
+    const expand = () => {
+        container.classList.remove('minimized');
+    };
+
+    closeBtn?.addEventListener('click', dismiss);
+    gotItBtn?.addEventListener('click', dismiss);
+    container.addEventListener('click', (e) => {
+        if (container.classList.contains('minimized')) {
+            expand();
+        }
+    });
+
+    // 1. 5s 后渐变出现
+    setTimeout(() => {
+        container.hidden = false;
+        // 强制重绘以触发 transition
+        container.offsetHeight; 
+        container.classList.add('show');
+
+        // 2. 出现 5s 后自动收起
+        setTimeout(minimize, 5000);
+    }, 5000);
+}
+
 // Initialize after DOM is fully loaded
 document.addEventListener('DOMContentLoaded', () => {
     initDots();
@@ -207,5 +260,6 @@ document.addEventListener('DOMContentLoaded', () => {
     initBentoGlow();
     initCards(); // Use initCards for efficient management
     setInterval(cycleCards, 5000);
+    initUpdateNotificationBento();
 });
 

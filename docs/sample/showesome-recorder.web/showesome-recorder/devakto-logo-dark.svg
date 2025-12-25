@@ -1,0 +1,23 @@
+<svg width="420" height="120" viewBox="0 0 420 120" xmlns="http://www.w3.org/2000/svg" aria-label="DEVΛKTO dark logo">
+  <defs>
+    <!-- white → purple gradient -->
+    <linearGradient id="devakto-purple" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ffffff"></stop>
+      <stop offset="100%" stop-color="#764ba2"></stop>
+    </linearGradient>
+  </defs>
+
+  <!-- Left bracket -->
+  <path d="M70 30 L40 60 L70 90" stroke="url(#devakto-purple)" stroke-width="20" stroke-linecap="round" stroke-linejoin="round" fill="transparent"></path>
+
+  <!-- Slash -->
+  <path d="M95 30 L75 90" stroke="url(#devakto-purple)" stroke-width="20" stroke-linecap="round"></path>
+
+  <!-- Right bracket -->
+  <path d="M100 30 L130 60 L100 90" stroke="url(#devakto-purple)" stroke-width="20" stroke-linecap="round" stroke-linejoin="round" fill="transparent"></path>
+
+  <!-- DEVΛKTO text -->
+  <text x="170" y="74" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="40" font-weight="700" letter-spacing="6" fill="url(#devakto-purple)">
+    DEVΛKTO
+  </text>
+</svg>

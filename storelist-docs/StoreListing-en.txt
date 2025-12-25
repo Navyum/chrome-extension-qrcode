@@ -11,44 +11,31 @@ PixelQR is a high-performance tool designed for the modern Google Workspace ecos
 
 🚀 EXCLUSIVE: FOLDER & BATCH UPLOAD TO QR Stop the tedious "Upload-Copy-Paste" cycle. PixelQR is built for users who handle local assets:
 
-Upload Folders & Files: Drag any local folder or files directly into the extension.
-
-Auto-Drive Integration: Files are automatically uploaded to your Google Drive.
-
-Automatic QR Generation: Get a QR code for the sharing link instantly after upload.
-
-Visibility Control: Set links to "Owner Only" or "Anyone with the link" within the app.
-
-Rapid Sharing: The fastest way to move local folders from PC to mobile devices.
+· Upload Folders & Files: Drag any local folder or files directly into the extension.
+· Auto-Drive Integration: Files are automatically uploaded to your Google Drive.
+· Automatic QR Generation: Get a QR code for the sharing link instantly after upload.
+· Visibility Control: Set links to "Owner Only" or "Anyone with the link" within the app.
+· Rapid Sharing: The fastest way to move local folders from PC to mobile devices.
 
 🎨 BUILT-IN LOGO SUPPORT & BEAUTIFICATION
 
-12 Preset Platform Logos: Instant access to icons for Instagram, YouTube, Telegram, and more.
-
-Quick Beautification: One-click selection to make your QR code professional.
-
-Custom Logo Upload: Still supports uploading your own custom branding images.
-
-Transparency Control: Adjust logo opacity (0-100%) to ensure 100% scannability.
+· 12 Preset Platform Logos: Instant access to icons for Instagram, YouTube, Telegram, and more.
+· Quick Beautification: One-click selection to make your QR code professional.
+· Custom Logo Upload: Still supports uploading your own custom branding images.
+· Transparency Control: Adjust logo opacity (0-100%) to ensure 100% scannability.
 
 🔍 SMART SCANNING & INSTANT GENERATION
 
-URL Scanning: Enter an image URL to decode it remotely without downloading.
-
-Local Scanning: Drag and drop local images to read their content instantly.
-
-Context Menu: Right-click any text/link to create a QR code immediately.
-
-Keyboard Shortcuts: Ctrl+Shift+Q for current page, Ctrl+Shift+T for selected text.
+· URL Scanning: Enter an image URL to decode it remotely without downloading.
+· Local Scanning: Drag and drop local images to read their content instantly.
+· Context Menu: Right-click any text/link to create a QR code immediately.
+· Keyboard Shortcuts: Ctrl+Shift+Q for current page, Ctrl+Shift+T for selected text.
 
 🔒 PRIVACY-FIRST & ENTERPRISE SECURITY
 
-Offline-First Core: Basic QR generation and scanning are processed locally.
-
-Secure Google Integration: File uploads use official Google Drive APIs directly.
-
-Zero Tracking: No ads, no analytics, and no hidden scripts.
-
-Auto Dark Mode: UI respects your system theme for a comfortable experience.
+· Offline-First Core: Basic QR generation and scanning are processed locally.
+· Secure Google Integration: File uploads use official Google Drive APIs directly.
+· Zero Tracking: No ads, no analytics, and no hidden scripts.
+· Auto Dark Mode: UI respects your system theme for a comfortable experience.
 
 Keywords: QR Code Generator, QR Code Scanner, Folder to QR, File to QR, Google Drive Upload, Offline QR Maker, Batch Folder Upload, Privacy QR Code, QR with Logo.

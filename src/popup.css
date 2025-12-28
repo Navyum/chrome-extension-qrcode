@@ -24,7 +24,6 @@
     }
 
     .cloud-icon img {
-        filter: brightness(0) invert(1); /* 反转云图标颜色 */
         opacity: 0.9;
     }
 

@@ -613,7 +613,7 @@ html, body {
     text-transform: uppercase;
     letter-spacing: 0.5px;
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-    z-index: 10;
+    z-index: 12;
 }
 
 .magic-bento-card:hover {
@@ -646,7 +646,7 @@ html, body {
     content: "";
     position: absolute;
     inset: 0;
-    padding: 1.5px; /* 略微加粗，让激光感更强 */
+    padding: 4px; /* 炫彩边框宽度 */
     background: radial-gradient(
         200px circle at var(--glow-x, 50%) var(--glow-y, 50%),
         #ffffff 0%,
@@ -664,7 +664,7 @@ html, body {
     z-index: 10;
 }
 
-.feature-content, .feature-icon-wrapper, .feature-badge {
+.feature-content, .feature-icon-wrapper {
     position: relative;
     z-index: 5;
 }
@@ -1062,6 +1062,21 @@ html, body {
     height: auto;
     gap: 0;
     transition: all 0.5s ease;
+    position: relative; /* 确保伪元素正确定位 */
+    --glow-color: 132, 0, 255; /* 紫色发光效果 */
+}
+
+/* 为 update-notification-bento 添加炫彩边框 hover 效果 */
+.update-notification-bento .magic-bento-card:hover {
+    border-color: rgba(var(--glow-color), 0.3);
+    box-shadow: 
+        0 20px 50px rgba(0, 0, 0, 0.5),
+        0 0 20px rgba(var(--glow-color), 0.15);
+}
+
+.update-notification-bento .magic-bento-card:hover::before,
+.update-notification-bento .magic-bento-card:hover::after {
+    opacity: 1;
 }
 .update-notification-bento-header {
     display: flex;
@@ -1072,6 +1087,7 @@ html, body {
     border-bottom: 1px solid rgba(57, 46, 78, 0.6);
     position: relative;
     transition: padding 0.3s ease;
+    z-index: 5; /* 确保内容显示在炫彩边框之上 */
 }
 .update-notification-bento-title-section {
     flex: 1;
@@ -1136,6 +1152,8 @@ html, body {
     flex-direction: column;
     gap: 16px;
     transition: all 0.4s ease;
+    position: relative;
+    z-index: 5; /* 确保内容显示在炫彩边框之上 */
 }
 .update-notification-bento-section {
     display: flex;
@@ -1216,6 +1234,8 @@ html, body {
     background: rgba(6, 0, 16, 0.5);
     min-height: 60px;
     transition: all 0.4s ease;
+    position: relative;
+    z-index: 5; /* 确保内容显示在炫彩边框之上 */
 }
 .update-notification-bento-checkbox {
     display: flex;

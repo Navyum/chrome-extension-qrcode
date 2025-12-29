@@ -68,7 +68,10 @@ function animate() {
     requestAnimationFrame(animate);
 }
 
-window.addEventListener('resize', initDots);
+window.addEventListener('resize', () => {
+    initDots();
+    renderCards();
+});
 window.addEventListener('mousemove', e => {
     mouse.x = e.clientX;
     mouse.y = e.clientY;
@@ -157,14 +160,13 @@ function renderCards() {
         // Calculate logical offset
         const offset = (i - currentIdx + cardData.length) % cardData.length;
         
-        // Skip front card if it's currently in an explicit CSS animation phase
-        if (card.classList.contains('dropping') || card.classList.contains('slide-back')) {
-            return;
-        }
+        // 为堆叠卡片添加交错延迟，营造“被推”的波动感
+        const staggerDelay = isTransitioning ? (offset * 80) : 0;
+        card.style.transitionDelay = `${staggerDelay}ms`;
 
         // Base styles for stacked cards
         let zIndex = 20 - offset;
-        let opacity = offset === 0 ? 1 : Math.max(0, 0.8 - offset * 0.15);
+        let opacity = 0.95; // Fully opaque
         
         let xOffsetMultiplier = isMobile ? 20 : isTablet ? 40 : 60;
         let yOffsetMultiplier = isMobile ? -30 : isTablet ? -50 : -70;
@@ -174,11 +176,17 @@ function renderCards() {
         let y = offset * yOffsetMultiplier;
         let z = offset * zOffsetMultiplier;
         let skewY = 6;
-        let filter = offset === 0 ? 'none' : `blur(${Math.min(offset * 0.8, 4)}px)`;
+        let filter = 'none'; // No blur
         let visibility = offset > 4 ? 'hidden' : 'visible';
 
-        // Apply styles with a slight delay if we're in a transition to allow CSS to handle it smoothly
+        // Set z-index always, but skip other styles if it's currently in an explicit CSS animation phase
+        // to avoid conflicting with keyframes.
         card.style.zIndex = zIndex;
+        
+        if (card.classList.contains('dropping') || card.classList.contains('slide-back')) {
+            return;
+        }
+
         card.style.opacity = opacity;
         card.style.visibility = visibility;
         card.style.filter = filter;
@@ -198,26 +206,35 @@ function cycleCards() {
         // Phase 1: Card drops down (Visual focus)
         topCard.classList.add('dropping');
         
-        // Phase 2: Midway through drop, update the stack positions
+        // Phase 2: Midway through drop, switch to slide-back
         setTimeout(() => {
-            // Update index - this will trigger renderCards for other cards
-            currentIdx = (currentIdx + 1) % cardData.length;
-            
-            // Start sliding back to the end of the stack
             topCard.classList.remove('dropping');
             topCard.classList.add('slide-back');
 
-            // Render other cards. The topCard is skipped due to 'slide-back' class
-            renderCards();
-        }, 400); // Slightly before the end of drop to feel more fluid
+            // Phase 2.5: 额外延迟，等待绕后卡片“钻入”深层后再触发前移
+            setTimeout(() => {
+                currentIdx = (currentIdx + 1) % cardData.length;
+                renderCards();
+            }, 400); 
+        }, 800); 
 
         // Phase 3: Cleanup and reset
         setTimeout(() => {
+            // Before removing the animation class, temporarily disable transitions
+            // to prevent the browser from trying to transition between the 
+            // animation end-state and the JS-applied state.
+            topCard.style.transition = 'none';
             topCard.classList.remove('slide-back');
             isTransitioning = false;
-            // Sync final state for the card that just moved to the back
+            
+            // Sync final state
             renderCards();
-        }, 950); // Total duration of the round-trip
+            
+            // Re-enable transitions after a tiny delay
+            requestAnimationFrame(() => {
+                topCard.style.transition = '';
+            });
+        }, 2400); 
     }
 }
 

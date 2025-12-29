@@ -330,10 +330,8 @@ html, body {
     height: 380px;
     border-radius: 16px;
     border: none;
-    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(255, 255, 255, 0.2);
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(30px) saturate(180%);
-    -webkit-backdrop-filter: blur(30px) saturate(180%);
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(255, 255, 255, 0.15);
+    background: #11111a;
     transform-style: preserve-3d;
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
@@ -343,91 +341,166 @@ html, body {
     display: flex;
     flex-direction: column;
     opacity: 0;
-    transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1), 
-                opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1), 
-                filter 0.8s cubic-bezier(0.25, 1, 0.5, 1),
-                z-index 0.8s step-end;
-}
-
-.CardSwap_card__HvzWu.dropping,
-.CardSwap_card__HvzWu.slide-back {
-    transition: none !important;
-    pointer-events: none;
-    z-index: 100 !important;
+    /* 使用更加灵动的贝塞尔曲线，增强轻盈感 */
+    transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1), 
+                opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1), 
+                filter 0.9s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .CardSwap_card__HvzWu.dropping {
-    animation: card-drop-phase 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    transition: none !important;
+    pointer-events: none;
+    z-index: 100 !important; /* 下落时保持最前 */
 }
 
 .CardSwap_card__HvzWu.slide-back {
-    animation: card-slide-back 0.55s cubic-bezier(0.55, 0, 1, 0.45) forwards;
+    transition: none !important;
+    pointer-events: none;
+    z-index: 1 !important; /* 绕后时立即降到最低，防止遮挡 */
+}
+
+.CardSwap_card__HvzWu.dropping {
+    /* 更加从容的下落速度，配合极柔和的曲线 */
+    animation: card-drop-phase 0.8s cubic-bezier(0.45, 0, 0.55, 1) forwards;
+}
+
+.CardSwap_card__HvzWu.slide-back {
+    /* 更加从容的绕后入位 */
+    animation: card-slide-back 1.6s cubic-bezier(0.37, 0, 0.63, 1) forwards;
 }
 
 @keyframes card-drop-phase {
     0% {
-        transform: translate3d(-50%, -50%, 0) skewY(6deg);
+        transform: translate3d(-50%, -50%, 0) skewY(6deg) scale(1);
         opacity: 1;
-        filter: none;
+    }
+    /* 轻盈移出：先有一个极微小的上浮，再配合侧旋下坠 */
+    30% {
+        transform: translate3d(-50%, calc(-50% - 15px), 20px) skewY(5deg) scale(1.02);
+        opacity: 1;
     }
     100% {
-        transform: translate3d(-50%, calc(-50% + 220px), 150px) skewY(6deg);
-        opacity: 1;
-        filter: none;
+        transform: translate3d(calc(-50% - 20px), calc(-50% + 200px), 60px) skewY(7deg) scale(0.95);
+        opacity: 0.9;
     }
 }
 
-@media (min-width: 641px) {
+@media (min-width: 641px) and (max-width: 1024px) {
     @keyframes card-drop-phase {
         0% {
-            transform: translate3d(-50%, -50%, 0) skewY(6deg);
+            transform: translate3d(-50%, -50%, 0) skewY(6deg) scale(1);
             opacity: 1;
-            filter: none;
+        }
+        30% {
+            transform: translate3d(-50%, calc(-50% - 18px), 25px) skewY(5deg) scale(1.02);
+            opacity: 1;
         }
         100% {
-            transform: translate3d(-50%, calc(-50% + 320px), 200px) skewY(6deg);
+            transform: translate3d(calc(-50% - 30px), calc(-50% + 230px), 80px) skewY(7deg) scale(0.95);
+            opacity: 0.9;
+        }
+    }
+}
+
+@media (min-width: 1025px) {
+    @keyframes card-drop-phase {
+        0% {
+            transform: translate3d(-50%, -50%, 0) skewY(6deg) scale(1);
             opacity: 1;
-            filter: none;
+        }
+        /* 桌面端同样的轻盈移出感 */
+        30% {
+            transform: translate3d(-50%, calc(-50% - 20px), 30px) skewY(5deg) scale(1.02);
+            opacity: 1;
+        }
+        100% {
+            transform: translate3d(calc(-50% - 40px), calc(-50% + 260px), 100px) skewY(7deg) scale(0.95);
+            opacity: 0.9;
         }
     }
 }
 
 @keyframes card-slide-back {
     0% {
-        transform: translate3d(-50%, calc(-50% + 220px), 150px) skewY(6deg);
-        opacity: 1;
-        filter: none;
+        transform: translate3d(calc(-50% - 20px), calc(-50% + 200px), 60px) skewY(7deg) scale(0.95);
+        opacity: 0.9;
         z-index: 100;
     }
-    40% {
-        opacity: 0.8;
-        z-index: 1; /* Drop z-index mid-air to go behind others */
+    20% {
+        transform: translate3d(-50%, calc(-50% + 200px), -500px) skewY(6deg) scale(0.85);
+        z-index: 1;
+        opacity: 0.6;
+    }
+    /* 70%: 处于目标位置下方，开始轻盈回升 */
+    75% {
+        transform: translate3d(calc(-50% + 80px), calc(-50% - 100px), -340px) skewY(6.5deg) scale(0.98);
+        opacity: 0.9;
+    }
+    /* 88%: 轻盈入位：稍微越过目标点，配合极小的弹性 */
+    94% {
+        transform: translate3d(calc(-50% + 80px), calc(-50% - 122px), -315px) skewY(5.8deg) scale(1.005);
+        opacity: 1;
     }
     100% {
-        /* Move to the final resting position of the last card in stack */
-        transform: translate3d(calc(-50% + 80px), calc(-50% - 120px), -400px) skewY(6deg);
-        opacity: 0.5;
-        filter: blur(4px);
+        transform: translate3d(calc(-50% + 80px), calc(-50% - 120px), -320px) skewY(6deg) scale(1);
+        opacity: 1;
         z-index: 1;
     }
 }
 
-@media (min-width: 641px) {
+@media (min-width: 641px) and (max-width: 1024px) {
     @keyframes card-slide-back {
         0% {
-            transform: translate3d(-50%, calc(-50% + 320px), 200px) skewY(6deg);
-            opacity: 1;
-            filter: none;
+            transform: translate3d(calc(-50% - 30px), calc(-50% + 230px), 80px) skewY(7deg) scale(0.95);
+            opacity: 0.9;
             z-index: 100;
         }
-        40% {
-            opacity: 0.8;
+        20% {
+            transform: translate3d(-50%, calc(-50% + 230px), -650px) skewY(6deg) scale(0.82);
             z-index: 1;
+            opacity: 0.55;
+        }
+        /* 平滑回升 */
+        75% {
+            transform: translate3d(calc(-50% + 160px), calc(-50% - 180px), -500px) skewY(6.5deg) scale(0.98);
+            opacity: 0.9;
+        }
+        94% {
+            transform: translate3d(calc(-50% + 160px), calc(-50% - 205px), -475px) skewY(5.8deg) scale(1.005);
+            opacity: 1;
         }
         100% {
-            transform: translate3d(calc(-50% + 240px), calc(-50% - 280px), -600px) skewY(6deg);
+            transform: translate3d(calc(-50% + 160px), calc(-50% - 200px), -480px) skewY(6deg) scale(1);
+            opacity: 1;
+            z-index: 1;
+        }
+    }
+}
+
+@media (min-width: 1025px) {
+    @keyframes card-slide-back {
+        0% {
+            transform: translate3d(calc(-50% - 40px), calc(-50% + 260px), 100px) skewY(7deg) scale(0.95);
+            opacity: 0.9;
+            z-index: 100;
+        }
+        20% {
+            transform: translate3d(-50%, calc(-50% + 260px), -800px) skewY(6deg) scale(0.8);
+            z-index: 1;
             opacity: 0.5;
-            filter: blur(4px);
+        }
+        /* 桌面端：更大幅度的轻盈归位 */
+        75% {
+            transform: translate3d(calc(-50% + 240px), calc(-50% - 240px), -640px) skewY(6.5deg) scale(0.98);
+            opacity: 0.9;
+        }
+        94% {
+            transform: translate3d(calc(-50% + 240px), calc(-50% - 285px), -595px) skewY(5.8deg) scale(1.005);
+            opacity: 1;
+        }
+        100% {
+            transform: translate3d(calc(-50% + 240px), calc(-50% - 280px), -600px) skewY(6deg) scale(1);
+            opacity: 1;
             z-index: 1;
         }
     }
@@ -438,8 +511,8 @@ html, body {
     align-items: center;
     gap: 12px;
     padding: 12px 20px;
-    background: linear-gradient(to right, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background: linear-gradient(to right, rgba(89, 101, 238, 0.4), rgba(170, 112, 241, 0.4));
+    border-bottom: 1px solid rgba(56, 189, 248, 0.2);
     flex-shrink: 0;
     transform: translateZ(0);
     backface-visibility: hidden;
@@ -467,7 +540,7 @@ html, body {
     flex: 1;
     position: relative;
     width: 100%;
-    background: rgba(0, 0, 0, 0.2);
+    background: #0a0a0f;
 }
 
 .CardSwap_cardImage__HhGOd {

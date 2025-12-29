@@ -366,28 +366,62 @@ html, body {
         filter: none;
     }
     100% {
-        /* 下移到停顿点 */
-        transform: translate3d(-50%, calc(-50% + 300px), 0) skewY(6deg);
+        /* 下移到停顿点 - 移动端减小下移距离 */
+        transform: translate3d(-50%, calc(-50% + 200px), 0) skewY(6deg);
         z-index: 50;
         opacity: 1;
         filter: none;
     }
 }
 
+@media (min-width: 641px) {
+    @keyframes card-drop-phase {
+        0% {
+            transform: translate3d(-50%, -50%, 0) skewY(6deg);
+            z-index: 50;
+            opacity: 1;
+            filter: none;
+        }
+        100% {
+            transform: translate3d(-50%, calc(-50% + 300px), 0) skewY(6deg);
+            z-index: 50;
+            opacity: 1;
+            filter: none;
+        }
+    }
+}
+
 @keyframes card-slide-back {
     0% {
         /* 从停顿点开始，切换到后排层级 */
-        transform: translate3d(-50%, calc(-50% + 300px), 0) skewY(6deg);
+        transform: translate3d(-50%, calc(-50% + 200px), 0) skewY(6deg);
         z-index: 10;
         opacity: 1;
         filter: none;
     }
     100% {
-        /* 归位到堆叠末尾（offset 4 的位置） */
-        transform: translate3d(calc(-50% + 240px), calc(-50% - 280px), -600px) skewY(6deg);
+        /* 归位到堆叠末尾 - 移动端减小偏移 */
+        transform: translate3d(calc(-50% + 80px), calc(-50% - 120px), -400px) skewY(6deg);
         z-index: 10;
         opacity: 0.7;
         filter: blur(3.2px);
+    }
+}
+
+@media (min-width: 641px) {
+    @keyframes card-slide-back {
+        0% {
+            transform: translate3d(-50%, calc(-50% + 300px), 0) skewY(6deg);
+            z-index: 10;
+            opacity: 1;
+            filter: none;
+        }
+        100% {
+            transform: translate3d(calc(-50% + 240px), calc(-50% - 280px), -600px) skewY(6deg);
+            z-index: 10;
+            opacity: 0.7;
+            filter: blur(3.2px);
+        }
     }
 }
 
@@ -1116,25 +1150,79 @@ html, body {
     background: rgba(57, 46, 78, 0.3);
 }
 
-@media (max-width: 768px) {
-    .update-notification-bento {
-        bottom: 10px;
-        right: 10px;
-        max-width: calc(100vw - 20px);
-    }
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .nav-content { max-width: 100%; }
+    .hero-section { gap: 40px; }
+    .hero-title { font-size: 3rem; }
 }
 
 @media (max-width: 1024px) {
-    .hero-section { grid-template-columns: 1fr; text-align: center; padding-top: 140px; }
+    .hero-section { 
+        grid-template-columns: 1fr; 
+        text-align: center; 
+        padding-top: 140px; 
+        padding-bottom: 40px;
+        min-height: auto;
+    }
+    .hero-content { align-items: center; }
     .hero-subtitle { margin: 0 auto; }
     .hero-actions, .hero-features { justify-content: center; }
+    .hero-visual { min-width: 100%; min-height: 400px; margin-top: 40px; }
+    .CardSwap_card__HvzWu { width: 480px; height: 350px; }
     .features-grid { grid-template-columns: repeat(2, 1fr); }
-    .footer-grid { grid-template-columns: 1fr 1fr; gap: 40px; }
+    .footer-grid { grid-template-columns: repeat(2, 1fr); gap: 40px; }
 }
-@media (max-width: 640px) {
+
+@media (max-width: 768px) {
     .hero-title { font-size: 2.5rem; }
-    .features-grid { grid-template-columns: 1fr; grid-auto-rows: auto; }
+    .hero-subtitle { font-size: 1.1rem; }
+    .hero-primary-button, .hero-secondary-button { padding: 14px 28px; font-size: 1rem; }
+    .section-title { font-size: 2.25rem; }
+    .features-grid { grid-template-columns: 1fr; }
+    .magic-bento-card { padding: 24px; }
+    .magic-bento-card__title { font-size: 1.25rem; }
+    .privacy-title { font-size: 2rem; }
+    .cta-title { font-size: 2rem; }
+    .cta-button { padding: 16px 32px; font-size: 1rem; }
+    .policy-section { padding-top: 100px; }
+    .policy-container { padding: 32px 24px; }
+    .update-notification-bento {
+        bottom: 10px;
+        right: 10px;
+        left: 10px;
+        max-width: none;
+    }
+}
+
+@media (max-width: 640px) {
     .nav-center { display: none; }
-    .footer-grid { grid-template-columns: 1fr; }
+    .nav-content { padding: 12px 16px; }
+    .logo-text { font-size: 1.25rem; }
+    .nav-cta-button span { display: none; }
+    .nav-cta-button { padding: 10px; border-radius: 50%; }
+    .nav-cta-button svg { font-size: 1.25rem; }
+    
+    .hero-section { padding-top: 100px; }
+    .hero-title { font-size: 2.25rem; }
+    .hero-features { flex-wrap: wrap; gap: 16px; }
+    .hero-visual { min-height: 320px; overflow: hidden; }
+    .CardSwap_card__HvzWu { width: 90vw; height: 260px; }
+    .CardSwap_windowTitle__Q1Asa { font-size: 0.75rem; }
+    
+    .magic-bento-card { flex-direction: column; align-items: center; text-align: center; }
+    .feature-icon-wrapper { padding: 12px; }
+    
+    .footer-grid { grid-template-columns: 1fr; text-align: center; }
+    .footer-logo, .footer-social { justify-content: center; }
+}
+
+@media (max-width: 480px) {
+    .hero-title { font-size: 2rem; }
+    .hero-actions { flex-direction: column; width: 100%; }
+    .hero-primary-button, .hero-secondary-button { width: 100%; justify-content: center; }
+    .hero-badge { font-size: 12px; padding: 8px 14px; }
+    .policy-container { padding: 32px 20px; border-radius: 20px; }
+    .policy-title { font-size: 1.75rem; }
 }
 

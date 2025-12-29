@@ -12,7 +12,6 @@ const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
 module.exports = {
   entry: {
     popup: './src/popup.js',
-    main: './src/main.js',
     background: './src/background.js',
     content: './src/content.js'
   },
@@ -47,22 +46,8 @@ module.exports = {
           }
         },
         {
-          from: 'src/main.html',
-          to: 'main.html',
-          globOptions: {
-            ignore: ['**/.*', '**/.*/**']
-          }
-        },
-        {
           from: 'src/popup.css',
           to: 'popup.css',
-          globOptions: {
-            ignore: ['**/.*', '**/.*/**']
-          }
-        },
-        {
-          from: 'src/main.css',
-          to: 'main.css',
           globOptions: {
             ignore: ['**/.*', '**/.*/**']
           }

@@ -149,6 +149,9 @@ function initCards() {
 }
 
 function renderCards() {
+    const isMobile = window.innerWidth <= 640;
+    const isTablet = window.innerWidth <= 1024 && window.innerWidth > 640;
+
     cardElements.forEach((card, i) => {
         const offset = (i - currentIdx + cardData.length) % cardData.length;
         
@@ -158,9 +161,15 @@ function renderCards() {
         // Sample-inspired physics values
         let zIndex = 20 - offset;
         let opacity = offset === 0 ? 1 : offset === 1 ? 0.8 : offset === 2 ? 0.7 : offset === 3 ? 0.6 : 0.5;
-        let x = offset * 60;
-        let y = offset * -70;
-        let z = offset * -150;
+        
+        // Scale offsets for mobile
+        let xOffsetMultiplier = isMobile ? 20 : isTablet ? 40 : 60;
+        let yOffsetMultiplier = isMobile ? -30 : isTablet ? -50 : -70;
+        let zOffsetMultiplier = isMobile ? -80 : isTablet ? -120 : -150;
+
+        let x = offset * xOffsetMultiplier;
+        let y = offset * yOffsetMultiplier;
+        let z = offset * zOffsetMultiplier;
         let skewY = 6;
         let filter = offset === 0 ? 'none' : `blur(${offset * 0.8}px)`;
         let visibility = offset > 4 ? 'hidden' : 'visible';

@@ -92,30 +92,36 @@ function initBentoGlow() {
 }
 
 // --- AUTHENTIC CARD SWAP LOGIC ---
+// 使用 WebP 格式优化图片，提供 PNG 回退
 const cardData = [
     { 
         title: 'Cloud Integration', 
-        img: './images/1-5.png', 
+        img: './images/1-5.webp',
+        imgFallback: './images/1-5.png',
         icon: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19a3.5 3.5 0 0 1-7 0c0-.18.01-.36.03-.53A3.501 3.501 0 0 1 7 12c0-1.93 1.57-3.5 3.5-3.5.18 0 .36.01.53.03A5.5 5.5 0 0 1 21 12c0 2.12-1.19 3.96-2.96 4.93.31.33.46.77.46 1.07 0 1.1-.9 2-2 2Z"/></svg>' 
     },
     { 
         title: 'QR Generation', 
-        img: './images/1-1.png', 
+        img: './images/1-1.webp',
+        imgFallback: './images/1-1.png',
         icon: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="5" height="5" x="3" y="3" rx="1"/><rect width="5" height="5" x="16" y="3" rx="1"/><rect width="5" height="5" x="3" y="16" rx="1"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/><path d="M12 7v3a2 2 0 0 1-2 2H7"/><path d="M3 12h.01"/><path d="M12 3h.01"/><path d="M12 16v.01"/><path d="M16 12h1"/><path d="M21 12v.01"/><path d="M12 21v.01"/></svg>' 
     },
     { 
         title: 'Right click', 
-        img: './images/1-2.png', 
+        img: './images/1-2.webp',
+        imgFallback: './images/1-2.png',
         icon: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="7"/><path d="M12 6v4"/></svg>' 
     },
     { 
         title: 'Artistic Tuning', 
-        img: './images/1-4.png', 
+        img: './images/1-4.webp',
+        imgFallback: './images/1-4.png',
         icon: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.9 0 1.5-.6 1.5-1.5 0-.4-.1-.8-.4-1.1-.3-.3-.4-.7-.4-1.1 0-.9.7-1.5 1.5-1.5H16c3.3 0 6-2.7 6-6 0-4.9-4.5-9-10-9z"/></svg>' 
     },
     { 
         title: 'Intelligent Scan', 
-        img: './images/1-3.png', 
+        img: './images/1-3.webp',
+        imgFallback: './images/1-3.png',
         icon: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 12h10"/><path d="M12 7v10"/></svg>' 
     }
 ];
@@ -135,6 +141,13 @@ function initCards() {
         const card = document.createElement('div');
         card.className = 'CardSwap_card__HvzWu';
         card.dataset.id = i;
+        // 使用 picture 标签提供 WebP 和 PNG 回退支持
+        const pictureHtml = data.imgFallback 
+            ? `<picture>
+                <source srcset="${data.img}" type="image/webp">
+                <img src="${data.imgFallback}" alt="${data.title}" draggable="false">
+               </picture>`
+            : `<img src="${data.img}" alt="${data.title}" draggable="false">`;
         card.innerHTML = `
             <div class="CardSwap_windowHeader__pAaBr">
                 <div class="CardSwap_windowIcon__mOIYe">${data.icon}</div>
@@ -142,7 +155,7 @@ function initCards() {
             </div>
             <div class="CardSwap_cardContent__OWUTy">
                 <div class="CardSwap_cardImage__HhGOd">
-                    <img src="${data.img}" alt="${data.title}" draggable="false">
+                    ${pictureHtml}
                 </div>
             </div>
         `;

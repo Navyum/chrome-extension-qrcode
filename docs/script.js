@@ -76,7 +76,8 @@ window.addEventListener('mousemove', e => {
 
 // --- BENTO CARD GLOW EFFECT ---
 function initBentoGlow() {
-    document.querySelectorAll('.magic-bento-card').forEach(card => {
+    const cards = document.querySelectorAll('.magic-bento-card');
+    cards.forEach(card => {
         card.addEventListener('mousemove', e => {
             const rect = card.getBoundingClientRect();
             const x = e.clientX - rect.left;
@@ -153,16 +154,18 @@ function renderCards() {
     const isTablet = window.innerWidth <= 1024 && window.innerWidth > 640;
 
     cardElements.forEach((card, i) => {
+        // Calculate logical offset
         const offset = (i - currentIdx + cardData.length) % cardData.length;
         
-        // Skip front card if it's currently animating
-        if (card.classList.contains('dropping') || card.classList.contains('slide-back')) return;
+        // Skip front card if it's currently in an explicit CSS animation phase
+        if (card.classList.contains('dropping') || card.classList.contains('slide-back')) {
+            return;
+        }
 
-        // Sample-inspired physics values
+        // Base styles for stacked cards
         let zIndex = 20 - offset;
-        let opacity = offset === 0 ? 1 : offset === 1 ? 0.8 : offset === 2 ? 0.7 : offset === 3 ? 0.6 : 0.5;
+        let opacity = offset === 0 ? 1 : Math.max(0, 0.8 - offset * 0.15);
         
-        // Scale offsets for mobile
         let xOffsetMultiplier = isMobile ? 20 : isTablet ? 40 : 60;
         let yOffsetMultiplier = isMobile ? -30 : isTablet ? -50 : -70;
         let zOffsetMultiplier = isMobile ? -80 : isTablet ? -120 : -150;
@@ -171,9 +174,10 @@ function renderCards() {
         let y = offset * yOffsetMultiplier;
         let z = offset * zOffsetMultiplier;
         let skewY = 6;
-        let filter = offset === 0 ? 'none' : `blur(${offset * 0.8}px)`;
+        let filter = offset === 0 ? 'none' : `blur(${Math.min(offset * 0.8, 4)}px)`;
         let visibility = offset > 4 ? 'hidden' : 'visible';
 
+        // Apply styles with a slight delay if we're in a transition to allow CSS to handle it smoothly
         card.style.zIndex = zIndex;
         card.style.opacity = opacity;
         card.style.visibility = visibility;
@@ -184,29 +188,36 @@ function renderCards() {
 
 function cycleCards() {
     if (isTransitioning) return;
+    
+    // Find the current top card by its data-id
     const topCard = cardElements.find(c => c.dataset.id === currentIdx.toString());
 
     if (topCard) {
         isTransitioning = true;
         
-        // Phase 1: 下移到停顿点
+        // Phase 1: Card drops down (Visual focus)
         topCard.classList.add('dropping');
         
-        // Phase 2: 开始绕后，同时推进队列
+        // Phase 2: Midway through drop, update the stack positions
         setTimeout(() => {
+            // Update index - this will trigger renderCards for other cards
+            currentIdx = (currentIdx + 1) % cardData.length;
+            
+            // Start sliding back to the end of the stack
             topCard.classList.remove('dropping');
             topCard.classList.add('slide-back');
 
-            currentIdx = (currentIdx + 1) % cardData.length;
+            // Render other cards. The topCard is skipped due to 'slide-back' class
             renderCards();
-        }, 450); // 匹配 drop-phase 0.45s
+        }, 400); // Slightly before the end of drop to feel more fluid
 
-        // Phase 3: 动画结束后收尾
+        // Phase 3: Cleanup and reset
         setTimeout(() => {
             topCard.classList.remove('slide-back');
-            renderCards();
             isTransitioning = false;
-        }, 1000); // 总时长 0.45s + 0.55s
+            // Sync final state for the card that just moved to the back
+            renderCards();
+        }, 950); // Total duration of the round-trip
     }
 }
 

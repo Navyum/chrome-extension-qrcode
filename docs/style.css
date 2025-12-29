@@ -337,40 +337,41 @@ html, body {
     transform-style: preserve-3d;
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
-    will-change: transform, opacity, filter;
+    will-change: transform, opacity, filter, z-index;
+    contain: layout style;
     overflow: hidden;
     display: flex;
     flex-direction: column;
     opacity: 0;
-    transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.8s ease, filter 0.8s ease;
+    transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1), 
+                opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1), 
+                filter 0.8s cubic-bezier(0.25, 1, 0.5, 1),
+                z-index 0.8s step-end;
 }
 
 .CardSwap_card__HvzWu.dropping,
 .CardSwap_card__HvzWu.slide-back {
     transition: none !important;
-    will-change: transform, opacity, filter;
     pointer-events: none;
+    z-index: 100 !important;
 }
 
 .CardSwap_card__HvzWu.dropping {
-    animation: card-drop-phase 0.45s cubic-bezier(0.33, 1, 0.68, 1) forwards;
+    animation: card-drop-phase 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .CardSwap_card__HvzWu.slide-back {
-    animation: card-slide-back 0.55s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    animation: card-slide-back 0.55s cubic-bezier(0.55, 0, 1, 0.45) forwards;
 }
 
 @keyframes card-drop-phase {
     0% {
         transform: translate3d(-50%, -50%, 0) skewY(6deg);
-        z-index: 50;
         opacity: 1;
         filter: none;
     }
     100% {
-        /* 下移到停顿点 - 移动端减小下移距离 */
-        transform: translate3d(-50%, calc(-50% + 200px), 0) skewY(6deg);
-        z-index: 50;
+        transform: translate3d(-50%, calc(-50% + 220px), 150px) skewY(6deg);
         opacity: 1;
         filter: none;
     }
@@ -380,13 +381,11 @@ html, body {
     @keyframes card-drop-phase {
         0% {
             transform: translate3d(-50%, -50%, 0) skewY(6deg);
-            z-index: 50;
             opacity: 1;
             filter: none;
         }
         100% {
-            transform: translate3d(-50%, calc(-50% + 300px), 0) skewY(6deg);
-            z-index: 50;
+            transform: translate3d(-50%, calc(-50% + 320px), 200px) skewY(6deg);
             opacity: 1;
             filter: none;
         }
@@ -395,34 +394,41 @@ html, body {
 
 @keyframes card-slide-back {
     0% {
-        /* 从停顿点开始，切换到后排层级 */
-        transform: translate3d(-50%, calc(-50% + 200px), 0) skewY(6deg);
-        z-index: 10;
+        transform: translate3d(-50%, calc(-50% + 220px), 150px) skewY(6deg);
         opacity: 1;
         filter: none;
+        z-index: 100;
+    }
+    40% {
+        opacity: 0.8;
+        z-index: 1; /* Drop z-index mid-air to go behind others */
     }
     100% {
-        /* 归位到堆叠末尾 - 移动端减小偏移 */
+        /* Move to the final resting position of the last card in stack */
         transform: translate3d(calc(-50% + 80px), calc(-50% - 120px), -400px) skewY(6deg);
-        z-index: 10;
-        opacity: 0.7;
-        filter: blur(3.2px);
+        opacity: 0.5;
+        filter: blur(4px);
+        z-index: 1;
     }
 }
 
 @media (min-width: 641px) {
     @keyframes card-slide-back {
         0% {
-            transform: translate3d(-50%, calc(-50% + 300px), 0) skewY(6deg);
-            z-index: 10;
+            transform: translate3d(-50%, calc(-50% + 320px), 200px) skewY(6deg);
             opacity: 1;
             filter: none;
+            z-index: 100;
+        }
+        40% {
+            opacity: 0.8;
+            z-index: 1;
         }
         100% {
             transform: translate3d(calc(-50% + 240px), calc(-50% - 280px), -600px) skewY(6deg);
-            z-index: 10;
-            opacity: 0.7;
-            filter: blur(3.2px);
+            opacity: 0.5;
+            filter: blur(4px);
+            z-index: 1;
         }
     }
 }
@@ -431,22 +437,30 @@ html, body {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 10px 16px;
-    background: #1a1a1a;
-    border-bottom: 1px solid hsla(0, 0%, 100%, 0.1);
+    padding: 12px 20px;
+    background: linear-gradient(to right, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     flex-shrink: 0;
     transform: translateZ(0);
     backface-visibility: hidden;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
+    position: relative;
+    z-index: 2;
 }
 
-.CardSwap_windowIcon__mOIYe { font-size: 1.1rem; display: flex; align-items: center; }
+.CardSwap_windowIcon__mOIYe {
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    color: #667eea;
+    filter: drop-shadow(0 0 8px rgba(102, 126, 234, 0.4));
+}
+
 .CardSwap_windowTitle__Q1Asa {
-    font-size: 0.85rem;
-    color: hsla(0, 0%, 100%, 0.9);
+    font-size: 0.9rem;
+    color: hsla(0, 0%, 100%, 0.95);
     font-weight: 600;
-    letter-spacing: 0.3px;
+    letter-spacing: 0.5px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .CardSwap_cardContent__OWUTy {
@@ -498,8 +512,8 @@ html, body {
 }
 
 .magic-bento-card {
-    background: #060010;
-    border: 1px solid var(--border-color);
+    background: rgba(6, 0, 16, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 24px;
     padding: 40px;
     position: relative;
@@ -508,8 +522,9 @@ html, body {
     flex-direction: row;
     align-items: flex-start;
     gap: 24px;
-    transition: all 0.3s ease;
+    transition: transform 0.3s ease, background 0.3s ease, border-color 0.3s ease;
     height: 100%;
+    backdrop-filter: blur(10px);
 }
 
 .feature-badge {
@@ -530,26 +545,61 @@ html, body {
 
 .magic-bento-card:hover {
     transform: translateY(-5px);
-    border-color: rgba(255, 255, 255, 0.2);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    background: rgba(6, 0, 16, 0.7);
+    border-color: rgba(var(--glow-color), 0.3);
+    box-shadow: 
+        0 20px 50px rgba(0, 0, 0, 0.5),
+        0 0 20px rgba(var(--glow-color), 0.15);
 }
 
-/* Glowing border on hover */
+/* Internal Spotlight Effect */
+.magic-bento-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+        600px circle at var(--glow-x, 50%) var(--glow-y, 50%),
+        rgba(var(--glow-color), 0.15),
+        transparent 80%
+    );
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Border Glow Effect - Sharp Laser Style */
 .magic-bento-card::after {
     content: "";
     position: absolute;
     inset: 0;
-    padding: 1px;
-    background: radial-gradient(250px circle at var(--glow-x, 50%) var(--glow-y, 50%), rgba(var(--glow-color), 0.4), transparent 70%);
+    padding: 1.5px; /* 略微加粗，让激光感更强 */
+    background: radial-gradient(
+        200px circle at var(--glow-x, 50%) var(--glow-y, 50%),
+        #ffffff 0%,
+        rgba(var(--glow-color), 1) 30%,
+        rgba(var(--glow-color), 0.2) 60%,
+        transparent 100%
+    );
     border-radius: inherit;
-    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;
     mask-composite: exclude;
     pointer-events: none;
     opacity: 0;
-    transition: opacity 0.3s;
+    transition: opacity 0.4s ease;
+    z-index: 10;
 }
-.magic-bento-card:hover::after { opacity: 1; }
+
+.feature-content, .feature-icon-wrapper, .feature-badge {
+    position: relative;
+    z-index: 5;
+}
+
+.magic-bento-card:hover::before,
+.magic-bento-card:hover::after {
+    opacity: 1;
+}
 
 .feature-content {
     flex: 1;
@@ -582,6 +632,14 @@ html, body {
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    transition: all 0.3s ease;
+}
+
+.magic-bento-card:hover .feature-icon-wrapper {
+    background: rgba(var(--glow-color), 0.2);
+    color: #fff;
+    box-shadow: 0 0 20px rgba(var(--glow-color), 0.4);
+    transform: scale(1.05);
 }
 
 /* Remove Custom Grid Spans */
@@ -800,6 +858,12 @@ html, body {
     .policy-container { padding: 32px 24px; }
     .policy-title { font-size: 2.25rem; }
 }
+
+.homepage-footer {
+    margin-top: 60px;
+    padding-bottom: 60px;
+}
+
 .footer-container {
     max-width: 1400px;
     margin: 0 auto;

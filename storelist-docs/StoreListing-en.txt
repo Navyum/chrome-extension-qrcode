@@ -1,41 +1,45 @@
 [Title]
-QR Code Generator & Scanner - File/Folder to Drive
-
+QR Code Generator & Scanner - File/Folder to Google Drive
 [Summary]
-The fastest QR code creator & scanner with 100% privacy. Auto-upload folders/files to Google Drive for instant sharing. Custom logos & offline support included.
+The best QR Code Generator & Scanner. Create QR codes for URLs and text, or share local files and folders instantly via Google Drive. Secure, private, and offline-ready.
 
 [Detailed Description]
-PixelQR: The Ultimate Productivity Bridge for Chrome
+PixelQR: The All-in-One QR Code Generator & File Sharing Bridge
 
-PixelQR is a high-performance tool designed for the modern Google Workspace ecosystem. It is the only Chrome extension that provides a seamless, secure bridge between your local files and your Google Drive. Whether you need to share a single document or an entire project folder, PixelQR automates the workflow—uploading, linking, and generating a QR code in one single motion.
+Stop emailing files to yourself just to open them on your phone. PixelQR is the only QR Code Generator that allows you to turn local PC files and folders into a QR code instantly via Google Drive integration.
 
-🚀 EXCLUSIVE: FOLDER & BATCH UPLOAD TO QR Stop the tedious "Upload-Copy-Paste" cycle. PixelQR is built for users who handle local assets:
+🚀 EXCLUSIVE: THE FASTEST WAY TO SHARE FOLDERS TO MOBILE PixelQR eliminates the "Upload-Copy-Paste" headache. It is the perfect QR code maker for professionals, students, and creators who need to bridge the gap between desktop and mobile.
 
-· Upload Folders & Files: Drag any local folder or files directly into the extension.
-· Auto-Drive Integration: Files are automatically uploaded to your Google Drive.
-· Automatic QR Generation: Get a QR code for the sharing link instantly after upload.
-· Visibility Control: Set links to "Owner Only" or "Anyone with the link" within the app.
-· Rapid Sharing: The fastest way to move local folders from PC to mobile devices.
+Folder to QR Code: Drag a local folder into the extension, and it auto-uploads to your Google Drive.
 
-🎨 BUILT-IN LOGO SUPPORT & BEAUTIFICATION
+Automatic QR Generation: Once uploaded, a QR code for the sharing link is generated instantly.
 
-· 12 Preset Platform Logos: Instant access to icons for Instagram, YouTube, Telegram, and more.
-· Quick Beautification: One-click selection to make your QR code professional.
-· Custom Logo Upload: Still supports uploading your own custom branding images.
-· Transparency Control: Adjust logo opacity (0-100%) to ensure 100% scannability.
+Cloud Sync: Files are securely stored in your Drive with full visibility control (Owner vs. Anyone).
 
-🔍 SMART SCANNING & INSTANT GENERATION
+Productivity First: Ideal for moving large project folders, PDFs, or design assets to your phone in one scan.
 
-· URL Scanning: Enter an image URL to decode it remotely without downloading.
-· Local Scanning: Drag and drop local images to read their content instantly.
-· Context Menu: Right-click any text/link to create a QR code immediately.
-· Keyboard Shortcuts: Ctrl+Shift+Q for current page, Ctrl+Shift+T for selected text.
+🎨 CUSTOM QR CODE CREATOR WITH LOGO Make your codes stand out with professional branding tools:
+
+Built-in Logos: One-click presets for Instagram, YouTube, LinkedIn, and more.
+
+Custom Brand Uploads: Add your company logo to your QR code.
+
+Design Control: Customize colors and adjust logo transparency for 100% scannability.
+
+🔍 ADVANCED QR CODE SCANNER
+
+Scan from Website: Right-click any image or enter a URL to scan a QR code without downloading it.
+
+Desktop Scanner: Drag and drop local images to read their content instantly.
+
+Smart Recognition: Automatically detects URLs, text, Wi-Fi, and contact cards.
 
 🔒 PRIVACY-FIRST & ENTERPRISE SECURITY
 
-· Offline-First Core: Basic QR generation and scanning are processed locally.
-· Secure Google Integration: File uploads use official Google Drive APIs directly.
-· Zero Tracking: No ads, no analytics, and no hidden scripts.
-· Auto Dark Mode: UI respects your system theme for a comfortable experience.
+Offline-Ready: Standard QR code generation and scanning happen locally on your computer.
 
-Keywords: QR Code Generator, QR Code Scanner, Folder to QR, File to QR, Google Drive Upload, Offline QR Maker, Batch Folder Upload, Privacy QR Code, QR with Logo.
+No Data Collection: We do not track your browsing history or collect personal data.
+
+Secure Google API: File uploads use official Google Drive APIs directly to your own account.
+
+Dark Mode Support: Beautifully adapts to your system theme for eye comfort.
